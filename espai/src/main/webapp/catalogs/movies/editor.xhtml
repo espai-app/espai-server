@@ -1,0 +1,266 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/layout.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="jakarta.tags.core">
+
+  <ui:param name="title"  value="#{movieEditorView.movie.id != null ? movieEditorView.movie.title : 'Neuen Film erstellen'}" />
+
+  <ui:define name="content">
+    <h:form>
+      <f:passThroughAttribute name="autocomplete" value="off" />
+
+      <div class="page-title">
+        <h1><h:outputText value="#{title}" /></h1>
+      </div>
+
+      <div class="mb-3">
+        <p:commandButton action="#{movieEditorView.save}" value="speichern" />
+      </div>
+
+      <div class="lg:flex align-items-stretch">
+        <p:card styleClass="ui-fluid lg:flex-1 lg:w-6 lg:mr-1">
+          <div class="field">
+            <p:outputLabel for="title" value="Titel" />
+
+            <p:inputText id="title" value="#{movieEditorView.movie.title}" />
+            <h:message for="title" />
+          </div>
+
+          <div class="field">
+            <p:outputLabel for="description" value="Beschreibung" />
+
+            <p:textEditor id="description" value="#{movieEditorView.movie.description}" height="200" secure="false" styleClass="w-full">
+              <f:facet name="toolbar">
+                <span class="ql-formats">
+                  <button class="ql-bold"></button>
+                  <button class="ql-italic"></button>
+                  <button class="ql-underline"></button>
+                  <button class="ql-strike"></button>
+                </span>
+              </f:facet>
+            </p:textEditor>
+            <h:message for="description" />
+          </div>
+
+          <div class="field">
+            <p:outputLabel for="duration" value="Laufzeit" styleClass="w-full" />
+
+            <p:inputText id="duration" value="#{movieEditorView.movie.durationInMinutes}"  styleClass="w-4 lg:w-3" /> min.
+            <h:message for="duration" />
+          </div>
+
+          <div class="grid">
+            <div class="field col-12 lg:col-4">
+              <p:outputLabel for="rating" value="Altersfreigabe" styleClass="w-full"/>
+
+              <p:inputText id="rating" value="#{movieEditorView.movie.rating}" styleClass="w-4 lg:w-8"/>
+              <h:message for="rating" />
+            </div>
+            <div class="field col-12 lg:col-8">
+              <p:outputLabel value="Altersempfehlung" />
+
+              <div>
+                <p:outputLabel for="fromAge" value="von" styleClass="mr-2"/>
+                <p:inputText id="fromAge" value="#{movieEditorView.movie.fromAge}" styleClass="w-4 lg:w-3 mr-3 " />
+
+                <p:outputLabel for="toAge" value="bis" styleClass="mr-2" />
+                <p:inputText id="toAge" value="#{movieEditorView.movie.toAge}" styleClass="w-4 lg:w-3" />
+              </div>
+
+              <h:message for="fromAge" />
+              <h:message for="toAge" />
+            </div>
+          </div>
+
+        </p:card>
+
+        <div class="ui-fluid lg:flex-1 lg:ml-2 mt-3 lg:mt-0 lg:w-6">
+          <p:card>
+            <f:facet name="title">
+              Metadaten
+            </f:facet>
+
+            <div class="field">
+              <p:outputLabel for="productionCountries" value="Produktionsland" />
+              <p:inputText id="productionCountries" value="#{movieEditorView.movie.productionCountries}" />
+              <h:message for="productionCountries" />
+            </div>
+
+            <div class="field">
+              <p:outputLabel for="productionYear" value="Produktionsjahr" />
+              <p:inputText id="productionYear" value="#{movieEditorView.movie.productionYear}" />
+              <h:message for="productionYear" />
+            </div>
+
+            <div class="field">
+              <p:outputLabel for="director" value="Regisseur:in" />
+              <p:inputText id="director" value="#{movieEditorView.movie.director}" />
+              <h:message for="director" />
+            </div>
+
+            <div class="field">
+              <p:outputLabel for="starring" value="Hauptdarsteller:innen" />
+              <p:inputText id="starring" value="#{movieEditorView.movie.starring}" />
+              <h:message for="starring" />
+            </div>
+
+            <div class="field">
+              <p:outputLabel for="book" value="Buch" />
+              <p:inputText id="book" value="#{movieEditorView.movie.book}" />
+              <h:message for="book" />
+            </div>
+          </p:card>
+
+          <p:card styleClass="mt-3">
+            <f:facet name="title">
+              Konditionen
+            </f:facet>
+            <div class="field">
+              <p:outputLabel for="agency" value="Verleih" />
+
+              <p:selectOneMenu id="agency" value="#{movieEditorView.movie.agency}">
+                <f:selectItems value="#{movieEditorView.agencyList}" var="agency" itemLabel="#{agency.name}" itemValue="#{agency}">
+                </f:selectItems>
+              </p:selectOneMenu>
+              <h:message for="agency" />
+            </div>
+
+            <div class="grid">
+              <div class="col-12 sm:col-4 field">
+                <p:outputLabel for="fixedPrice" value="Festpreis" styleClass="w-full"/>
+
+                <p:inputNumber id="fixedPrice" value="#{movieEditorView.movie.fixedPrice.amount}" styleClass="w-4 sm:w-8" minValue="0" decimalPlaces="2" modifyValueOnWheel="false" symbol=" #{movieEditorView.movie.fixedPrice.currency}" symbolPosition="s" />
+                <h:message for="fixedPrice" />
+              </div>
+
+              <div class="col-12 sm:col-4 field">
+                <p:outputLabel for="ticketShare" value="Prozentsatz" styleClass="w-full" />
+
+                <p:inputNumber id="ticketShare" value="#{movieEditorView.movie.ticketShare}" styleClass="w-4 sm:w-8"  minValue="0" maxValue="100" decimalPlaces="2" modifyValueOnWheel="false" symbol=" %" symbolPosition="s"/>
+                <h:message for="ticketShare" />
+              </div>
+
+              <div class="col-12 sm:col-4 field">
+                <p:outputLabel for="additionalCost" value="weitere Kosten" styleClass="w-full" />
+
+                <p:inputNumber id="additionalCost" value="#{movieEditorView.movie.additionalCost.amount}" styleClass="w-4 sm:w-8" minValue="0" decimalPlaces="2" modifyValueOnWheel="false" symbol=" #{movieEditorView.movie.additionalCost.currency}" symbolPosition="s"/>
+                <h:message for="additionalCost" />
+              </div>
+            </div>
+          </p:card>
+        </div>
+      </div>
+
+      <p:tabView styleClass="mt-3">
+        <p:tab title="Schlagworte und Kategorien">
+          <div class="ui-fluid">
+            <ui:repeat value="#{movieEditorView.tagTemplateList}" var="currentCategory">
+              <div class="field">
+                <p:outputLabel for="category" value="#{currentCategory.name}" styleClass="w-full" />
+                <p:autoComplete id="category" 
+                                multiple="true" 
+                                value="#{movieEditorView.categorizedTags.get(currentCategory.name).list}"
+                                var="tag" 
+                                itemLabel="#{tag}"
+                                itemValue="#{tag}"
+                                completeMethod="#{movieEditorView.tagTemplateMap.get(currentCategory.name).lookup}"/>
+                <h:message for="category" />
+              </div>
+            </ui:repeat>
+          </div>
+        </p:tab>
+        <p:tab title="Fassungen und Formate">
+
+          <p:commandButton action="#{movieEditorView.addProductionVersion()}" icon="pi pi-plus" value="Fassung hinzufügen" styleClass="ui-button-outlined"/>
+
+          <p:dataTable value="#{movieEditorView.versionList}" 
+                       var="v"
+                       class="mt-4 ui-fluid" 
+                       rowKey="#{v.id}"
+                       rowIndexVar="versionIndex">
+
+            <p:autoUpdate />
+            
+            <p:column headerText="ID" style="width: 50px;">
+              <h:outputText value="#{v.id}" />
+            </p:column>
+
+            <p:column headerText="Beschreibung">
+              <p:inputText value="#{v.versionName}" />
+            </p:column>
+
+            <p:column headerText="Medien-Format">
+              <p:inputText value="#{v.mediaFormat}" />
+            </p:column>
+
+            <p:column headerText="gesprochene Sprache">
+              <p:inputText value="#{v.spokenLanguage}" />
+            </p:column>
+
+            <p:column headerText="Untertitel">
+              <p:inputText value="#{v.subtitles}" />
+            </p:column>
+
+            <p:column style="width: 50px;">
+              <p:commandButton action="#{movieEditorView.removeProductionVersion(versionIndex)}" icon="pi pi-trash" styleClass="ui-button-danger ui-button-flat rounded-button" />
+            </p:column>
+          </p:dataTable>
+
+        </p:tab>
+
+        <p:tab title="Medien">
+          <ui:repeat value="#{movieEditorView.attachmentCategoryList}" var="ac">
+            <h3><h:outputText value="#{ac.name}" /></h3>
+
+            <div class="mb-3">
+              <p:commandButton value="hinzufügen" icon="pi pi-plus" action="#{movieEditorView.addAttachment(ac.name)}" rendered="#{movieEditorView.movie.id != null}">
+                <p:ajax event="dialogReturn" listener="#{movieEditorView.onAttachmentsChanged}" update="@form"/>
+              </p:commandButton>
+            </div>
+            
+            <div class="grid">
+              <ui:repeat value="#{movieEditorView.categorizedAttachments.get(ac.name).list}" var="a">
+                <div class="lg:col-3 md:col-4 col-12">
+                  <h:graphicImage url="/webservice/attachments/#{a.id}/dataStream" 
+                                  alt="#{a.caption}" 
+                                  styleClass="img-attachment"
+                                  rendered="#{a.mediaType == 'IMAGE'}"/>
+
+                  <h:outputText value="#{a.caption}" style="block" />
+                  <h:outputText value="© #{a.copyright}" rendered="#{a.copyright != null}" style="block" />
+                  <p:commandButton title="Anhang bearbeiten"
+                                   icon="pi pi-pencil"
+                                   action="#{movieEditorView.editAttachment(a.id)}"
+                                   styleClass="ui-button-flat ui-rounded-button">
+                    <p:ajax event="dialogReturn" listener="#{movieEditorView.onAttachmentsChanged}" update="@form"/>
+                  </p:commandButton>
+                  <p:commandButton title="Bild löschen" 
+                                   icon="pi pi-trash"
+                                   styleClass="ui-button-flat ui-rounded-button ui-button-danger"
+                                   action="#{movieEditorView.removeAttachment(a.id)}"
+                                   update="@form">
+                    <p:confirm header="Löschen bestätigen" message="Möchten Sie diesen Anhang wirklich löschen?" icon="pi pi-exclamation-triangle" />
+                  </p:commandButton>
+                </div>
+              </ui:repeat>
+            </div>
+          </ui:repeat>
+        </p:tab>
+      </p:tabView>
+
+      <div class="mt-3 mb-5">
+        <p:commandButton action="#{movieEditorView.save}" value="speichern" />
+      </div>
+      
+      <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="650">
+        <p:commandButton value="abbrechen" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+        <p:commandButton value="Ja, löschen" type="button" icon="pi pi-trash" styleClass="ui-confirmdialog-yes ui-button-danger" />
+      </p:confirmDialog>
+    </h:form>
+  </ui:define>
+</ui:composition>

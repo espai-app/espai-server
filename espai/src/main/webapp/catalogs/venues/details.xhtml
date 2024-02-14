@@ -1,0 +1,183 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:jsf="http://xmlns.jcp.org/jsf"
+  template="/WEB-INF/layout/layout.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+  <ui:param name="title" value="#{venueDetailsView.venue.name}, #{venueDetailsView.venue.city}" />
+
+  <ui:define name="content">
+    <h:form>
+      <div class="page-title">
+        <h1><h:outputText value="#{venueDetailsView.venue.name} (#{venueDetailsView.venue.city})" /></h1>
+      </div>
+
+      <div class="mb-3">
+        <p:commandButton value="bearbeiten" icon="pi pi-pencil" action="#{venueDetailsView.editVenue}">
+          <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+        </p:commandButton>
+
+        <p:commandButton value="löschen" icon="pi pi-trash" action="#{venueDetailsView.removeVenue}" rendered="#{request.isUserInRole('MANAGER')}" styleClass="ml-2 ui-button-danger ui-button-outlined">
+          <p:confirm header="Löschen bestätigen" message="Möchten Sie diese Spielstätte wirklich löschen? Damit gehen auch Veranstaltungen verloren." icon="pi pi-exclamation-triangle" />
+        </p:commandButton>
+      </div>
+
+      <div class="md:flex md:align-items-stretch">
+        <p:card styleClass="md:flex-1 md:mr-1">
+          <f:facet name="title">
+            Öffentliche Adresse
+          </f:facet>
+          <div class="ui-fluid ">
+            <div class="field">
+              <h:outputText id="address" value="#{venueDetailsView.venue.address}" /><br />
+              <h:outputText id="city" value="#{venueDetailsView.venue.postcode} #{venueDetailsView.venue.city}" /><br /><br />
+
+              <p:outputLabel for="phone" value="Telefon" /><h:outputText value=" " />
+              <h:outputText id="phone" value="#{venueDetailsView.venue.phone}" /><br />
+
+              <p:outputLabel for="email" value="E-Mail" /><h:outputText value=" " />
+              <h:outputText id="email" value="#{venueDetailsView.venue.email}" />
+            </div>
+          </div>
+        </p:card>
+
+        <p:card styleClass="md:flex-1 md:ml-1">
+          <f:facet name="title">
+            Profilbilder
+          </f:facet>
+          <div>
+            <p:commandButton title="Bild hinzufügen"
+                             icon="pi pi-plus"
+                             action="#{venueDetailsView.addImage}"
+                             styleClass="ui-button-flat ui-rounded-button">
+              <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+            </p:commandButton>
+          </div>
+
+          <ui:repeat value="#{venueDetailsView.imageList}" var="image">
+            <div>
+              <img src="#{request.contextPath}/webservice/attachment/original/#{image.id}/" alt="" class="img-attachment" />
+              <p:commandButton title="Bild ändern"
+                               icon="pi pi-pencil"
+                               action="#{venueDetailsView.editImage(image.id)}"
+                               styleClass="ui-button-flat ui-rounded-button">
+                <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+              </p:commandButton>
+              <p:commandButton title="Bild löschen" 
+                               icon="pi pi-trash"
+                               styleClass="ui-button-flat ui-rounded-button ui-button-danger"
+                               action="#{venueDetailsView.removeImage(image.id)}"
+                               update="@form">
+                <p:confirm header="Löschen bestätigen" message="Möchten Sie diese Spielstätte wirklich löschen? Damit gehen auch Veranstaltungen verloren." icon="pi pi-exclamation-triangle" />
+              </p:commandButton>
+            </div>
+          </ui:repeat>
+
+        </p:card>
+      </div>
+
+      <p:card styleClass="mt-3">
+        <f:facet name="title">
+          Ansprechpartner:innen
+        </f:facet>
+
+        <p:commandButton value="Kontakt hinzufügen" icon="pi pi-plus" action="#{venueDetailsView.addContact}">
+          <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+        </p:commandButton>
+
+        <p:dataTable value="#{venueDetailsView.venueContactList}" var="contact" class="mt-3">
+
+          <p:autoUpdate />
+
+          <p:column headerText="Name">
+            <h:outputText value="#{contact.familyName}, #{contact.givenName}" />
+          </p:column>
+
+          <p:column headerText="Position">
+            <h:outputText value="#{contact.position}" />
+          </p:column>
+
+          <p:column headerText="Telefon">
+            <p:link value="#{contact.phone}" href="tel:#{contact.phone}" />
+          </p:column>
+
+          <p:column headerText="E-Mail">
+            <p:link value="#{contact.email}" href="mailto:#{contact.email}" />
+          </p:column>
+
+          <p:column styleClass="text-right" style="width: 100px;">
+            <p:commandButton title="bearbeiten" 
+                             icon="pi pi-pencil" 
+                             styleClass="ui-button-flat rounded-button" 
+                             action="#{venueDetailsView.editContact(contact.id)}">
+              <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+            </p:commandButton>
+            <p:commandButton title="löschen" 
+                             icon="pi pi-trash" 
+                             styleClass="ui-button-flat rounded-button ui-button-danger ml-2"
+                             action="#{venueDetailsView.removeContact(contact.id)}"
+                             update="@form">
+              <p:confirm header="Löschen bestätigen" message="Möchten Sie diesen Kontakt wirklich löschen?" icon="pi pi-exclamation-triangle" />
+            </p:commandButton>
+          </p:column>
+        </p:dataTable>
+      </p:card>
+
+      <p:card styleClass="mt-3">
+        <f:facet name="title">
+          Säle
+        </f:facet>
+
+        <p:commandButton value="Saal hinzufügen" icon="pi pi-plus" action="#{venueDetailsView.addHall}">
+          <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+        </p:commandButton>
+
+        <p:dataTable value="#{venueDetailsView.hallList}" var="hall" class="mt-3">
+
+          <p:autoUpdate />
+
+          <p:column headerText="Name">
+            <h:outputText value="#{hall.name}" />
+          </p:column>
+
+          <p:column headerText="Sitze">
+            <h:outputText value="#{hall.capacity}" />
+          </p:column>
+
+          <p:column headerText="Rollstuhl-Plätze">
+            <h:outputText value="#{hall.capacityWheelchairs}" />
+          </p:column>
+
+          <p:column headerText="Hörschleife">
+            <h:outputText value="#{hall.hearingLoops ? 'ja' : 'nein'}" />
+          </p:column>
+
+          <p:column styleClass="text-right" style="width: 100px;">
+            <p:commandButton title="bearbeiten" 
+                             icon="pi pi-pencil" 
+                             styleClass="ui-button-flat rounded-button"
+                             action="#{venueDetailsView.editHall(hall.id)}">
+              <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+            </p:commandButton>
+            <p:commandButton title="löschen"
+                             icon="pi pi-trash" 
+                             styleClass="ui-button-flat rounded-button ui-button-danger ml-2"
+                             action="#{venueDetailsView.removeHall(hall.id)}"
+                             update="@form">
+              <p:confirm header="Löschen bestätigen" message="Möchten Sie diesen Saal wirklich löschen? Alle damit verbundenen Veranstaltungen werden ebenfalls gelöscht." icon="pi pi-exclamation-triangle"/>
+            </p:commandButton>
+          </p:column>
+        </p:dataTable>
+      </p:card>
+
+      <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="650">
+        <p:commandButton value="abbrechen" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+        <p:commandButton value="Ja, löschen" type="button" icon="pi pi-trash" styleClass="ui-confirmdialog-yes ui-button-danger" />
+      </p:confirmDialog>
+    </h:form>
+  </ui:define>
+</ui:composition>

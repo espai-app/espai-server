@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/login.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+  <ui:param name="title" value="Abgemeldet"/>
+
+  <ui:define name="content">
+    <div class="text-center">
+      <h1>Abgemeldet</h1>
+      <p>Sie wurden erfolgreich abgemeldet.</p>
+
+      <p:linkButton href="login.xhtml" value="erneut anmelden" />
+    </div>
+  </ui:define>
+</ui:composition>

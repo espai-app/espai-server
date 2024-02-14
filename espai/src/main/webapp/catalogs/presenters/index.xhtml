@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/layout.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+  <ui:param name="title" value="Referenten"/>
+
+  <ui:define name="content">
+    <h1>Referenten</h1>
+
+    <div class="mb-3">
+      <p:linkButton href="editor.xhtml" icon="pi pi-plus" value="neuer Referent:in" />
+    </div>
+    
+    <p:card>
+      <p:dataTable value="#{presenterIndexView.presenterList}" var="p">
+        <p:column headerText="Nachname">
+          <p:link href="editor.xhtml" value="#{p.surname}">
+            <f:param name="presenterId" value="#{p.id}" />
+          </p:link>
+        </p:column>
+        
+        <p:column headerText="Vorname">
+          <p:link href="editor.xhtml" value="#{p.givenName}">
+            <f:param name="presenterId" value="#{p.id}" />
+          </p:link>
+        </p:column>
+        
+        <p:column headerText="Ort">
+          <p:link href="editor.xhtml" value="#{p.city}">
+            <f:param name="presenterId" value="#{p.id}" />
+          </p:link>
+        </p:column>
+      </p:dataTable>
+    </p:card>
+  </ui:define>
+</ui:composition>

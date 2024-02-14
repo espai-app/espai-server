@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+  <ui:insert name="metadata"/>
+
+  <h:head>
+    <title>#{title} - espai</title>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, width=device-width" />
+    <h:outputStylesheet name="webjars/primeflex/3.3.1/primeflex.min.css" />
+    <h:outputStylesheet library="css" name="default.css" />
+  </h:head>
+  <h:body>
+    <div class="header">
+      <p:menubar class="text-white">
+        <h:outputText value="espai" />
+        <p:menuitem value="Dashboard" outcome="/index.html"/>
+        <p:menuitem value="Veranstaltungen" outcome="/seasons/events/index.html" />
+        <p:menuitem value="Stammdaten" outcome="/catalogs/index.html" />
+        <p:menuitem value="Einstellungen" outcome="/settings/index.html" rendered="#{request.isUserInRole('MANAGER')}" />
+
+        <f:facet name="options">
+          <h:outputLabel value="#{request.userPrincipal.user.displayName}" styleClass="ml-3 mr-3"/>
+          <h:form>
+            <p:commandButton value="Logout" icon="pi pi-power-off" styleClass="ui-button-flat text-white" action="#{logoutView.logout}"/>
+          </h:form>
+        </f:facet>
+      </p:menubar>
+
+    </div>
+
+    <div class="main">
+      <ui:insert name="sidebar" />
+
+      <div class="content">
+        <ui:insert name="content"/>
+      </div>
+    </div>
+    
+    <h:form>
+      <p:growl id="growl" for="popup" showDetail="true" />
+    </h:form>
+    
+    <div class="footer">© 2023, BOROWSKI IT GmbH. Alle Rechte vorbehalten.</div>
+  </h:body>
+</html>

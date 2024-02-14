@@ -1,0 +1,11 @@
+#
+# (c) BOROWSKI IT GmbH, 2023
+#
+# espai - cultural space managment
+#
+
+PROJECT "espai";
+BASEPACKAGE "app.espai";
+
+INCLUDE "app/espai/model/show.xprsm";
+

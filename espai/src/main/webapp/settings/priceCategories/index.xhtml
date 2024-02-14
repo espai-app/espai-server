@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/settings.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+  
+  <ui:param name="title" value="Preiskategorien verwalten" />
+
+  <ui:define name="content">
+    <h1>Preiskategorien</h1>
+    
+    <div class="mb-3">
+      <p:commandButton icon="pi pi-plus" 
+                       value="neue Preiskategorie"
+                       action="#{priceCategoryIndexView.addCategory}" />
+    </div>
+    
+    <p:card>
+      <p:dataTable value="#{priceCategoryIndexView.priceCategoryList}" var="p">
+        
+        <p:autoUpdate />
+        
+        <p:column headerText="Name">
+          <h:outputText value="#{p.name}" />
+          <h:outputText value="#{p.description}" />
+        </p:column>
+        
+        <p:column headerText="Preis" style="width: 150px;">
+          <h:outputText value="#{p.defaultValue.amount}">
+            <f:convertNumber minFractionDigits="2" maxFractionDigits="2" currencySymbol="#{p.defaultValue.currency}" />
+          </h:outputText>
+        </p:column>
+        
+        <p:column headerText="automatisch erstellen" style="width: 70px;">
+          <h:outputText value="#{p.addByDefault ? 'ja' : 'nein'}" />
+        </p:column>
+        
+        <p:column style="width: 100px;">
+          <p:commandButton icon="pi pi-pencil" 
+                           title="bearbeiten" 
+                           class="ui-button-flat ui-rounded-button"
+                           action="#{priceCategoryIndexView.editCategory(p.id)}">
+          
+          </p:commandButton>
+          <p:commandButton icon="pi pi-trash" 
+                           title="löschen" 
+                           class="ui-button-flat ui-rounded-button ui-button-danger"
+                           action="#{priceCategoryIndexView.deleteCategory(p.id)}">
+            
+            <p:confirm header="Löschen bestätigen" message="Möchten Sie diese Preiskategorie wirklich löschen?" icon="pi pi-exclamation-triangle" />
+          </p:commandButton>
+        </p:column>
+      </p:dataTable>
+      
+      <p:confirmDialog global="true" 
+                       showEffect="fade" 
+                       hideEffect="fade" 
+                       responsive="true" 
+                       width="650">
+        <p:commandButton value="abbrechen" 
+                         type="button" 
+                         styleClass="ui-confirmdialog-no ui-button-flat"/>
+        <p:commandButton value="Ja, löschen" 
+                         type="button" 
+                         icon="pi pi-trash" styleClass="ui-confirmdialog-yes ui-button-danger" />
+      </p:confirmDialog>
+    </p:card>
+  </ui:define>
+</ui:composition>

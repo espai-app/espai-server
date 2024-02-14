@@ -1,0 +1,159 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/dialog.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="jakarta.tags.core">
+
+  <ui:param name="title" value="#{eventEditorView.event.id == null ? 'Veranstaltung erstellen' : 'Veranstaltung bearbeiten'}" />
+
+  <ui:define name="content">
+
+    <h:form>
+      <input type="hidden" name="eventId" value="#{eventEditorView.event.id}" />
+      <input type="hidden" name="seasonId" value="#{eventEditorView.event.season.id}" />
+      <input type="hidden" name="parentEventId" value="#{eventEditorView.event.parentEvent != null ? eventEditorView.event.parentEvent.id : ''}" />
+
+      <div class="ui-fluid">
+        <c:if test="#{eventEditorView.event.parentEvent == null}">
+          <div class="flex flex-row flex-wrap">
+            <div class="field mr-3">
+              <p:outputLabel for="date" value="Datum" styleClass="block" />
+              <p:inputMask id="date" 
+                           value="#{eventEditorView.event.date}" 
+                           mask="99.99.9999"
+                           style="width: 150px">
+                <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+              </p:inputMask>
+              <h:message for="date" />
+            </div>
+
+            <div class="field">
+              <p:outputLabel for="time" value="Uhrzeit" styleClass="block" />
+              <p:inputMask id="time" 
+                           value="#{eventEditorView.event.time}" 
+                           mask="99:99"
+                           style="width: 100px">
+                <f:convertDateTime type="localTime" pattern="HH:mm" />
+              </p:inputMask>
+              <h:message for="time" />
+            </div>
+          </div>
+        </c:if>
+
+        <div class="grid">
+          <c:if test="#{eventEditorView.event.parentEvent == null}">
+            <div class="field md:col-6 col-12">
+              <p:outputLabel for="venue" value="Spielstätte" />
+              <p:selectOneMenu id="venue" value="#{eventEditorView.venue}">
+                <p:ajax listener="#{eventEditorView.onVenueChanged}" update="hall" />
+                <f:selectItems value="#{eventEditorView.venueList}"
+                               var="venue"
+                               itemValue="#{venue}"
+                               itemLabel="#{venue.name}, #{venue.city}"
+                               noSelectionValue="- bitte wählen -"/>
+                <f:converter binding="#{venueConverter}" />
+              </p:selectOneMenu>
+            </div>
+          </c:if>
+
+          <div class="field  md:col-6 col-12">
+            <p:outputLabel for="hall" value="Saal" />
+            <p:selectOneMenu id="hall" value="#{eventEditorView.event.hall}" class="block">
+              <f:selectItems value="#{eventEditorView.hallList}" var="hall" itemValue="#{hall}" itemLabel="#{hall.name} (#{hall.capacity} Pers.)" />
+              <f:converter binding="#{hallConverter}" />
+            </p:selectOneMenu>
+            <h:message for="hall" />
+          </div>
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="eventSerial" value="Veranstaltungsreihe" />
+          <p:selectOneMenu id="eventSerial" value="#{eventEditorView.event.eventSerial}" class="block">
+            <f:selectItem itemLabel="" itemValue="#{null}" />
+            <f:selectItems value="#{eventEditorView.eventSerialList}" var="serial" itemValue="#{serial}" itemLabel="#{serial.name}" />
+            <f:converter binding="#{eventSerialConverter}" />
+          </p:selectOneMenu>
+          <h:message for="eventSerial" />
+        </div>
+
+        <div class="grid">
+          <div class="field md:col-6 col-12">
+            <p:outputLabel for="host" value="Moderation" />
+            <p:selectOneMenu id="host" value="#{eventEditorView.event.host}" class="block">
+              <f:selectItem itemLabel="" itemValue="#{null}" />
+              <f:selectItems value="#{eventEditorView.presenterList}" 
+                             var="presenter" 
+                             itemValue="#{presenter}" 
+                             itemLabel="#{presenter.surname}, #{presenter.givenName}" />
+              <f:converter binding="#{presenterConverter}" />
+            </p:selectOneMenu>
+            <h:message for="host" />
+          </div>
+
+          <div class="field  md:col-6 col-12">
+            <p:outputLabel for="coHost" value="Co-Moderation" />
+            <p:selectOneMenu id="coHost" value="#{eventEditorView.event.coHost}" class="block">
+              <f:selectItem itemLabel="" itemValue="#{null}" />
+              <f:selectItems value="#{eventEditorView.presenterList}"
+                             var="presenter" 
+                             itemValue="#{presenter}" 
+                             itemLabel="#{presenter.surname}, #{presenter.givenName}"
+                             noSelectionValue="true" />
+              <f:converter binding="#{presenterConverter}" />
+            </p:selectOneMenu>
+            <h:message for="coHost" />
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="field md:col-6 col-12">
+            <p:outputLabel for="production" value="Veranstaltung" />
+            <p:selectOneMenu id="production" value="#{eventEditorView.production}" class="block">
+              <p:ajax listener="#{eventEditorView.onProductionChanged}" update="productionVersion" />
+              <f:selectItems value="#{eventEditorView.productionList}"
+                             var="production"
+                             itemValue="#{production}"
+                             itemLabel="#{production.title}"
+                             noSelectionValue="- bitte wählen -"/>
+              <f:converter binding="#{productionConverter}" />
+            </p:selectOneMenu>
+            <h:message for="production" />
+          </div>
+
+          <div class="field md:col-6 col-12">
+            <p:outputLabel for="productionVersion" value="Format" />
+            <p:selectOneMenu id="productionVersion" value="#{eventEditorView.event.production}" class="block">
+              <f:selectItems value="#{eventEditorView.productionVersionList}" var="version" itemValue="#{version}" itemLabel="#{version.versionName == '' ? '(leerer Name)' : version.versionName}" />
+              <f:converter binding="#{productionVersionConverter}" />
+            </p:selectOneMenu>
+            <h:message for="productionVersion" />
+          </div>
+        </div>
+        
+        <div class="field">
+          <p:outputLabel for="ticketLimit" value="Ticket-Limit" />
+          <p:inputNumber id="ticketLimit" value="#{eventEditorView.event.ticketLimit}" />
+          <h:message for="ticketLimit" />
+        </div>
+
+        <div class="field">
+          <p:selectBooleanCheckbox value="#{eventEditorView.event.mandatory}" itemLabel="Teilnahme verpflichtend" />
+        </div>
+
+        <div class="field">
+          <p:selectBooleanCheckbox value="#{eventEditorView.event.hidden}" itemLabel="Veranstaltung nicht öffentlich sichtbar" />
+        </div>
+      </div>
+
+      <div class="dialog-footer">
+        <p:commandButton value="speichern" icon="pi pi-save" action="#{eventEditorView.save}" />
+      </div>
+
+    </h:form>
+
+  </ui:define>
+</ui:composition>

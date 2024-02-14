@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      template="/WEB-INF/layout/dialog.xhtml">
+  
+  <ui:param name="title" value="#{venueEditorView.venue.id == null ? 'Neue Spielstätte erstellen' : 'Spielstätte bearbeiten'}" />
+
+  <ui:define name="content">
+    <h:form>
+      <f:passThroughAttribute name="autocomplete" value="off" />
+      
+      <input type="hidden" name="venueId" value="#{venueEditorView.venue.id}" />
+      
+      <div class="ui-fluid">
+        <div class="field">
+          <p:outputLabel for="name" value="Name" />
+          <p:inputText id="name" value="#{venueEditorView.venue.name}" />
+          <h:message for="name" />
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="address" value="Adresse" />
+          <p:inputText id="address" value="#{venueEditorView.venue.address}" />
+          <h:message for="address" />
+        </div>
+
+        <div class="grid">
+          <div class="field lg:col-2 col-4">
+            <p:outputLabel for="postcode" value="PLZ" />
+            <p:inputText id="postcode" value="#{venueEditorView.venue.postcode}" />
+            <h:message for="postcode" />
+          </div>
+
+          <div class="field lg:col-10 col-8">
+            <p:outputLabel for="city" value="Ort" />
+            <p:inputText id="city" value="#{venueEditorView.venue.city}" />
+            <h:message for="city" />
+          </div>
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="phone" value="Telefon" />
+          <p:inputText id="phone" value="#{venueEditorView.venue.phone}" />
+          <h:message for="phone" />
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="email" value="E-Mail" />
+          <p:inputText type="email" id="email" value="#{venueEditorView.venue.email}" />
+          <h:message for="email" />
+        </div>
+      </div>
+
+      <div class="dialog-footer">
+        <p:commandButton action="#{venueEditorView.save}" value="speichern" icon="pi pi-save" />
+      </div>
+    </h:form>
+  </ui:define>
+</ui:composition>

@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/login.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+  <ui:param name="title" value="Anmelden"/>
+
+  <ui:define name="content">
+
+    <h1>Login</h1>
+    <p>Willkommen bei den Schulkinowochen Sachsen. Bitte melden Sie sich mit Ihren Zugangsdaten an.</p>
+
+    <p:messages />
+
+    <div class="grid">
+      <div class="col-12 md:col-6">
+        <div class="field">
+          <p:outputLabel for="username">E-Mail-Adresse</p:outputLabel>
+          <p:inputText id="username" value="#{loginView.username}" />
+        </div>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <div class="field">
+          <p:outputLabel for="password">Passwort</p:outputLabel>
+          <p:password id="password" value="#{loginView.password}" />
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-content-between align-items-center">
+      <p:commandButton id="loginButton" action="#{loginView.login}" value="anmelden" ajax="false" />
+
+      <p:link href="forgotPassword.xhtml" value="Passwort vergessen" />
+    </div>
+
+  </ui:define>
+</ui:composition>

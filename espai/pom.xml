@@ -1,0 +1,152 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>app.espai</groupId>
+  <artifactId>espai</artifactId>
+  <version>1.0</version>
+  <packaging>war</packaging>
+
+  <name>espai</name>
+
+  <properties>
+    <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>jakarta.platform</groupId>
+      <artifactId>jakarta.jakartaee-api</artifactId>
+      <version>10.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.eclipse.microprofile.config</groupId>
+      <artifactId>microprofile-config-api</artifactId>
+      <version>3.1</version>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- PrimeFaces -->
+    <dependency>
+      <groupId>org.primefaces</groupId>
+      <artifactId>primefaces</artifactId>
+      <version>12.0.0</version>
+      <classifier>jakarta</classifier>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.webjars.npm</groupId>
+      <artifactId>primeflex</artifactId>
+      <version>3.3.1</version>
+    </dependency>   
+    
+    <!-- Parsing and Writing data -->
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.16.2</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>net.sf.supercsv</groupId>
+      <artifactId>super-csv</artifactId>
+      <version>2.4.0</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>net.sf.supercsv</groupId>
+      <artifactId>super-csv-java8</artifactId>
+      <version>2.4.0</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.im4java</groupId>
+      <artifactId>im4java</artifactId>
+      <version>1.4.0</version>
+    </dependency>
+    
+    <!-- XPRS framework -->    
+    <dependency>
+      <groupId>rocks.xprs</groupId>
+      <artifactId>runtime.sdk</artifactId>
+      <version>0.3.0</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>rocks.xprs</groupId>
+      <artifactId>commons.mvc</artifactId>
+      <version>2022.11</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <source>17</source>
+          <target>17</target>
+          <compilerArguments>
+            <endorseddirs>${endorsed.dir}</endorseddirs>
+          </compilerArguments>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.2.3</version>
+        <configuration>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
+        </configuration>
+      </plugin>
+      
+      <!-- XPRS CODE GENERATOR -->
+      <plugin>
+        <artifactId>creator</artifactId>
+        <groupId>rocks.xprs</groupId>
+        <version>0.4.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <!-- PROJECT FILE -->
+              <projectfile>app/espai/model/project.xprsm</projectfile>
+              <!-- USE GENERATORS -->
+              <generators>
+                <generator>rocks.xprs.generators.ee.ModelGenerator</generator>
+                <generator>rocks.xprs.generators.ee.FilterGenerator</generator><!--
+                <generator>rocks.xprs.generators.db.ValidatorGenerator</generator>-->
+                <generator>rocks.xprs.generators.ee.DaoGenerator</generator>
+                <!--<generator>rocks.xprs.generators.db.OrmXmlGenerator</generator>-->
+                <generator>rocks.xprs.generators.ee.SqlGenerator</generator>
+                <!--<generator>rocks.xprs.generators.localization.ResourceKeysGenerator</generator>-->
+              </generators>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <!-- PROJECT CONTAINING THE PROJECT FILE -->
+          <dependency>
+            <groupId>app.espai</groupId>
+            <artifactId>model</artifactId>
+            <version>1.0-SNAPSHOT</version>
+          </dependency>
+          <!-- PROJECT CONTAINING THE CODE GENERATORS -->
+          <dependency>
+            <groupId>rocks.xprs</groupId>
+            <artifactId>generators</artifactId>
+            <version>2020.08</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
+</project>

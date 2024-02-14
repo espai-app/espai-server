@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/layout.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+  <ui:param name="title" value="Einstellungen" />
+  
+  <ui:define name="content">
+    <h1>Einstellungen</h1>
+    
+    <div class="grid">
+      <p:card styleClass="lg:col-3 md:col-4 col-12 md:mr-2 mb-2" rendered="#{request.isUserInRole('MANAGER')}">
+        <f:facet name="title">Spielzeiten verwalten</f:facet>
+        <p>Legen Sie neue Spielzeiten an und legen Sie Spieltätten und Programm fest.</p>
+        <f:facet name="footer"><div class="text-right"><p:linkButton href="seasons/index.xhtml" value="zur Liste" styleClass="ui-button-flat"/></div></f:facet>
+      </p:card> 
+
+      <p:card styleClass="lg:col-3 md:col-4 col-12 md:mr-2 mb-2" rendered="#{request.isUserInRole('MANAGER')}">
+        <f:facet name="title">Benutzerkonten verwalten</f:facet>
+        <p>Fügen Sie neue Nutzer hinzu und vergeben Sie Nutzerrechte.</p>
+        <f:facet name="footer"><div class="text-right"><p:linkButton href="users/index.xhtml" value="zur Liste" styleClass="ui-button-flat"/></div></f:facet>
+      </p:card>
+      
+      <p:card styleClass="lg:col-3 md:col-4 col-12 md:mr-2 mb-2" rendered="#{request.isUserInRole('MANAGER')}">
+        <f:facet name="title">Mailvorlagen</f:facet>
+        <p>Bearbeiten Sie die Standardtexte für Status-E-Mails.</p>
+        <f:facet name="footer"><div class="text-right"><p:linkButton href="mailTemplates/index.xhtml" value="zur Liste" styleClass="ui-button-flat"/></div></f:facet>
+      </p:card>
+      
+      <p:card styleClass="lg:col-3 md:col-4 col-12 md:mr-2 mb-2" rendered="#{request.isUserInRole('MANAGER')}">
+        <f:facet name="title">Preiskategorien</f:facet>
+        <p>Verwalten Sie die Preiskategorien für die Tickets.</p>
+        <f:facet name="footer"><div class="text-right"><p:linkButton href="priceCategories/index.xhtml" value="zur Liste" styleClass="ui-button-flat"/></div></f:facet>
+      </p:card>
+    </div>
+  </ui:define>
+</ui:composition>

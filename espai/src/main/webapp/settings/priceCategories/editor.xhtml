@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/dialog.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+  <ui:param name="title" value="Preiskategorien bearbeiten" />
+
+  <ui:define name="content">
+    <h:form>
+      <div class="ui-fluid">
+        <div class="field">
+          <p:outputLabel for="name" value="Name" />
+          <p:inputText id="name" value="#{priceCategoryEditorView.priceCategory.name}" />
+          <h:message for="name" />
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="description" value="Beschreibung" />
+          <p:inputTextarea id="description" value="#{priceCategoryEditorView.priceCategory.description}" />
+          <h:message for="description" />
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="defaultValue" value="Preis" />
+          <p:inputNumber id="defaultValue" 
+                         value="#{priceCategoryEditorView.priceCategory.defaultValue.amount}"
+                         decimalPlaces="2"
+                         decimalSeparator=","
+                         symbol="#{priceCategoryEditorView.priceCategory.defaultValue.currency}"
+                         symbolPosition="suffix"
+                         />
+          <h:message for="defaultValue" />
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="position" value="Sortierung" />
+          <p:inputNumber id="position" value="#{priceCategoryEditorView.priceCategory.position}" />
+          <h:message for="position" />
+        </div>
+
+        <div class="field">
+          <p:selectBooleanCheckbox id="addByDefault" 
+                                   value="#{priceCategoryEditorView.priceCategory.addByDefault}"
+                                   itemLabel="automatisch anlegen"/>
+          <h:message for="addByDefault" />
+        </div>
+      </div>
+
+      <div class="dialog-footer">
+        <p:commandButton icon="pi pi-save" value="speichern" action="#{priceCategoryEditorView.save}" />
+      </div>
+    </h:form>
+  </ui:define>
+</ui:composition>

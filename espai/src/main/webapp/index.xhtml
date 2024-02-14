@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/layout.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+  <ui:param name="title" value="Dashboard"/>
+
+  <ui:define name="content">
+    <div class="page-title">
+      <h1>Dashboard</h1>
+    </div>
+
+    <h:form>
+      <p:dashboard model="#{dashboardView.model}" styleClass="grid" >
+        <p:panel id="welcome" header="Herzlich willkommen!" closable="true" styleClass="xl:col-6">
+          <f:facet name="options"></f:facet>
+          <p>Willkommen im neuen Planungsprogramm für die Schulkinowochen Sachsen!
+            Wir modernisieren dieses Jahr unsere IT-Infrastruktur, d.h. dieses Portal wird kontinuierlich um neue Funktionen erweitert.
+            Freuen Sie sich mit uns auf eine einfachere Planung und auf mehr Übersicht bei Ihren Buchungen.
+          </p>
+
+          <p>Wir stellen im Moment das Programm für die Schulkinowochen 2024 zusammen. Tragen Sie Ihre Veranstaltungen am besten gleich schon mit ein!</p>
+
+          <p class="text-center"><p:linkButton href="seasons/events/programming.xhtml?seasonId=1" value="zur Eingabemaske"/></p>
+          
+          <p>Bei Fragen und Anregungen sprechen Sie uns gern an. Wir freuen uns auf Ihr Feedback.</p>
+        </p:panel>
+      </p:dashboard>
+    </h:form>
+  </ui:define>
+
+
+</ui:composition>

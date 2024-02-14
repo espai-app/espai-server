@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/settings.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="jakarta.tags.core">
+  
+  <ui:param name="title" value="Benutzerkonto bearbeiten" />
+
+  <ui:define name="content">
+    <h1>
+      <c:choose>
+        <c:when test="#{userEditorView.user.id != null}">#{userEditorView.user.displayName} bearbeiten</c:when>
+        <c:otherwise>Neues Benutzerkonto erstellen</c:otherwise>
+      </c:choose>
+    </h1>
+
+    <p:card>
+      <h:form>
+        <div>
+          <p:commandButton value="speichern" icon="pi pi-save" action="#{userEditorView.save}" />
+          <c:if test="#{userEditorView.user.id != null}">
+            <p:commandButton value="Passwort zurücksetzen" icon="pi pi-undo" action="#{userEditorView.resetPassword}" styleClass="ml-3 ui-button-outlined ui-button-secondary"/>
+            <p:commandButton value="löschen" icon="pi pi-trash" action="#{userEditorView.delete}" styleClass="ml-3 ui-button-outlined ui-button-danger">
+              <p:confirm header="Löschen bestätigen" message="Möchten Sie dieses Benutzerkonto wirklich löschen?" />
+            </p:commandButton>
+          </c:if>
+        </div>
+
+        <dl>
+          <dt><p:outputLabel for="displayName" value="Name" /></dt>
+          <dd>
+            <p:inputText id="displayName" value="#{userEditorView.user.displayName}" />
+            <p:message for="displayName" />
+          </dd>
+
+          <dt><p:outputLabel for="email" value="E-Mail" /></dt>
+          <dd>
+            <p:inputText id="email" value="#{userEditorView.user.email}" />
+            <p:message for="email" />
+          </dd>
+
+          <dt><p:outputLabel for="username" value="Benutzername" /></dt>
+          <dd>
+            <p:inputText id="username" value="#{userEditorView.user.username}" />
+            <p:message for="username" />
+          </dd>
+        </dl>
+
+        <h2>Zugriffsrechte</h2>
+
+        <p:commandButton value="Zugriffsrecht hinzufügen" icon="pi pi-plus" action="#{userEditorView.addAccessRight}" />
+
+        <p:dataTable value="#{userEditorView.accessRightList}" 
+                     var="a" 
+                     class="mt-4 ui-fluid" 
+                     rowKey="#{a.id}"
+                     rowIndexVar="rightIndex">
+
+          <p:autoUpdate />
+
+          <p:column headerText="Rolle">
+            <p:selectOneMenu id="role" value="#{a.role}" styleClass="block">
+              <f:selectItems value="#{userEditorView.userRoleList}" var="r" itemValue="#{r}" itemLabel="#{r}" />
+            </p:selectOneMenu>
+          </p:column>
+          <p:column headerText="Spielstätte">
+            <p:selectOneMenu id="venue" value="#{a.venue}" styleClass="block" rendered="#{a.role != 'MANAGER'}">
+              <f:selectItems value="#{userEditorView.venueList}" var="v" itemValue="#{v}" itemLabel="#{v.name}, #{v.city}" />
+            </p:selectOneMenu>
+          </p:column>
+          <p:column>
+            <p:commandButton id="deleteRole" icon="pi pi-trash" styleClass="rounded-button ui-button-flat" action="#{userEditorView.removeAccessRight(rightIndex)}" update="@form" />
+          </p:column>
+        </p:dataTable>
+
+        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="450">
+          <p:commandButton value="Ja, Benutzerkonto löschen" type="button" styleClass="ui-confirmdialog-yes" />
+          <p:commandButton value="Nein" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+        </p:confirmDialog>
+      </h:form>
+    </p:card>
+
+  </ui:define>
+</ui:composition>

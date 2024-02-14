@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/dialog.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="jakarta.tags.core">
+
+  <ui:param name="title" value="E-Mail senden" />
+
+  <ui:define name="content">
+    <h:form>
+      <f:passThroughAttribute name="autocomplete" value="off" />
+      
+      <div class="ui-fluid">
+        <div class="field">
+          <p:outputLabel for="from" value="Von" />
+          <p:inputText id="from" value="#{mailEditorView.mail.from}" />
+          <h:message for="from" />
+        </div>
+        
+        <div class="field">
+          <p:outputLabel for="to" value="An" />
+          <p:chips id="to" value="#{mailEditorView.mail.to}" addOnPaste="true" separator="," />
+          <h:message for="to" />
+        </div>
+        
+        <div class="field">
+          <p:outputLabel for="subject" value="Betreff" />
+          <p:inputText id="subject" value="#{mailEditorView.mail.subject}" />
+          <h:message for="subject" />
+        </div>
+        
+        <div class="field">
+          <p:outputLabel for="message" value="Nachricht" />
+          <p:textEditor id="message"
+                        value="#{mailEditorView.mail.html}" 
+                          height="300" 
+                          secure="false" 
+                          styleClass="w-full">
+
+              <f:facet name="toolbar">
+                <span class="ql-formats">
+                  <button class="ql-bold"></button>
+                  <button class="ql-italic"></button>
+                  <button class="ql-underline"></button>
+                  <button class="ql-strike"></button>
+                  <button class="ql-link" />
+                </span>
+              </f:facet>
+            </p:textEditor>
+          <h:message for="message" />
+        </div>
+      </div>
+      
+      <div class="dialog-footer">
+        <p:commandButton value="senden" icon="pi pi-send" action="#{mailEditorView.sendMail}" />
+      </div>
+    </h:form>
+  </ui:define>
+</ui:composition>

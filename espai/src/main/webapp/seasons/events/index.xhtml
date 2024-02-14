@@ -1,0 +1,155 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/seasons.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="jakarta.tags.core">
+
+  <ui:param name="title" value="Veranstaltungen" />
+
+  <ui:define name="content">
+
+    <div class="flex justify-content-between align-items-center flex-wrap">
+      <h1 class="">Veranstaltungen</h1>
+
+      <!-- DATE SELECTION -->
+      <div class=""  >
+        <p:linkButton href="index.xhtml" icon="pi pi-chevron-left" styleClass="rounded-button ui-button-secondary ui-button-flat">
+          <f:param name="seasonId" value="#{eventIndexView.currentSeason.id}" />
+          <f:param name="startDate" value="#{eventIndexView.prevWeek}" />
+        </p:linkButton>
+        <h:outputText value="#{eventIndexView.startDate}" styleClass="ml-3">
+          <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+        </h:outputText>
+        -
+        <h:outputText value="#{eventIndexView.endDate}" styleClass="mr-3">
+          <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+        </h:outputText>
+        <p:linkButton href="index.xhtml" icon="pi pi-chevron-right" styleClass="rounded-button ui-button-secondary ui-button-flat">
+          <f:param name="seasonId" value="#{eventIndexView.currentSeason.id}" />
+          <f:param name="startDate" value="#{eventIndexView.nextWeek}" />
+        </p:linkButton>
+      </div>
+    </div>
+    
+    <!-- TOOLBAR -->
+    <div class="grid mb-3">
+      <div class="col">
+        <p:linkButton href="programming.xhtml" icon="pi pi-pencil" value="Programm bearbeiten" styleClass="ui-button-outlined">
+          <f:param name="seasonId" value="#{eventIndexView.currentSeason.id}" />
+        </p:linkButton>
+      </div>
+      <div class="col text-right">
+        <p:commandButton type="button" class="ui-button-flat rounded-button ui-button-secondary" icon="pi pi-filter" title="filtern" onclick="PF('filterDialog').show()" />
+      </div>
+    </div>
+
+    <p:card>
+      
+      <!-- ACTIVATED FILTERS -->
+      <ui:repeat value="#{eventIndexView.selectedVenues}" var="svenue">
+        <p:chip label="#{svenue.name}, #{svenue.city}" styleClass="mr-2"/>
+      </ui:repeat>
+
+      <ui:repeat value="#{eventIndexView.selectedProductions}" var="sprod">
+        <p:chip label="#{sprod.title}" styleClass="mr-2"/>
+      </ui:repeat>
+
+      <p:linkButton href="index.xhtml" 
+                    icon="pi pi-times" 
+                    styleClass="rounded-button ui-button-flat" 
+                    value="Filter löschen"
+                    rendered="#{not((eventIndexView.selectedVenues == null or eventIndexView.selectedVenues.isEmpty()) and (eventIndexView.selectedProductions == null or eventIndexView.selectedProductions.isEmpty()))}">
+        <f:param name="seasonId" value="#{eventIndexView.currentSeason.id}" />
+        <f:param name="startDate" value="#{eventIndexView.startDate}" />
+      </p:linkButton>
+
+      <!-- EVENTS TABLE -->
+      <p:dataTable var="event" 
+                   value="#{eventIndexView.eventList}" 
+                   sortBy="#{event.date}"
+                   styleClass="mt-5"
+                   reflow="true">
+        <p:headerRow field="date" expandable="true">
+          <p:column colspan="4">
+            <h:outputText value="#{event.date}">
+              <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+            </h:outputText>
+          </p:column>
+        </p:headerRow>
+
+        <p:column headerText="Zeit" style="width: 70px;">
+          <p:link href="details.xhtml">
+            <f:param name="eventId" value="#{event.id}" />
+            <f:param name="seasonId" value="#{eventIndexView.currentSeason.id}" />
+            <h:outputText value="#{event.time}"/>
+          </p:link>
+        </p:column>
+
+        <p:column headerText="Veranstaltung">
+          <p:link href="details.xhtml" styleClass="block">
+            <f:param name="eventId" value="#{event.id}" />
+            <f:param name="seasonId" value="#{eventIndexView.currentSeason.id}" />
+            
+            <h:outputText value=" " class="pi pi-plus mr-1" rendered="#{event.parentEvent != null}"  />
+            <h:outputText value="#{event.production.fullName}" />
+            
+          </p:link>
+        </p:column>
+
+        <p:column headerText="Ort">
+          <h:outputText value="#{event.hall.venue.name}"/>, <h:outputText value="#{event.hall.venue.city}"/>
+        </p:column>
+
+        <p:column headerText="Auslastung" style="width: 100px;">
+          <p:progressBar id="seatsTaken" value="#{eventIndexView.ticketsSold.get(event.id) / event.capacity * 100}" displayOnly="true" />
+        </p:column>
+      </p:dataTable>
+    </p:card>
+
+    <!-- FILTER DIALOGS --> 
+    <form method="GET">
+      <p:dialog widgetVar="filterDialog" header="Filter" modal="true" responsive="true" resizable="true" width="800" height="600" closeOnEscape="true" showEffect="fade" blockScroll="true">
+        <f:facet name="footer">
+          <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+            <span class="ui-button-text ui-c">filtern</span>
+          </button>
+        </f:facet>
+
+        <h:inputHidden id="seasonId" value="#{eventIndexView.currentSeason.id}" />
+        <h:inputHidden id="startDate" value="#{eventIndexView.startDate}" />
+
+        <p:tabView>
+          <p:tab title="Spielstätte">
+            <p:selectManyCheckbox id="venue" 
+                                  value="#{eventIndexView.selectedVenueIds}"
+                                  layout="pageDirection"
+                                  columns="1" 
+                                  styleClass="grid-checkbox">
+
+              <f:selectItems value="#{eventIndexView.venueList}" var="v" itemLabel="#{v.name}, #{v.city}"
+                             itemValue="#{v.id}"/>
+            </p:selectManyCheckbox>
+          </p:tab>
+          <p:tab title="Veranstaltung">
+            <p:selectManyCheckbox id="production" 
+                                  value="#{eventIndexView.selectedProductionIds}"
+                                  layout="pageDirection"
+                                  columns="1" 
+                                  styleClass="grid-checkbox">
+
+              <f:selectItems value="#{eventIndexView.productionList}" 
+                             var="p" 
+                             itemLabel="#{p.title}"
+                             itemValue="#{p.id}"/>
+            </p:selectManyCheckbox>
+          </p:tab>
+        </p:tabView>          
+      </p:dialog>
+    </form>
+
+  </ui:define>
+</ui:composition>

@@ -1,0 +1,165 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/seasons.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="jakarta.tags.core">
+
+  <ui:param name="title" value="Buchungen" />
+
+  <ui:define name="content">
+    <h:form>
+      <h1>Buchungen</h1>      
+
+      <div class="grid mb-3">
+        <div class="md:col-9">
+          <p:linkButton href="editor.xhtml" 
+                        icon="pi pi-plus" 
+                        value="neue Buchung" 
+                        styleClass="mr-4"
+                        rendered="#{request.isUserInRole('MANAGER')}">
+            <f:param name="seasonId" value="#{reservationIndexView.seasonContext.currentSeason.id}" />
+          </p:linkButton>
+
+          <p:commandButton value="bestätigen" 
+                           icon="pi pi-check" 
+                           action="#{reservationIndexView.confirmReservations}"
+                           styleClass="ui-button-outlined mr-2"
+                           rendered="#{request.isUserInRole('MANAGER')}"
+                           update="@form">
+
+          </p:commandButton>
+
+          <p:commandButton value="parken" 
+                           icon="pi pi-pause" 
+                           action="#{reservationIndexView.holdReservations}"
+                           styleClass="ui-button-outlined mr-2"
+                           rendered="#{request.isUserInRole('MANAGER')}"
+                           update="@form">
+
+          </p:commandButton>
+
+          <p:commandButton value="stornieren" 
+                           icon="pi pi-times" 
+                           action="#{reservationIndexView.cancelReservations}"
+                           styleClass="ui-button-outlined"
+                           rendered="#{request.isUserInRole('MANAGER')}"
+                           update="@form">
+
+          </p:commandButton>
+        </div>
+        <!--<div class="md:col-3 text-right">
+          <p:commandButton title="filtern"
+                           onclick="PF('filterDialog').show()"
+                           icon="pi pi-filter" 
+                           styleClass="ui-button-secondary ui-button-flat rounded-button mr-2"
+                           rendered="#{request.isUserInRole('MANAGER')}">
+
+          </p:commandButton>
+        </div>-->
+      </div>
+
+      <p:card>
+        <p:dataTable value="#{reservationIndexView.reservationList}"
+                     selection="#{reservationIndexView.selectedReservationIds}"
+                     rowKey="#{r.id}"
+                     rowSelectMode="none"
+                     var="r"
+                     reflow="true">
+
+          <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+          <p:column headerText="Datum" style="width: 200px;">
+            <h:outputText value="#{r.eventDate}">
+              <f:convertDateTime pattern="dd.MM.yyyy" type="localDate" />
+            </h:outputText>
+            <h:outputText value=", #{r.eventStartTime} Uhr" />
+          </p:column>
+
+          <p:column headerText="Veranstaltung">
+            <p:link outcome="details">
+              <f:param name="reservationId" value="#{r.id}" />
+              <f:param name="seasonId" value="#{r.event.season.id}" />
+
+              <h:outputText value="#{r.productionTitle}" class="block text-lg mb-2" />
+              <ui:repeat value="#{reservationIndexView.childReservationMap.get(r.id)}" var="c">
+                <span class="block mb-2">
+                  <i class="pi pi-plus"></i>
+                  <h:outputText value=" #{c.event.production.fullName}" />
+                </span>
+              </ui:repeat>
+              <span class="block mt-3">
+                <i class="pi pi-map-marker"></i>
+                <h:outputText value=" #{r.venueName}, #{r.venueCity}" />
+              </span>
+            </p:link>
+          </p:column>
+
+          <p:column headerText="Besteller:in">
+            <h:outputText value="#{r.company}" /><br />
+            <h:outputText value="#{r.givenName} #{r.surname}" /><br />
+          </p:column>
+
+          <p:column headerText="Tickets" style="width: 70px">
+            <h:outputText value="#{r.tickets}" />
+          </p:column>
+
+          <p:column headerText="Status" style="width: 100px">
+            <h:outputText value="#{r.status}" />
+          </p:column>
+
+        </p:dataTable>
+      </p:card>
+
+      <p:confirmDialog global="true"></p:confirmDialog>
+
+      <p:growl id="grwl" globalOnly="true" />
+    </h:form>
+
+    <form method="GET">
+      <p:dialog widgetVar="filterDialog" header="Filter" modal="true" responsive="true" 
+                resizable="true" width="800" height="600" closeOnEscape="true" showEffect="fade" 
+                blockScroll="true">
+
+        <f:facet name="footer">
+          <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+            <span class="ui-button-text ui-c">filtern</span>
+          </button>
+        </f:facet>
+
+        <h:inputHidden id="seasonId" value="#{reservationIndexView.seasonContext.currentSeason.id}" />
+
+        <p:tabView>
+          <p:tab title="Spielstätte">
+            <p:selectManyCheckbox id="venue" 
+                                  value="#{reservationIndexView.selectedVenueIds}"
+                                  layout="pageDirection"
+                                  columns="1" 
+                                  styleClass="grid-checkbox">
+
+              <f:selectItems value="#{reservationIndexView.venueList}" var="v" itemLabel="#{v.name}, #{v.city}"
+                             itemValue="#{v.id}"/>
+            </p:selectManyCheckbox>
+          </p:tab>
+          <p:tab title="Veranstaltung">
+            <p:selectManyCheckbox id="production" 
+                                  value="#{reservationIndexView.selectedProductionIds}"
+                                  layout="pageDirection"
+                                  columns="1" 
+                                  styleClass="grid-checkbox">
+
+              <f:selectItems value="#{reservationIndexView.productionList}" 
+                             var="p" 
+                             itemLabel="#{p.title}"
+                             itemValue="#{p.id}"/>
+            </p:selectManyCheckbox>
+          </p:tab>
+        </p:tabView>          
+      </p:dialog>
+    </form>
+
+  </ui:define>
+</ui:composition>

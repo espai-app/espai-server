@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/layout/dialog.xhtml">
+
+  <ui:param name="title" value="#{venueContactEditorView.contact.id == null ? 'Neuer Ansprechpartner' : 'Ansprechpartner bearbeiten'}" />
+
+  <ui:define name="content">
+    <h:form>
+      <f:passThroughAttribute name="autocomplete" value="off" />
+
+      <input type="hidden" name="contactId" value="#{venueContactEditorView.contact.id}" />
+      <input type="hidden" name="venueId" value="#{param.venueId}" />
+
+      <div class="ui-fluid">
+        <div class="grid">
+          <div class="field sm:col-6 col-12">
+            <p:outputLabel for="givenName" value="Vorname" />
+            <p:inputText id="givenName" value="#{venueContactEditorView.contact.givenName}" />
+            <h:message for="givenName" />
+          </div>
+
+          <div class="field sm:col-6 col-12">
+            <p:outputLabel for="familyName" value="Nachname" />
+            <p:inputText id="familyName" value="#{venueContactEditorView.contact.familyName}" />
+            <h:message for="familyName" />
+          </div>
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="position" value="Position/Funktion" />
+          <p:inputText id="position" value="#{venueContactEditorView.contact.position}" />
+          <small class="w-full">z.B. Theaterleiter, Buchhaltung oder Programmplanung</small>
+          <h:message for="position" />
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="formOfAddress" value="Anredeformel" />
+          <p:inputText id="formOfAddress" value="#{venueContactEditorView.contact.formOfAddress}" />
+          <small class="w-full">z.B. 'Sehr geehrte Frau Mustermann' oder 'Lieber Herr Müller'</small>
+          <h:message for="formOfAddress" />
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="phone" value="Telefon" />
+          <p:inputText id="phone" value="#{venueContactEditorView.contact.phone}" />
+          <h:message for="phone" />
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="email" value="E-Mail" />
+          <p:inputText type="email" id="email" value="#{venueContactEditorView.contact.email}" />
+          <h:message for="email" />
+        </div>
+      </div>
+
+      <div class="dialog-footer">
+        <p:commandButton action="#{venueContactEditorView.save}" value="speichern" icon="pi pi-save" />
+      </div>
+    </h:form>
+  </ui:define>
+</ui:composition>

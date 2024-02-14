@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/settings.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+  
+  <ui:param name="title" value="Spielzeiten verwalten" />
+
+  <ui:define name="content">
+    <h1>Spielzeiten</h1>
+
+    <h:form>
+      <p:commandButton value="neue Spielzeit" icon="pi pi-plus" onclick="PF('createDialog').show()"/>
+
+      <p:dataTable value="#{seasonIndexView.seasonList}" var="s" styleClass="mt-3">
+        <p:column headerText="Name">
+          <p:link value="#{s.name}" href="details.xhtml">
+            <f:param name="seasonId" value="#{s.id}" />
+          </p:link>
+        </p:column>
+        
+        <p:column headerText="von">
+          <h:outputText value="#{s.start}">
+            <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+          </h:outputText>
+        </p:column>
+        
+        <p:column headerText="bis">
+          <h:outputText value="#{s.end}">
+            <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+          </h:outputText>
+        </p:column>
+      </p:dataTable>
+
+      <p:dialog header="Neue Spielzeit" widgetVar="createDialog" showEffect="fade" modal="true">
+        <dl>
+          <dt><p:outputLabel for="name" value="Name" /></dt>
+          <dd>
+            <p:inputText id="name" value="#{seasonIndexView.newSeason.name}" />
+            <p:message for="name" />
+          </dd>
+
+          <dt><p:outputLabel for="start" value="Start" /></dt>
+          <dd>
+            <p:inputMask id="start" value="#{seasonIndexView.newSeason.start}" mask="99.99.9999">
+              <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+            </p:inputMask>
+            <p:message for="start" />
+          </dd>
+
+          <dt><p:outputLabel for="end" value="Ende" /></dt>
+          <dd>
+            <p:inputMask id="end" value="#{seasonIndexView.newSeason.end}" mask="99.99.9999">
+              <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+            </p:inputMask>
+            <p:message for="end" />
+          </dd>
+        </dl>
+
+        <f:facet name="footer">
+          <p:commandButton type="button" value="abbrechen" styleClass="ui-button-flat mr-2" onclick="PF('createDialog').hide()" />
+          <p:commandButton type="submit" value="erstellen" action="#{seasonIndexView.create}"/>
+        </f:facet>
+      </p:dialog>
+    </h:form>
+  </ui:define>
+</ui:composition>

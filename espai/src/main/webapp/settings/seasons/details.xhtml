@@ -1,0 +1,147 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/settings.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+  <ui:param name="title" value="#{seasonDetailsView.season.name} bearbeiten"/>
+
+  <ui:define name="content">
+    <h:form>
+      <h1>
+        <h:outputText value="#{seasonDetailsView.season.name}" />
+        <small>
+          <h:outputText value="#{seasonDetailsView.season.start}">
+            <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+          </h:outputText>
+          -
+          <h:outputText value="#{seasonDetailsView.season.end}">
+            <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+          </h:outputText>
+          <c:if test="#{seasonDetailsView.season.isArchived()}"> (archiviert)</c:if>
+        </small>
+      </h1>
+
+      <p:card>
+        <p:commandButton value="bearbeiten" type="button" icon="pi pi-pencil" onclick="PF('editDialog').show()" styleClass="mr-2 ui-button-outlined ui-button-secondary" />
+        <p:commandButton value="archivieren" icon="pi pi-lock" action="#{seasonDetailsView.toggleArchive}" rendered="#{not seasonDetailsView.season.archived}" styleClass="mr-2 ui-button-outlined ui-button-secondary" />
+        <p:commandButton value="wiederherstellen" icon="pi pi-lock-open" action="#{seasonDetailsView.toggleArchive}" rendered="#{seasonDetailsView.season.archived}" styleClass="mr-2 ui-button-outlined ui-button-secondary" />
+        <p:commandButton value="Spielzeit löschen" icon="pi pi-trash" action="#{seasonDetailsView.deleteSeason}" styleClass="ui-button-outlined ui-button-secondary">
+          <p:confirm header="Spielzeit löschen" message="Möchten Sie die Spielzeit wirklich löschen? Beim Löschen gehen auch alle programmierten Veranstaltungen verloren." icon="pi pi-trash"/>
+        </p:commandButton>
+
+        <p:tabView styleClass="mt-5">
+          <p:tab title="Programmauswahl">
+            <p:commandButton value="hinzufügen" icon="pi pi-plus" action="#{seasonDetailsView.addProductions}" styleClass="mr-2" update="productionList">
+              <p:ajax event="dialogReturn" listener="#{seasonDetailsView.loadProductions}" />
+            </p:commandButton>
+            <p:commandButton value="markierte entfernen" icon="pi pi-trash" action="#{seasonDetailsView.deleteProductions}" styleClass="ui-button-outlined ui-button-secondary" update="productionList">
+              <p:confirm header="Programme entfernen" message="Möchten Sie die ausgewählten Programme wirklich aus der Spielzeit entfernen?" icon="pi pi-trash" />
+            </p:commandButton>
+
+            <p:dataTable id="productionList"
+                         value="#{seasonDetailsView.productionList}" 
+                         var="p"
+                         rowKey="#{p.id}"
+                         rowSelector="none"
+                         selection="#{seasonDetailsView.selectedProductions}"
+                         styleClass="mt-3">
+
+              <p:autoUpdate />
+
+              <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+              <p:column headerText="Titel" style="width: 40%">
+                <h:outputText value="#{p.production.title}" />
+              </p:column>
+              <p:column headerText="Alter" style="width: 10%">
+                <h:outputText value="#{p.production.fromAge}" /> - <h:outputText value="#{p.production.toAge}" />
+              </p:column>
+              <p:column headerText="Freigabe" style="width: 10%">
+                <h:outputText value="#{p.production.rating}" />
+              </p:column>
+              <p:column headerText="Agentur/Verleih">
+                <h:outputText value="#{p.production.agency.name}" />
+              </p:column>
+            </p:dataTable>
+          </p:tab>
+
+          <p:tab title="Spielstätten">
+            <p:commandButton value="hinzufügen" icon="pi pi-plus" action="#{seasonDetailsView.addVenues}" styleClass="mr-2">
+              <p:ajax event="dialogReturn" listener="#{seasonDetailsView.loadVenues}" />
+            </p:commandButton>
+            <p:commandButton value="markierte entfernen" icon="pi pi-trash" action="#{seasonDetailsView.deleteVenues}" styleClass="ui-button-outlined ui-button-secondary" update="venueList">
+              <p:confirm header="Spielstätten entfernen" message="Möchten Sie die ausgewählten Spielstätten wirklich aus der Spielzeit entfernen?" icon="pi pi-trash"/>
+            </p:commandButton>
+
+            <p:dataTable id="venueList"
+                         value="#{seasonDetailsView.venueList}"
+                         var="v"
+                         rowKey="#{v.id}"
+                         rowSelector="none"
+                         selection="#{seasonDetailsView.selectedVenues}"
+                         styleClass="mt-3">
+
+              <p:autoUpdate />
+
+              <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+              <p:column headerText="Name">
+                <h:outputText value="#{v.venue.name}" />
+              </p:column>
+
+              <p:column headerText="Ort">
+                <h:outputText value="#{v.venue.city}" />
+              </p:column>
+
+              <p:column headerText="programmiert selbst">
+                <h:outputText value="#{v.selfProgramming}" />
+              </p:column>
+            </p:dataTable>
+          </p:tab>
+        </p:tabView>
+      </p:card>
+
+      <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="450">
+        <p:commandButton value="Nein" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+        <p:commandButton value="Ja" type="button" styleClass="ui-confirmdialog-yes" />
+      </p:confirmDialog>
+
+      <p:dialog id="editDialog" widgetVar="editDialog" header="Spielzeit bearbeiten" width="400" showEffect="fade">
+        <dl>
+          <dt><p:outputLabel for="name" value="Name" /></dt>
+          <dd>
+            <p:inputText id="name" value="#{seasonDetailsView.season.name}" />
+            <p:message for="name" />
+          </dd>
+
+          <dt><p:outputLabel for="start" value="Start" /></dt>
+          <dd>
+            <p:inputMask id="start" value="#{seasonDetailsView.season.start}" mask="99.99.9999">
+              <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+            </p:inputMask>
+            <p:message for="start" />
+          </dd>
+
+          <dt><p:outputLabel for="end" value="Ende" /></dt>
+          <dd>
+            <p:inputMask id="end" value="#{seasonDetailsView.season.end}" mask="99.99.9999">
+              <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+            </p:inputMask>
+            <p:message for="end" />
+          </dd>
+        </dl>
+
+        <f:facet name="footer">
+          <p:commandButton type="button" value="abbrechen" styleClass="ui-button-flat mr-2" onclick="PF('editDialog').hide()"/>
+          <p:commandButton type="submit" value="speichern" action="#{seasonDetailsView.saveSeason}"/>
+        </f:facet>
+      </p:dialog>
+    </h:form>
+  </ui:define>
+</ui:composition>

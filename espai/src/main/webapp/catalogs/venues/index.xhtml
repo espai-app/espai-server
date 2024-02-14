@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/layout.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+  <ui:param name="title" value="Spielstätten"/>
+
+  <ui:define name="content">
+    <h:form>
+      <div class="page-title">
+        <h1>Spielstätten</h1>
+      </div>
+
+      <div>
+        <p:commandButton value="neue Spielstätte" action="#{venueIndexView.createVenue}" >
+          <p:ajax event="dialogReturn" listener="#{venueIndexView.onVenueCreated}" update="@form"/>
+        </p:commandButton>
+      </div>
+      
+      <p:dataTable value="#{venueIndexView.venueList}" var="v" styleClass="mt-3">
+        <p:column headerText="Name">
+          <p:link value="#{v.name}" href="../venues/details.xhtml">
+            <f:param name="venueId" value="#{v.id}" />
+          </p:link>
+        </p:column>
+        
+        <p:column headerText="Stadt">
+          <p:link value="#{v.city}" href="../venues/details.xhtml">
+            <f:param name="venueId" value="#{v.id}" />
+          </p:link>
+        </p:column>
+      </p:dataTable>
+    </h:form>
+  </ui:define>
+</ui:composition>

@@ -1,0 +1,146 @@
+/* 
+    Created on : 10.11.2023, 08:09:30
+    Author     : rborowski
+*/
+
+html, body {
+  padding: 0px;
+  margin: 0px;
+  font-family: var(--font-family);
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  background: #f2f2f2;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-family);
+}
+
+h1 {
+  font-weight: normal;
+  font-size: 2rem;
+} 
+
+a:hover {
+  text-decoration: none;
+}
+
+.header {
+  background: #3f89ba;
+  color: white;
+}
+
+.header .ui-menu.ui-menubar {
+  border: none;
+  background: transparent;
+}
+
+.header .ui-menu .ui-menu-list .ui-menuitem .ui-menuitem-link .ui-menuitem-text {
+  color: white;
+}
+
+.header form {
+  display: inline-block;
+}
+
+.main:has(.sidebar) {
+  display: flex;
+}
+
+.main .sidebar {
+  flex: 0;
+  width: 200px;
+  margin: 2rem 1rem;
+}
+
+.footer {
+    padding: 1rem;
+/*    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;*/
+    text-align: center;
+    clear: both;
+}
+
+.content {
+  padding: 1rem;
+}
+
+/* UI Buttons */
+button.ui-button {
+    text-align: left;
+}
+
+.ui-button a {
+    text-decoration: none;
+}
+
+body .ui-commandlink:hover, body .ui-link:hover {
+  text-decoration: none;
+}
+
+/* DATA LIST */
+dl.data-list dt {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+dl.data-list dd {
+  margin: 0.25rem 0 0.5rem 0;
+  padding: 0;
+}
+
+@media(min-width: 600px) {
+  dl.data-list dt {
+    display: inline-block;
+    width: 150px;
+    font-weight: normal;
+  }
+
+  dl.data-list dd {
+    display: block;
+    margin: -1.2rem 0 0.5rem 160px;
+    min-height: 1.25rem;
+  }
+}
+
+/* DIALOG */
+body.dialog {
+  background: white;
+  padding: 0 1rem 4rem 1rem;
+}
+
+.dialog-footer {
+  padding: 1rem;
+  text-align: right;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+}
+
+/* SIDEBAR */
+
+.sidebar .menu, .sidebar .menu li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sidebar .menu a {
+  display: block;
+  padding: 1rem 0.5rem;
+}
+
+.img-attachment {
+  display: inline-block;
+  width: 100%;
+  max-width: 250px;
+}

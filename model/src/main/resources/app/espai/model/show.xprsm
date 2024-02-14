@@ -1,0 +1,309 @@
+PROJECT "espai";
+BASEPACKAGE "app.espai";
+
+#
+#  PRODUCTION TYPES
+#
+
+DEFINE MODEL Agency
+WITH FIELDS
+  name String(200) REQUIRED;
+
+DEFINE MODEL Production
+WITH FIELDS
+  title String(200) REQUIRED,
+  description String,
+  durationInMinutes Integer,
+  fromAge Integer,
+  toAge Integer,
+  rating Integer,
+  agency Agency,
+  available Boolean,
+  fixedPrice Monetary,
+  ticketShare Double,
+  additionalCost Monetary
+ON DELETE 
+  IN Attachment DELETE,
+  IN ProductionTag DELETE,
+  IN ProductionVersion DELETE;
+
+DEFINE ENUM AttachmentType
+WITH OPTIONS
+  UNSET,
+  AUDIO,
+  VIDEO,
+  IMAGE,
+  URL;
+
+DEFINE MODEL Attachment
+WITH FIELDS
+  entityId Long REQUIRED,
+  entityType String(100) REQUIRED,
+  mediaType AttachmentType REQUIRED,
+  mimeType String(100),
+  position Integer,
+  category String(100),
+  caption String(200) REQUIRED,
+  location String(300),
+  copyright String(200);
+
+DEFINE MODEL AttachmentCategory
+WITH FIELDS
+  name String(20),
+  entityType String(100),
+  attachmentType AttachmentType;
+
+DEFINE MODEL ProductionVersion
+WITH FIELDS
+  production Production,
+  versionName String(30),
+  mediaFormat String(30),
+  spokenLanguage String(3),
+  subtitles String(3);
+
+DEFINE MODEL ProductionTagTemplate
+WITH FIELDS
+  name String(50),
+  presets String,
+  exclusive Boolean;
+
+DEFINE MODEL ProductionTag
+WITH FIELDS
+  production Production,
+  position Integer,
+  category String(50),
+  value String;
+
+DEFINE MODEL Movie
+INHERIT FROM Production
+WITH FIELDS
+  productionCountries String(200),
+  productionYear String(10),
+  releaseDate LocalDate,
+  director String(200),
+  starring String,
+  book String (200),
+  trailer String(200);
+
+DEFINE MODEL Presenter
+WITH FIELDS
+  givenName String(50),
+  surname String(50),
+  address String(300),
+  postcode String(10),
+  city String(200),
+  phone String(50),
+  email String(100);
+
+DEFINE MODEL Talk
+INHERIT FROM Production;
+
+DEFINE MODEL Workshop
+INHERIT FROM Production;
+
+DEFINE MODEL Concert
+INHERIT FROM Production;
+
+DEFINE MODEL Play
+INHERIT FROM Production;
+
+DEFINE MODEL Exhibition
+INHERIT FROM Production;
+
+DEFINE MODEL Venue
+WITH FIELDS
+  name String(300),
+  address String(300),
+  postcode String(10),
+  city String(100),
+  phone String(50),
+  email String(150),
+  internalNotes String
+ON DELETE
+  IN SeasonVenue DELETE,
+  IN Event DELETE;
+
+DEFINE MODEL VenueContact
+WITH FIELDS
+  venue Venue REQUIRED,
+  position String(50),
+  formOfAddress String(100),
+  givenName String(100),
+  familyName String(100),
+  phone String(100),
+  email String(150);
+
+DEFINE MODEL Hall
+WITH FIELDS
+  venue Venue REQUIRED,
+  name String(50) REQUIRED,
+  capacity Integer,
+  wheelchairAccessable Boolean,
+  capacityWheelchairs Integer,
+  hearingLoops Boolean,
+  film35 Boolean,
+  film16 Boolean,
+  betasp Boolean,
+  dvd Boolean,
+  bluray Boolean,
+  dcp Boolean,
+  mpeg Boolean,
+  publicNotes String,
+  internalNotes String;
+
+DEFINE MODEL PriceCategory
+WITH FIELDS
+  name String(50),
+  description String,
+  defaultValue Monetary,
+  position Integer,
+  addByDefault Boolean;
+
+DEFINE MODEL Season
+WITH FIELDS
+  name String(50),
+  start LocalDate,
+  end LocalDate,
+  isArchived Boolean
+ON DELETE
+  IN SeasonProduction DELETE,
+  IN SeasonVenue DELETE,
+  IN Event DELETE;
+
+DEFINE MODEL SeasonProduction
+WITH FIELDS
+  season Season,
+  production Production;
+
+DEFINE MODEL SeasonVenue
+WITH FIELDS
+  season Season REQUIRED,
+  venue Venue REQUIRED,
+  selfProgramming Boolean;
+
+DEFINE MODEL VenueProduction
+WITH FIELDS
+  venue Venue REQUIRED,
+  production Production REQUIRED;
+
+DEFINE MODEL EventSerial
+WITH FIELDS
+  name String(150),
+  description String
+ON DELETE
+  IN Event SET NULL;
+  
+DEFINE MODEL Event
+WITH FIELDS
+  season Season,
+  eventSerial EventSerial,
+  date LocalDate REQUIRED,
+  time LocalTime REQUIRED,
+  hall Hall REQUIRED,
+  host Presenter,
+  coHost Presenter,
+  production ProductionVersion REQUIRED,
+  ticketLimit Integer,
+  parentEvent Event,
+  mandatory Boolean,
+  hidden Boolean
+ON DELETE
+  IN Event DELETE;
+
+DEFINE MODEL EventTicketPrice
+WITH FIELDS
+  event Event,
+  priceCategory PriceCategory,
+  price Monetary;
+
+DEFINE ENUM ReservationStatus
+WITH OPTIONS
+  UNSET,
+  NEW,
+  HOLD,
+  CONFIRMED,
+  CANCELED;
+
+DEFINE MODEL Reservation
+WITH FIELDS
+  status ReservationStatus,
+  event Event REQUIRED,
+  parentReservation Reservation,
+  company String(150),
+  givenName String(50),
+  surname String(50),
+  address String(300),
+  postcode String(10),
+  city String(200),
+  phone String(50),
+  email String(100),
+  message String,
+  internalNotes String,
+  termsAccepted Boolean;
+
+DEFINE MODEL ReservationExtra
+WITH FIELDS
+  reservation Reservation,
+  fieldName String(100),
+  value String(250);
+
+DEFINE MODEL ReservationSummary
+WITH FIELDS
+  season Season,
+  parentReservation Reservation,
+  eventDate LocalDate,
+  eventStartTime LocalTime,
+  productionTitle String(300),
+  production Production,
+  event Event,
+  venue Venue,
+  venueName String(300),
+  venueCity String(300),
+  company String(150),
+  givenName String(50),
+  surname String(50),
+  tickets Integer,
+  status ReservationStatus;
+
+
+DEFINE MODEL ReservationTicket
+WITH FIELDS
+  reservation Reservation REQUIRED,
+  amount Integer,
+  category PriceCategory,
+  price Monetary;
+  
+DEFINE MODEL User
+WITH FIELDS
+  username String(100) REQUIRED,
+  email String(100) REQUIRED,
+  password String(250),
+  displayName String(100),
+  resetToken String(50),
+  resetTokenValid Date,
+  blocked Boolean,
+  lastLogin Date
+ON DELETE
+  IN AccessRight DELETE;
+
+DEFINE ENUM UserRole
+WITH OPTIONS
+  MANAGER,
+  VENUE_MANAGER;
+
+DEFINE MODEL AccessRight
+WITH FIELDS
+  user User REQUIRED,
+  role UserRole,
+  venue Venue;
+
+DEFINE MODEL MailTemplate
+WITH FIELDS
+  season Season,
+  shortCode String(50),
+  name String(150),
+  description String,
+  sender String(250),
+  replyTo String(250),
+  subject String(250),
+  htmlMessage String;

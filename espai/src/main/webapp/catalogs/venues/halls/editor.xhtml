@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/layout/dialog.xhtml">
+
+  <ui:param name="title" value="Saal bearbeiten" />
+
+  <ui:define name="content">
+    <h:form>
+      <f:passThroughAttribute name="autocomplete" value="off" />
+
+      <input type="hidden" name="venueId" value="#{param.venueId}" />
+      <input type="hidden" name="hallId" value="#{hallEditorView.hall.id}" />
+
+      <div class="ui-fluid">
+        <div class="field">
+          <p:outputLabel for="name" value="Name" />
+          <p:inputText id="name" value="#{hallEditorView.hall.name}" />
+          <h:message for="name" />
+        </div>
+
+        <div class="grid">
+          <div class="field col-6">
+            <p:outputLabel for="capacity" value="Kapazität" />
+            <p:inputNumber id="capacity" value="#{hallEditorView.hall.capacity}" />
+            <h:message for="capacity" />
+          </div>
+
+          <div class="field col-6">
+            <p:outputLabel for="capacityWheelchairs" value="Rollstuhlplätze" />
+            <p:inputNumber id="capacityWheelchairs" value="#{hallEditorView.hall.capacityWheelchairs}" />
+            <h:message for="capacityWheelchairs" />
+          </div>
+        </div>
+
+        <div class="field">
+          <p:selectBooleanCheckbox id="wheelchairAccessable" 
+                                   value="#{hallEditorView.hall.wheelchairAccessable}" 
+                                   itemLabel="mit Rollstuhl zugänglich" />
+        </div>
+
+        <div class="field">
+          <p:selectBooleanCheckbox id="hearingLoops" 
+                                   value="#{hallEditorView.hall.hearingLoops}" 
+                                   itemLabel="Hörschleife vorhanden" />
+        </div>
+
+        <h2>Ausstattung</h2>
+
+        <div class="field">
+
+          <p:selectBooleanCheckbox id="film35" 
+                                   value="#{hallEditorView.hall.film35}" 
+                                   itemLabel="Kinoprojektor 35mm"
+                                   styleClass="mb-2" />
+          <p:selectBooleanCheckbox id="film16" 
+                                   value="#{hallEditorView.hall.film16}" 
+                                   itemLabel="Schmalfilmprojektor 16mm"
+                                   styleClass="mb-2" />
+          <p:selectBooleanCheckbox id="dvd" 
+                                   value="#{hallEditorView.hall.dvd}" 
+                                   itemLabel="DVD"
+                                   styleClass="mb-2" />
+          <p:selectBooleanCheckbox id="bluray" 
+                                   value="#{hallEditorView.hall.bluray}" 
+                                   itemLabel="BluRay"
+                                   styleClass="mb-2" />
+          <p:selectBooleanCheckbox id="betasp" 
+                                   value="#{hallEditorView.hall.betasp}" 
+                                   itemLabel="BetaSP"
+                                   styleClass="mb-2" />
+          <p:selectBooleanCheckbox id="dcp" 
+                                   value="#{hallEditorView.hall.dcp}" 
+                                   itemLabel="DCP"
+                                   styleClass="mb-2" />
+        </div>
+
+        <div class="field mt-3">
+          <p:outputLabel for="internalNotes" value="interne Hinweise" />
+          <p:inputTextarea id="internalNotes" value="#{hallEditorView.hall.internalNotes}" />
+          <small class="w-full">Werden nur Backoffice-Nutzern angezeigt.</small>
+          <h:message for="internalNotes" />
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="publicNotes" value="öffentliche Hinweise" />
+          <p:inputTextarea id="publicNotes" value="#{hallEditorView.hall.internalNotes}" />
+          <small class="w-full">Werden auch auf der Webseite angezeigt, z.B. Hinweise zur Barrierefreiheit.</small>
+          <h:message for="publicNotes" />
+        </div>
+      </div>
+
+      <div class="dialog-footer">
+        <p:commandButton action="#{hallEditorView.save}" value="speichern" icon="pi pi-save" />
+      </div>
+    </h:form>
+  </ui:define>
+</ui:composition>
