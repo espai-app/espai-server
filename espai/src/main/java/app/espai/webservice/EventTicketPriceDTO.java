@@ -10,16 +10,22 @@ import java.math.BigDecimal;
 public class EventTicketPriceDTO {
 
   private Long id;
-  private String name;
+  private String seatCategory;
+  private String priceCategory;
   private String description;
   private Integer price;
+  private String currency;
+  private Integer seatsAvailable;
 
-  public static EventTicketPriceDTO of(EventTicketPrice price) {
+  public static EventTicketPriceDTO of(EventTicketPrice price, Integer seatsAvailable) {
     EventTicketPriceDTO result = new EventTicketPriceDTO();
     result.setId(price.getId());
-    result.setName(price.getPriceCategory().getName());
+    result.setSeatCategory(price.getSeatCategory().getName());
+    result.setPriceCategory(price.getPriceCategory().getName());
     result.setDescription(price.getPriceCategory().getDescription());
     result.setPrice(price.getPrice().getAmount().multiply(BigDecimal.valueOf(100)).intValue());
+    result.setCurrency(price.getPrice().getCurrency());
+    result.setSeatsAvailable(seatsAvailable);
     return result;
   }
 
@@ -39,17 +45,31 @@ public class EventTicketPriceDTO {
   }
 
   /**
-   * @return the name
+   * @return the seatCategory
    */
-  public String getName() {
-    return name;
+  public String getSeatCategory() {
+    return seatCategory;
   }
 
   /**
-   * @param name the name to set
+   * @param seatCategory the seatCategory to set
    */
-  public void setName(String name) {
-    this.name = name;
+  public void setSeatCategory(String seatCategory) {
+    this.seatCategory = seatCategory;
+  }
+
+  /**
+   * @return the priceCategory
+   */
+  public String getPriceCategory() {
+    return priceCategory;
+  }
+
+  /**
+   * @param priceCategory the priceCategory to set
+   */
+  public void setPriceCategory(String priceCategory) {
+    this.priceCategory = priceCategory;
   }
 
   /**
@@ -78,6 +98,34 @@ public class EventTicketPriceDTO {
    */
   public void setPrice(Integer price) {
     this.price = price;
+  }
+
+  /**
+   * @return the currency
+   */
+  public String getCurrency() {
+    return currency;
+  }
+
+  /**
+   * @param currency the currency to set
+   */
+  public void setCurrency(String currency) {
+    this.currency = currency;
+  }
+
+  /**
+   * @return the seatsAvailable
+   */
+  public Integer getSeatsAvailable() {
+    return seatsAvailable;
+  }
+
+  /**
+   * @param seatsAvailable the seatsAvailable to set
+   */
+  public void setSeatsAvailable(Integer seatsAvailable) {
+    this.seatsAvailable = seatsAvailable;
   }
   //</editor-fold>
 }

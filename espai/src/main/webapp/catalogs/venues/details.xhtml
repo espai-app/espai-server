@@ -40,17 +40,20 @@
               <h:outputText id="phone" value="#{venueDetailsView.venue.phone}" /><br />
 
               <p:outputLabel for="email" value="E-Mail" /><h:outputText value=" " />
-              <h:outputText id="email" value="#{venueDetailsView.venue.email}" />
+              <h:outputText id="email" value="#{venueDetailsView.venue.email}" /><br /><br />
+
+              <b><p:outputLabel for="publicNotes" value="Freitext (Webseite)" /></b><br />
+              <h:outputText id="publicNotes" value="#{venueDetailsView.venue.publicNotes}" escape="false" />
             </div>
           </div>
         </p:card>
 
-        <p:card styleClass="md:flex-1 md:ml-1">
+        <p:card styleClass="md:flex-1 md:ml-1" style="position:relative">
           <f:facet name="title">
             Profilbilder
           </f:facet>
-          <div>
-            <p:commandButton title="Bild hinzufügen"
+          <div style="position: absolute; top: 0.75rem; right: 1rem;">
+            <p:commandButton value="Bild hinzufügen"
                              icon="pi pi-plus"
                              action="#{venueDetailsView.addImage}"
                              styleClass="ui-button-flat ui-rounded-button">
@@ -60,14 +63,14 @@
 
           <ui:repeat value="#{venueDetailsView.imageList}" var="image">
             <div>
-              <img src="#{request.contextPath}/webservice/attachment/original/#{image.id}/" alt="" class="img-attachment" />
+              <img src="#{request.contextPath}/webservice/attachments/#{image.id}/datastream" alt="" class="img-attachment" />
               <p:commandButton title="Bild ändern"
                                icon="pi pi-pencil"
                                action="#{venueDetailsView.editImage(image.id)}"
                                styleClass="ui-button-flat ui-rounded-button">
                 <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
               </p:commandButton>
-              <p:commandButton title="Bild löschen" 
+              <p:commandButton title="Bild löschen"
                                icon="pi pi-trash"
                                styleClass="ui-button-flat ui-rounded-button ui-button-danger"
                                action="#{venueDetailsView.removeImage(image.id)}"
@@ -80,99 +83,180 @@
         </p:card>
       </div>
 
-      <p:card styleClass="mt-3">
-        <f:facet name="title">
-          Ansprechpartner:innen
-        </f:facet>
+      <p:tabView styleClass="mt-2">
+        <p:tab title="Ansprechpartner:innen">
 
-        <p:commandButton value="Kontakt hinzufügen" icon="pi pi-plus" action="#{venueDetailsView.addContact}">
-          <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
-        </p:commandButton>
+          <p:commandButton value="Kontakt hinzufügen" icon="pi pi-plus" action="#{venueDetailsView.addContact}">
+            <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+          </p:commandButton>
 
-        <p:dataTable value="#{venueDetailsView.venueContactList}" var="contact" class="mt-3">
+          <p:dataTable value="#{venueDetailsView.venueContactList}" var="contact" class="mt-3">
 
-          <p:autoUpdate />
+            <p:autoUpdate />
 
-          <p:column headerText="Name">
-            <h:outputText value="#{contact.familyName}, #{contact.givenName}" />
-          </p:column>
+            <p:column headerText="Name">
+              <h:outputText value="#{contact.familyName}, #{contact.givenName}" />
+            </p:column>
 
-          <p:column headerText="Position">
-            <h:outputText value="#{contact.position}" />
-          </p:column>
+            <p:column headerText="Position">
+              <h:outputText value="#{contact.position}" />
+            </p:column>
 
-          <p:column headerText="Telefon">
-            <p:link value="#{contact.phone}" href="tel:#{contact.phone}" />
-          </p:column>
+            <p:column headerText="Telefon">
+              <p:link value="#{contact.phone}" href="tel:#{contact.phone}" />
+            </p:column>
 
-          <p:column headerText="E-Mail">
-            <p:link value="#{contact.email}" href="mailto:#{contact.email}" />
-          </p:column>
+            <p:column headerText="E-Mail">
+              <p:link value="#{contact.email}" href="mailto:#{contact.email}" />
+            </p:column>
 
-          <p:column styleClass="text-right" style="width: 100px;">
-            <p:commandButton title="bearbeiten" 
-                             icon="pi pi-pencil" 
-                             styleClass="ui-button-flat rounded-button" 
-                             action="#{venueDetailsView.editContact(contact.id)}">
-              <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
-            </p:commandButton>
-            <p:commandButton title="löschen" 
-                             icon="pi pi-trash" 
-                             styleClass="ui-button-flat rounded-button ui-button-danger ml-2"
-                             action="#{venueDetailsView.removeContact(contact.id)}"
-                             update="@form">
-              <p:confirm header="Löschen bestätigen" message="Möchten Sie diesen Kontakt wirklich löschen?" icon="pi pi-exclamation-triangle" />
-            </p:commandButton>
-          </p:column>
-        </p:dataTable>
-      </p:card>
+            <p:column headerText="benachrichtigen">
+              <h:outputText styleClass="pi pi-check" rendered="#{contact.notifyOnReservation}" />
+            </p:column>
 
-      <p:card styleClass="mt-3">
-        <f:facet name="title">
-          Säle
-        </f:facet>
+            <p:column styleClass="text-right" style="width: 100px;">
+              <p:commandButton title="bearbeiten"
+                               icon="pi pi-pencil"
+                               styleClass="ui-button-flat rounded-button"
+                               action="#{venueDetailsView.editContact(contact.id)}">
+                <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+              </p:commandButton>
+              <p:commandButton title="löschen"
+                               icon="pi pi-trash"
+                               styleClass="ui-button-flat rounded-button ui-button-danger ml-2"
+                               action="#{venueDetailsView.removeContact(contact.id)}"
+                               update="@form">
+                <p:confirm header="Löschen bestätigen" message="Möchten Sie diesen Kontakt wirklich löschen?" icon="pi pi-exclamation-triangle" />
+              </p:commandButton>
+            </p:column>
+          </p:dataTable>
+        </p:tab>
 
-        <p:commandButton value="Saal hinzufügen" icon="pi pi-plus" action="#{venueDetailsView.addHall}">
-          <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
-        </p:commandButton>
+        <p:tab title="Säle und Platzkategorien">
+          <p:commandButton value="Saal hinzufügen" icon="pi pi-plus" action="#{venueDetailsView.addHall}">
+            <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+          </p:commandButton>
 
-        <p:dataTable value="#{venueDetailsView.hallList}" var="hall" class="mt-3">
+          <ui:repeat value="#{venueDetailsView.hallList}" var="hall">
+            <div class="grid mt-2">
+              <div class="col-8"><h3><h:outputText value="#{hall.name}" /></h3></div>
+              <div class="col-4 text-right pt-3">
+                <p:commandButton title="Platzkategorie hinzufügen"
+                                 icon="pi pi-plus"
+                                 styleClass="ui-button-flat rounded-button"
+                                 action="#{venueDetailsView.addSeatCategory(hall.id)}">
+                  <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+                </p:commandButton>
+                <p:commandButton title="bearbeiten"
+                                 icon="pi pi-pencil"
+                                 styleClass="ui-button-flat rounded-button"
+                                 action="#{venueDetailsView.editHall(hall.id)}">
+                  <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+                </p:commandButton>
+                <p:commandButton title="löschen"
+                                 icon="pi pi-trash"
+                                 styleClass="ui-button-flat rounded-button ui-button-danger ml-2"
+                                 action="#{venueDetailsView.removeHall(hall.id)}"
+                                 rendered="false"
+                                 update="@form">
+                  <p:confirm header="Löschen bestätigen"
+                             message="Möchten Sie diesen Saal wirklich löschen? Alle damit verbundenen Veranstaltungen werden ebenfalls gelöscht."
+                             icon="pi pi-exclamation-triangle"/>
+                </p:commandButton>
+              </div>
+            </div>
 
-          <p:autoUpdate />
+            <p:dataTable value="#{venueDetailsView.seatCategoryMap.get(hall.id)}"
+                         var="seatCategory">
 
-          <p:column headerText="Name">
-            <h:outputText value="#{hall.name}" />
-          </p:column>
+              <p:column headerText="Name">
+                <h:outputText value="#{seatCategory.name}" class="block mb-2" />
+                <h:outputText value="#{seatCategory.description}" />
+              </p:column>
 
-          <p:column headerText="Sitze">
-            <h:outputText value="#{hall.capacity}" />
-          </p:column>
+              <p:column headerText="Plätze" style="width: 100px;" styleClass="text-right">
+                <h:outputText value="#{seatCategory.capacity}" />
+              </p:column>
 
-          <p:column headerText="Rollstuhl-Plätze">
-            <h:outputText value="#{hall.capacityWheelchairs}" />
-          </p:column>
+              <p:column styleClass="text-right" style="width: 150px">
+                <p:commandButton title="bearbeiten"
+                                 icon="pi pi-pencil"
+                                 styleClass="ui-button-flat rounded-button"
+                                 action="#{venueDetailsView.editSeatCategory(seatCategory.id)}">
+                  <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+                </p:commandButton>
+                <p:commandButton title="löschen"
+                                 icon="pi pi-trash"
+                                 styleClass="ui-button-flat rounded-button ui-button-danger ml-2"
+                                 action="#{venueDetailsView.removeSeatCategory(seatCategory.id)}"
+                                 rendered="false"
+                                 update="@form">
+                  <p:confirm header="Löschen bestätigen" message="Möchten Sie diese Platzkategorie wirklich löschen?" icon="pi pi-exclamation-triangle"/>
+                </p:commandButton>
+              </p:column>
 
-          <p:column headerText="Hörschleife">
-            <h:outputText value="#{hall.hearingLoops ? 'ja' : 'nein'}" />
-          </p:column>
+              <p:columnGroup type="footer">
+                <p:row>
+                  <p:column styleClass="text-right" footerText="Sitzplätze gesamt" />
+                  <p:column styleClass="text-right" footerText="#{hall.capacity}" />
+                  <p:column>
+                  </p:column>
+                </p:row>
+              </p:columnGroup>
+            </p:dataTable>
+          </ui:repeat>
+        </p:tab>
 
-          <p:column styleClass="text-right" style="width: 100px;">
-            <p:commandButton title="bearbeiten" 
-                             icon="pi pi-pencil" 
-                             styleClass="ui-button-flat rounded-button"
-                             action="#{venueDetailsView.editHall(hall.id)}">
-              <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
-            </p:commandButton>
-            <p:commandButton title="löschen"
-                             icon="pi pi-trash" 
-                             styleClass="ui-button-flat rounded-button ui-button-danger ml-2"
-                             action="#{venueDetailsView.removeHall(hall.id)}"
-                             update="@form">
-              <p:confirm header="Löschen bestätigen" message="Möchten Sie diesen Saal wirklich löschen? Alle damit verbundenen Veranstaltungen werden ebenfalls gelöscht." icon="pi pi-exclamation-triangle"/>
-            </p:commandButton>
-          </p:column>
-        </p:dataTable>
-      </p:card>
+        <p:tab title="Preise">
+          <p>Die Preise auf dieser Seite dienen als Vorlagen bzw. Standardpreise für die Veranstaltung in dieser Spielstätte.
+            Sie können die Eintrittspreise je Preiskategorie (Erwachsene, Kinder...) festlegen und optional
+            auch Preise je Saal und Platzkategorie (Parkett, Loge...) definieren.
+            Diese Preisliste dient nur als Vorlage und kann an jeder Veranstaltung individuell angepasst werden.</p>
+          <p:commandButton value="hinzufügen"
+                           icon="pi pi-plus"
+                           action="#{venueDetailsView.addPriceTemplate}">
+            <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+          </p:commandButton>
+
+          <p:dataTable id="prices" value="#{venueDetailsView.priceTemplateList}" var="price" styleClass="mt-3">
+
+            <p:autoUpdate />
+
+            <p:column headerText="Saal">
+              <h:outputText value="#{price.hall.name}" />
+            </p:column>
+            <p:column headerText="Platzkategorie">
+              <h:outputText value="#{price.seatCategory.name}" />
+            </p:column>
+            <p:column headerText="Preiskategorie">
+              <h:outputText value="#{price.priceCategory.name}" />
+            </p:column>
+            <p:column headerText="Preis" styleClass="text-right">
+              <h:outputText value="#{price.price.amount}">
+                <f:convertNumber locale="DE" minFractionDigits="2" maxFractionDigits="2" />
+              </h:outputText>&#160;<h:outputText value="#{price.price.currency}" />
+            </p:column>
+            <p:column style="width: 150px; text-align: right">
+              <p:commandButton title="bearbeiten"
+                               icon="pi pi-pencil"
+                               styleClass="ui-button-flat rounded-button"
+                               action="#{venueDetailsView.editPriceTemplate(price.id)}">
+                <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
+              </p:commandButton>
+              <p:commandButton title="löschen"
+                               icon="pi pi-trash"
+                               styleClass="ui-button-flat rounded-button ui-button-danger ml-2"
+                               action="#{venueDetailsView.removePriceTemplate(price.id)}"
+                               rendered="#{request.isUserInRole('VENUE_MANAGER') or request.isUserInRole('MANAGER')}"
+                               update="@form">
+                <p:confirm header="Löschen bestätigen"
+                           message="Möchten Sie diesen Preis wirklich löschen?"
+                           icon="pi pi-exclamation-triangle"/>
+              </p:commandButton>
+            </p:column>
+          </p:dataTable>
+        </p:tab>
+      </p:tabView>
 
       <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="650">
         <p:commandButton value="abbrechen" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>

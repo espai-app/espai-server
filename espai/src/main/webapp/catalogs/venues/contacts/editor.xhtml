@@ -55,6 +55,11 @@
           <p:inputText type="email" id="email" value="#{venueContactEditorView.contact.email}" />
           <h:message for="email" />
         </div>
+
+        <div class="field">
+          <p:selectBooleanCheckbox value="#{venueContactEditorView.contact.notifyOnReservation}"
+                                   itemLabel="Bei neuen und stornierten Buchungen benachrichtigen" />
+        </div>
       </div>
 
       <div class="dialog-footer">

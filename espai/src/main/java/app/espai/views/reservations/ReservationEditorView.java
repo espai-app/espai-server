@@ -128,10 +128,10 @@ public class ReservationEditorView extends BaseView implements Serializable {
       selectedVenue = (reservation.getEvent() != null && reservation.getEvent().getHall() != null)
               ? reservation.getEvent().getHall().getVenue()
               : null;
-
-      onVenueChanged();
-      onEventChanged();
     }
+
+    onVenueChanged();
+    onEventChanged();
   }
 
   public String formatDate(LocalDate date, LocalTime time) {
@@ -161,7 +161,7 @@ public class ReservationEditorView extends BaseView implements Serializable {
         childReservationList.add(new Reservation());
       }
     } else if (selectedChildEventList.size() < childReservationList.size()) {
-      for (int i = selectedChildEventList.size() + 1; i <= childReservationList.size(); i++) {
+      for (int i = selectedChildEventList.size(); i < childReservationList.size(); i++) {
         reservations.delete(childReservationList.get(i));
         childReservationList.remove(i);
       }
@@ -218,6 +218,7 @@ public class ReservationEditorView extends BaseView implements Serializable {
 
     EventFilter eventFilter = new EventFilter();
     eventFilter.setHalls(hallList);
+    eventFilter.setSeason(seasonContext.getCurrentSeason());
     eventList = events.list(eventFilter).getItems();
     eventList.sort(Events.DEFAULT_ORDER);
 
@@ -291,7 +292,8 @@ public class ReservationEditorView extends BaseView implements Serializable {
   private ReservationTicket copyTicket(ReservationTicket source, ReservationTicket target) {
     target.setAmount(source.getAmount());
     target.setPrice(source.getPrice());
-    target.setCategory(source.getCategory());
+    target.setSeatCategory(source.getSeatCategory());
+    target.setPriceCategory(source.getPriceCategory());
     return target;
   }
 

@@ -27,9 +27,9 @@
             <p:outputLabel for="venue" value="Spielstätte" />
             <p:selectOneMenu id="venue" value="#{reservationEditorView.selectedVenue}">
               <p:ajax listener="#{reservationEditorView.onVenueChanged}" update="event" />
-              <f:selectItems value="#{reservationEditorView.venueList}" 
-                             var="v" 
-                             itemValue="#{v}" 
+              <f:selectItems value="#{reservationEditorView.venueList}"
+                             var="v"
+                             itemValue="#{v}"
                              itemLabel="#{v.name}, #{v.city}" />
               <f:converter binding="#{venueConverter}" />
             </p:selectOneMenu>
@@ -40,12 +40,12 @@
             <p:outputLabel for="event" value="Veranstaltung" />
             <p:selectOneMenu id="event" value="#{reservationEditorView.reservation.event}">
               <p:ajax listener="#{reservationEditorView.onEventChanged}" update="@form" />
-              <f:selectItems value="#{reservationEditorView.eventList}" 
-                             var="e" 
+              <f:selectItems value="#{reservationEditorView.eventList}"
+                             var="e"
                              itemLabel="#{reservationEditorView.formatDate(e.date, e.time)} - #{e.production.fullName} (#{reservationEditorView.seatsAvailable.get(e.id) != null ? reservationEditorView.seatsAvailable.get(e.id) : ''} Plätze frei)"
                              itemValue="#{e}" />
               <f:converter binding="#{eventConverter}" />
-            </p:selectOneMenu> 
+            </p:selectOneMenu>
             <h:message for="event" />
           </div>
         </div>
@@ -109,17 +109,17 @@
         <h2>Tickets</h2>
 
         <div class="">
-          <p:commandButton value="Tickets hinzufügen" 
-                           icon="pi pi-plus" 
+          <p:commandButton value="Tickets hinzufügen"
+                           icon="pi pi-plus"
                            action="#{reservationEditorView.addTickets}"
                            update="tickets"
                            styleClass="ui-button-outlined" />
         </div>
 
-        <p:dataTable id="tickets" 
+        <p:dataTable id="tickets"
                      styleClass="ui-fluid mt-3"
-                     value="#{reservationEditorView.ticketList}" 
-                     var="t" 
+                     value="#{reservationEditorView.ticketList}"
+                     var="t"
                      rowIndexVar="ticketIndex">
 
           <p:autoUpdate />
@@ -131,7 +131,7 @@
 
           <p:column headerText="Preiskategorie">
             <p:selectOneMenu id="ticketCategory" value="#{t.category}">
-              <f:selectItems value="#{reservationEditorView.priceCategoryList}" 
+              <f:selectItems value="#{reservationEditorView.priceCategoryList}"
                              var="p"
                              itemLabel="#{p.name}"
                              itemValue="#{p}" />
@@ -139,23 +139,22 @@
             </p:selectOneMenu>
             <h:message for="ticketCategory" />
           </p:column>
-          
+
           <p:column headerText="Preis" style="width: 100px;">
-            <p:outputLabel for="price" value="Festpreis" styleClass="w-full"/>
-            <p:inputNumber id="price" 
-                           value="#{t.price.amount}" 
-                           styleClass="w-4 sm:w-8" 
-                           minValue="0" 
-                           decimalPlaces="2" 
+            <p:inputNumber id="price"
+                           value="#{t.price.amount}"
+                           styleClass="w-4 sm:w-8"
+                           minValue="0"
+                           decimalPlaces="2"
                            modifyValueOnWheel="false"
-                           symbol=" #{t.price.currency}" 
+                           symbol=" #{t.price.currency}"
                            symbolPosition="s" />
             <h:message for="price" />
           </p:column>
 
           <p:column style="width: 36px;">
-            <p:commandButton title="löschen" 
-                             icon="pi pi-trash" 
+            <p:commandButton title="löschen"
+                             icon="pi pi-trash"
                              action="#{reservationEditorView.removeTickets(ticketIndex)}"
                              styleClass="ui-button-flat ui-rounded-button ui-button-danger"/>
           </p:column>
@@ -164,7 +163,7 @@
         <h2>Zusatzangebote</h2>
 
         <p:selectManyCheckbox id="childEvents" value="#{reservationEditorView.selectedChildEventList}">
-          <f:selectItems value="#{reservationEditorView.childEventList}" 
+          <f:selectItems value="#{reservationEditorView.childEventList}"
                          var="c"
                          itemLabel="#{c.production.production.title} (#{reservationEditorView.seatsAvailable.get(c.id)} freie Plätze)"
                          itemValue="#{c}" />
@@ -174,17 +173,17 @@
         <h2>Statistik</h2>
 
         <div>
-          <p:commandButton value="Feld hinzufügen" 
-                           icon="pi pi-plus" 
-                           title="Feld hinzufügen" 
+          <p:commandButton value="Feld hinzufügen"
+                           icon="pi pi-plus"
+                           title="Feld hinzufügen"
                            action="#{reservationEditorView.addExtra}"
                            update="extras"
                            styleClass="ui-button-outlined" />
         </div>
 
-        <p:dataTable id="extras" 
+        <p:dataTable id="extras"
                      styleClass="ui-fluid mt-3"
-                     value="#{reservationEditorView.extraList}" 
+                     value="#{reservationEditorView.extraList}"
                      var="e"
                      rowIndexVar="extraIndex">
 
@@ -199,9 +198,9 @@
           </p:column>
 
           <p:column style="width: 36px;">
-            <p:commandButton action="#{reservationEditorView.removeExtra(extraIndex)}" 
-                             icon="pi pi-trash" 
-                             title="löschen" 
+            <p:commandButton action="#{reservationEditorView.removeExtra(extraIndex)}"
+                             icon="pi pi-trash"
+                             title="löschen"
                              styleClass="ui-button-flat ui-rounded-button ui-button-danger" />
           </p:column>
         </p:dataTable>

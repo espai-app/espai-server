@@ -22,29 +22,15 @@
           <h:message for="name" />
         </div>
 
-        <div class="grid">
-          <div class="field col-6">
-            <p:outputLabel for="capacity" value="Kapazität" />
-            <p:inputNumber id="capacity" value="#{hallEditorView.hall.capacity}" />
-            <h:message for="capacity" />
-          </div>
-
-          <div class="field col-6">
-            <p:outputLabel for="capacityWheelchairs" value="Rollstuhlplätze" />
-            <p:inputNumber id="capacityWheelchairs" value="#{hallEditorView.hall.capacityWheelchairs}" />
-            <h:message for="capacityWheelchairs" />
-          </div>
-        </div>
-
         <div class="field">
-          <p:selectBooleanCheckbox id="wheelchairAccessable" 
-                                   value="#{hallEditorView.hall.wheelchairAccessable}" 
+          <p:selectBooleanCheckbox id="wheelchairAccessable"
+                                   value="#{hallEditorView.hall.wheelchairAccessable}"
                                    itemLabel="mit Rollstuhl zugänglich" />
         </div>
 
         <div class="field">
-          <p:selectBooleanCheckbox id="hearingLoops" 
-                                   value="#{hallEditorView.hall.hearingLoops}" 
+          <p:selectBooleanCheckbox id="hearingLoops"
+                                   value="#{hallEditorView.hall.hearingLoops}"
                                    itemLabel="Hörschleife vorhanden" />
         </div>
 
@@ -52,28 +38,28 @@
 
         <div class="field">
 
-          <p:selectBooleanCheckbox id="film35" 
-                                   value="#{hallEditorView.hall.film35}" 
+          <p:selectBooleanCheckbox id="film35"
+                                   value="#{hallEditorView.hall.film35}"
                                    itemLabel="Kinoprojektor 35mm"
                                    styleClass="mb-2" />
-          <p:selectBooleanCheckbox id="film16" 
-                                   value="#{hallEditorView.hall.film16}" 
+          <p:selectBooleanCheckbox id="film16"
+                                   value="#{hallEditorView.hall.film16}"
                                    itemLabel="Schmalfilmprojektor 16mm"
                                    styleClass="mb-2" />
-          <p:selectBooleanCheckbox id="dvd" 
-                                   value="#{hallEditorView.hall.dvd}" 
+          <p:selectBooleanCheckbox id="dvd"
+                                   value="#{hallEditorView.hall.dvd}"
                                    itemLabel="DVD"
                                    styleClass="mb-2" />
-          <p:selectBooleanCheckbox id="bluray" 
-                                   value="#{hallEditorView.hall.bluray}" 
+          <p:selectBooleanCheckbox id="bluray"
+                                   value="#{hallEditorView.hall.bluray}"
                                    itemLabel="BluRay"
                                    styleClass="mb-2" />
-          <p:selectBooleanCheckbox id="betasp" 
-                                   value="#{hallEditorView.hall.betasp}" 
+          <p:selectBooleanCheckbox id="betasp"
+                                   value="#{hallEditorView.hall.betasp}"
                                    itemLabel="BetaSP"
                                    styleClass="mb-2" />
-          <p:selectBooleanCheckbox id="dcp" 
-                                   value="#{hallEditorView.hall.dcp}" 
+          <p:selectBooleanCheckbox id="dcp"
+                                   value="#{hallEditorView.hall.dcp}"
                                    itemLabel="DCP"
                                    styleClass="mb-2" />
         </div>

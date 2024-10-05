@@ -5,7 +5,6 @@ import app.espai.dao.MailTemplates;
 import app.espai.dao.ReservationTickets;
 import app.espai.dao.Reservations;
 import app.espai.filter.AttachmentFilter;
-import app.espai.filter.MailTemplateFilter;
 import app.espai.filter.ReservationFilter;
 import app.espai.filter.ReservationTicketFilter;
 import app.espai.model.Attachment;
@@ -14,15 +13,17 @@ import app.espai.model.MailTemplate;
 import app.espai.model.Production;
 import app.espai.model.Reservation;
 import app.espai.model.ReservationTicket;
-import app.espai.model.Season;
 import app.espai.model.Venue;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import jakarta.mail.internet.AddressException;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import rocks.xprs.mail.Mail;
 
 /**
@@ -45,41 +46,35 @@ public class ReservationMailManager {
   private MailTemplates mailTemplates;
 
   public Mail createNew(Reservation reservation) {
-    MailTemplate template = getTemplate("RESERVATION_NEW", reservation.getEvent().getSeason());
-    return toMail(reservation, template);
+    MailTemplate template = mailTemplates.getByCode(
+            "RESERVATION_NEW", reservation.getEvent().getSeason());
+    return toMail(reservation, reservation.getGivenName(), reservation.getSurname(),
+            reservation.getEmail(), template);
   }
 
   public Mail createHold(Reservation reservation) {
-    MailTemplate template = getTemplate("RESERVATION_HOLD", reservation.getEvent().getSeason());
-    return toMail(reservation, template);
+    MailTemplate template = mailTemplates.getByCode(
+            "RESERVATION_HOLD", reservation.getEvent().getSeason());
+    return toMail(reservation, reservation.getGivenName(), reservation.getSurname(),
+            reservation.getEmail(), template);
   }
 
   public Mail createConfirmed(Reservation reservation) {
-    MailTemplate template = getTemplate("RESERVATION_CONFIRMED", reservation.getEvent().getSeason());
-    return toMail(reservation, template);
+    MailTemplate template = mailTemplates.getByCode(
+            "RESERVATION_CONFIRMED", reservation.getEvent().getSeason());
+    return toMail(reservation, reservation.getGivenName(), reservation.getSurname(),
+            reservation.getEmail(), template);
   }
 
   public Mail createCanceled(Reservation reservation) {
-    MailTemplate template = getTemplate("RESERVATION_CANCELED", reservation.getEvent().getSeason());
-    return toMail(reservation, template);
+    MailTemplate template = mailTemplates.getByCode(
+            "RESERVATION_CANCELED", reservation.getEvent().getSeason());
+    return toMail(reservation, reservation.getGivenName(), reservation.getSurname(),
+            reservation.getEmail(), template);
   }
 
-  private MailTemplate getTemplate(String shortCode, Season season) {
-
-    MailTemplateFilter mailTemplateFilter = new MailTemplateFilter();
-    mailTemplateFilter.setShortCode(shortCode);
-    mailTemplateFilter.setSeason(season);
-
-    List<MailTemplate> templateList = mailTemplates.list(mailTemplateFilter).getItems();
-    if (templateList.isEmpty()) {
-      mailTemplateFilter.setSeasonIsNull(true);
-      templateList = mailTemplates.list(mailTemplateFilter).getItems();
-    }
-
-    return templateList.get(0);
-  }
-
-  private Mail toMail(Reservation reservation, MailTemplate template) {
+  public Mail toMail(Reservation reservation, String givenName, String surname, String email,
+          MailTemplate template) {
 
     Event currentEvent = reservation.getEvent();
     Production currentProduction = reservation.getEvent().getProduction().getProduction();
@@ -108,8 +103,8 @@ public class ReservationMailManager {
 
     Map<String, String> replacements = new HashMap<>();
     replacements.put("id", String.valueOf(reservation.getId()));
-    replacements.put("givenName", reservation.getGivenName());
-    replacements.put("surname", reservation.getSurname());
+    replacements.put("givenName", givenName);
+    replacements.put("surname", surname);
     replacements.put("date", currentEvent.getDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
     replacements.put("time", currentEvent.getTime().format(DateTimeFormatter.ofPattern("HH:mm")));
 
@@ -122,13 +117,16 @@ public class ReservationMailManager {
     replacements.put("duration", String.format("%d min.",
             currentProduction.getDurationInMinutes()));
 
+    replacements.put("customer.company", escHtml(reservation.getCompany()));
+    replacements.put("customer.givenName", escHtml(reservation.getGivenName()));
+    replacements.put("customer.surname", escHtml(reservation.getSurname()));
+
     replacements.put("venue.name", escHtml(currentVenue.getName()));
     replacements.put("venue.address", escHtml(currentVenue.getAddress()));
     replacements.put("venue.postcode", escHtml(currentVenue.getPostcode()));
     replacements.put("venue.city", escHtml(currentVenue.getCity()));
 
     // child event list
-
     if (!childReservations.isEmpty()) {
       StringBuilder childEventList = new StringBuilder("");
       childEventList.append("<ul>");
@@ -151,7 +149,7 @@ public class ReservationMailManager {
     for (ReservationTicket t : tickets) {
       ticketTable.append(String.format("<li>%d x %s (%.2f € pro Person)</li>",
               t.getAmount(),
-              escHtml(t.getCategory().getName()),
+              escHtml(t.getPriceCategory().getName()),
               t.getPrice().getAmount()
       ));
     }
@@ -175,7 +173,21 @@ public class ReservationMailManager {
 
     Mail result = new Mail();
     result.setFrom(template.getSender());
-    result.addTo(reservation.getEmail());
+    result.addTo(email);
+    if (template.getBcc() != null && !template.getBcc().isBlank()) {
+      String[] bccs = template.getBcc().split(",");
+      for (String b : bccs) {
+        try {
+          result.addBcc(b.trim());
+        } catch (AddressException ex) {
+          Logger.getLogger(ReservationMailManager.class.getName()).log(
+                  Level.INFO,
+                  String.format("Could not add BCC %s to mail with template ID %d",
+                          b, template.getId()),
+                  ex);
+        }
+      }
+    }
     result.setSubject(apply(template.getSubject(), replacements));
     result.setHtml(apply(template.getHtmlMessage(), replacements));
     return result;
@@ -190,12 +202,13 @@ public class ReservationMailManager {
   }
 
   private String escHtml(String attribute) {
+    if (attribute == null) {
+      return "";
+    }
+
     return attribute;
-//    if (attribute == null) {
-//      return "";
-//    }
 //
-//    return attribute.replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;");
+//    return attribute.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
   }
 
   private String escAttr(String attribute) {
@@ -203,8 +216,8 @@ public class ReservationMailManager {
       return "";
     }
 
-    return attribute.replace("\"", "&quot;").replace("'", "&apos;").replace("<", "&lt;")
-            .replace(">", "&gt;").replace("&", "&amp;");
+    return attribute.replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&apos;")
+            .replace("<", "&lt;").replace(">", "&gt;");
   }
 
 }

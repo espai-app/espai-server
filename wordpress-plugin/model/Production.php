@@ -13,32 +13,38 @@ class Production {
   public $rating;
   public $tags;
   public $attachments;
-  
+
+  public $productionCountries;
+  public $productionYear;
+  public $director;
+  public $starring;
+  public $book;
+
   public static function getById($productionId) {
     $espai = Espai::getInstance();
-    
+
     $httpClient = HttpClient::getInstance($espai->baseUrl, $espai->apiKey);
     $production = $httpClient->GET(
             '/webservice/season/' . $espai->seasonId . '/productions/' . $productionId);
-    
+
     return self::of($production);
-  } 
-  
+  }
+
   public static function list() {
     $espai = Espai::getInstance();
-    
+
     $httpClient = HttpClient::getInstance($espai->baseUrl, $espai->apiKey);
     $productions = $httpClient->GET('/webservice/season/' . $espai->seasonId . '/productions');
-    
+
     return self::convertList($productions);
   }
-  
+
   private static function convertList($productionList) {
     $result = [];
     foreach ($productionList as $e) {
       $result[] = self::of($e);
     }
-    
+
     return $result;
   }
 

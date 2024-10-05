@@ -21,6 +21,7 @@ public class ProductionDTO {
   private Integer fromAge;
   private Integer toAge;
   private Integer rating;
+
   private Map<String, List<String>> tags;
   private Map<String, List<AttachmentDTO>> attachments;
 

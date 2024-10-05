@@ -5,7 +5,7 @@
   xmlns:f="http://xmlns.jcp.org/jsf/core"
   xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
   xmlns:p="http://primefaces.org/ui"
-  template="/WEB-INF/layout/layout.xhtml"
+  template="/WEB-INF/layout/seasons.xhtml"
   xmlns:h="http://xmlns.jcp.org/jsf/html">
 
   <ui:param name="title" value="Veranstaltungen programmieren"/>
@@ -18,7 +18,7 @@
     <p:card>
       <h:form>
         <f:passThroughAttribute name="autocomplete" value="off" />
-      
+
         <div class="field">
           <p:outputLabel for="venueId" value="Spielstätte" class="block" />
           <p:selectOneMenu id="venueId" value="#{programmingView.currentVenue}">
@@ -27,16 +27,16 @@
             <f:converter binding="#{venueConverter}" />
           </p:selectOneMenu>
         </div>
-      
-        <p:dataTable id="events" 
+
+        <p:dataTable id="events"
                      value="#{programmingView.eventList}"
-                     var="e" 
-                     class="mt-4 mb-4 ui-fluid" 
+                     var="e"
+                     class="mt-4 mb-4 ui-fluid"
                      rowKey="#{p.id}"
                      rowIndexVar="rowIndex">
-          
+
           <p:autoUpdate />
-                    
+
           <p:column headerText="Datum" style="width: 10%">
             <p:inputMask id="date" value="#{e.date}" mask="99.99.9999" label="Datum">
               <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
@@ -66,18 +66,18 @@
             </p:selectOneMenu>
             <h:message for="hall" />
           </p:column>
-          
+
           <p:column style="width: 30px; text-align: center">
             <p:commandButton id="deleteEvents" icon="pi pi-trash" styleClass="rounded-button ui-button-flat" action="#{programmingView.deleteEvent(rowIndex)}" update="@form" />
           </p:column>
-          
+
         </p:dataTable>
-        
+
         <div>
-          <p:commandButton id="saveProgram" icon="pi pi-save" value="Programm speichern" action="#{programmingView.save}" />
-          <p:commandButton id="addEvent" icon="pi pi-plus" value="Veranstaltung hinzufügen" action="#{programmingView.addEvents(1)}" update="@form" styleClass="ui-button-outlined ml-2"/>
-          <p:commandButton id="addTenEvent" icon="pi pi-plus" value="10 Veranstaltungen hinzufügen" action="#{programmingView.addEvents(10)}" update="@form" styleClass="ui-button-outlined ml-2 mr-3"/>
-          <p:selectBooleanCheckbox value="#{programmingView.keepDate}" itemLabel="Datum des letzten Eintrags kopieren" />
+          <p:commandButton id="saveProgram" icon="pi pi-save" value="Programm speichern" action="#{programmingView.save}" styleClass="mb-3" />
+          <p:commandButton id="addEvent" icon="pi pi-plus" value="Veranstaltung hinzufügen" action="#{programmingView.addEvents(1)}" update="@form" styleClass="ui-button-outlined ml-2 mb-3"/>
+          <p:commandButton id="addTenEvent" icon="pi pi-plus" value="10 Veranstaltungen hinzufügen" action="#{programmingView.addEvents(10)}" update="@form" styleClass="ui-button-outlined ml-2 mr-3 mb-3"/>
+          <p:selectBooleanCheckbox value="#{programmingView.keepDate}" itemLabel="Datum des letzten Eintrags kopieren" styleClass="mb-3" />
         </div>
       </h:form>
     </p:card>

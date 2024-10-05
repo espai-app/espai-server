@@ -21,6 +21,14 @@ public class PriceCategories extends AbstractPriceCategories {
   public static Comparator<PriceCategory> DEFAULT_ORDER = new Comparator<>() {
     @Override
     public int compare(PriceCategory o1, PriceCategory o2) {
+      if (o1.getPosition() == null) {
+        return 1;
+      }
+
+      if (o2.getPosition() == null) {
+        return -1;
+      }
+
       if (Objects.equals(o1.getPosition(), o2.getPosition())) {
         return String.CASE_INSENSITIVE_ORDER.compare(o1.getName(), o2.getName());
       }

@@ -1,15 +1,21 @@
 package app.espai.views.venues;
 
 import app.espai.dao.Attachments;
+import app.espai.dao.EventTicketPriceTemplates;
 import app.espai.dao.Halls;
+import app.espai.dao.SeatCategories;
 import app.espai.dao.VenueContacts;
 import app.espai.dao.Venues;
 import app.espai.filter.AttachmentFilter;
+import app.espai.filter.EventTicketPriceTemplateFilter;
 import app.espai.filter.HallFilter;
+import app.espai.filter.SeatCategoryFilter;
 import app.espai.filter.VenueContactFilter;
 import app.espai.model.Attachment;
 import app.espai.model.AttachmentType;
+import app.espai.model.EventTicketPriceTemplate;
 import app.espai.model.Hall;
+import app.espai.model.SeatCategory;
 import app.espai.model.Venue;
 import app.espai.model.VenueContact;
 import app.espai.views.BaseView;
@@ -25,6 +31,7 @@ import jakarta.inject.Named;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import rocks.xprs.runtime.db.PageableFilter;
@@ -54,10 +61,19 @@ public class VenueDetailsView extends BaseView {
   @EJB
   private Halls halls;
 
+  @EJB
+  private SeatCategories seatCategories;
+
+  @EJB
+  private EventTicketPriceTemplates priceTemplates;
+
   private Venue venue;
   private List<Attachment> imageList;
   private List<Hall> hallList;
   private List<VenueContact> venueContactList;
+  private Map<Long, List<SeatCategory>> seatCategoryMap = new HashMap<>();
+  private List<SeatCategory> seatCategoryList;
+  private List<EventTicketPriceTemplate> priceTemplateList;
 
   @PostConstruct
   public void init() {
@@ -94,6 +110,18 @@ public class VenueDetailsView extends BaseView {
     hallFilter.setOrderBy("name");
     hallFilter.setOrder(PageableFilter.Order.ASC);
     hallList = halls.list(hallFilter).getItems();
+
+    SeatCategoryFilter seatCategoryFilter = new SeatCategoryFilter();
+    for (Hall hall : hallList) {
+      seatCategoryFilter.setHall(hall);
+      seatCategoryMap.put(hall.getId(), seatCategories.list(seatCategoryFilter).getItems());
+    }
+    seatCategoryFilter.setHalls(hallList);
+    seatCategoryList = seatCategories.list(seatCategoryFilter).getItems();
+
+    EventTicketPriceTemplateFilter priceTemplateFilter = new EventTicketPriceTemplateFilter();
+    priceTemplateFilter.setVenue(venue);
+    priceTemplateList = priceTemplates.list(priceTemplateFilter).getItems();
   }
 
   public void editVenue() {
@@ -101,7 +129,7 @@ public class VenueDetailsView extends BaseView {
     params.put("venueId", Arrays.asList(String.valueOf(venue.getId())));
     PrimeFaces.current().dialog().openDynamic(
             "editor.xhtml",
-            Dialog.getDefaultOptions(600, 600),
+            Dialog.getDefaultOptions(600, 660),
             params);
   }
 
@@ -115,7 +143,7 @@ public class VenueDetailsView extends BaseView {
     params.put("venueId", Arrays.asList(String.valueOf(venue.getId())));
     PrimeFaces.current().dialog().openDynamic(
             "contacts/editor.xhtml",
-            Dialog.getDefaultOptions(600, 620),
+            Dialog.getDefaultOptions(600, 650),
             params);
   }
 
@@ -125,7 +153,7 @@ public class VenueDetailsView extends BaseView {
     params.put("contactId", Arrays.asList(String.valueOf(contactId)));
     PrimeFaces.current().dialog().openDynamic(
             "contacts/editor.xhtml",
-            Dialog.getDefaultOptions(600, 620),
+            Dialog.getDefaultOptions(600, 650),
             params);
   }
 
@@ -162,6 +190,62 @@ public class VenueDetailsView extends BaseView {
     init();
     FacesContext.getCurrentInstance().addMessage(
             null, new FacesMessage("Saal gelöscht."));
+  }
+
+  public void addSeatCategory(long hallId) {
+    HashMap<String, List<String>> params = new HashMap<>();
+    params.put("hallId", Arrays.asList(String.valueOf(hallId)));
+
+    PrimeFaces.current().dialog().openDynamic(
+            "/catalogs/venues/halls/seatCategoryEditor",
+            Dialog.getDefaultOptions(600, 500),
+            params);
+  }
+
+  public void editSeatCategory(long seatCategoryId) {
+    HashMap<String, List<String>> params = new HashMap<>();
+    params.put("seatCategoryId", Arrays.asList(String.valueOf(seatCategoryId)));
+
+    PrimeFaces.current().dialog().openDynamic(
+            "/catalogs/venues/halls/seatCategoryEditor",
+            Dialog.getDefaultOptions(600, 500),
+            params);
+  }
+
+  public void removeSeatCategory(long seatCategoryId) {
+    SeatCategory seatCategory = seatCategories.get(seatCategoryId);
+    seatCategories.delete(seatCategory);
+    init();
+    FacesContext.getCurrentInstance().addMessage(
+            null, new FacesMessage("Platzkategorie gelöscht."));
+  }
+
+  public void addPriceTemplate() {
+    HashMap<String, List<String>> params = new HashMap<>();
+    params.put("venueId", Arrays.asList(String.valueOf(venue.getId())));
+
+    PrimeFaces.current().dialog().openDynamic(
+            "/catalogs/venues/priceTemplates/editor",
+            Dialog.getDefaultOptions(500, 500),
+            params);
+  }
+
+  public void editPriceTemplate(long templateId) {
+    HashMap<String, List<String>> params = new HashMap<>();
+    params.put("priceTemplateId", Arrays.asList(String.valueOf(templateId)));
+
+    PrimeFaces.current().dialog().openDynamic(
+            "/catalogs/venues/priceTemplates/editor",
+            Dialog.getDefaultOptions(500, 500),
+            params);
+  }
+
+  public void removePriceTemplate(long templateId) {
+    EventTicketPriceTemplate priceTemplate = priceTemplates.get(templateId);
+    priceTemplates.delete(priceTemplate);
+    init();
+    FacesContext.getCurrentInstance().addMessage(
+            null, new FacesMessage("Preis gelöscht."));
   }
 
   public void addImage() {
@@ -252,6 +336,48 @@ public class VenueDetailsView extends BaseView {
    */
   public void setVenueContactList(List<VenueContact> venueContactList) {
     this.venueContactList = venueContactList;
+  }
+
+  /**
+   * @return the seatCategoryMap
+   */
+  public Map<Long, List<SeatCategory>> getSeatCategoryMap() {
+    return seatCategoryMap;
+  }
+
+  /**
+   * @param seatCategoryMap the seatCategoryMap to set
+   */
+  public void setSeatCategoryMap(Map<Long, List<SeatCategory>> seatCategoryMap) {
+    this.seatCategoryMap = seatCategoryMap;
+  }
+
+  /**
+   * @return the seatCategoryList
+   */
+  public List<SeatCategory> getSeatCategoryList() {
+    return seatCategoryList;
+  }
+
+  /**
+   * @param seatCategoryList the seatCategoryList to set
+   */
+  public void setSeatCategoryList(List<SeatCategory> seatCategoryList) {
+    this.seatCategoryList = seatCategoryList;
+  }
+
+  /**
+   * @return the priceTemplateList
+   */
+  public List<EventTicketPriceTemplate> getPriceTemplateList() {
+    return priceTemplateList;
+  }
+
+  /**
+   * @param priceTemplateList the priceTemplateList to set
+   */
+  public void setPriceTemplateList(List<EventTicketPriceTemplate> priceTemplateList) {
+    this.priceTemplateList = priceTemplateList;
   }
   //</editor-fold>
 }

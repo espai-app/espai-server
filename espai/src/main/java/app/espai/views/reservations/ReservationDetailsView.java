@@ -4,6 +4,7 @@ import app.espai.ReservationMailManager;
 import app.espai.dao.ReservationExtras;
 import app.espai.dao.ReservationTickets;
 import app.espai.dao.Reservations;
+import app.espai.events.ReservationChangedEvent;
 import app.espai.filter.ReservationExtraFilter;
 import app.espai.filter.ReservationFilter;
 import app.espai.filter.ReservationTicketFilter;
@@ -20,6 +21,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.util.List;
 import org.primefaces.PrimeFaces;
@@ -46,7 +48,11 @@ public class ReservationDetailsView extends BaseView {
   @EJB
   private ReservationMailManager mailManager;
 
+  @Inject
+  private jakarta.enterprise.event.Event<ReservationChangedEvent> reservationChangedEvent;
+
   private Reservation reservation;
+  private ReservationStatus reservationStatus;
   private Production production;
   private List<ReservationTicket> ticketList;
   private List<Reservation> childReservationList;
@@ -64,6 +70,7 @@ public class ReservationDetailsView extends BaseView {
     }
 
     reservation = reservations.get(Long.parseLong(reservationIdParam));
+    reservationStatus = reservation.getStatus();
     production = reservation.getEvent().getProduction().getProduction();
 
     ReservationTicketFilter ticketFilter = new ReservationTicketFilter();
@@ -81,7 +88,7 @@ public class ReservationDetailsView extends BaseView {
 
   public void updateStatus() {
 
-    Mail mail = switch (reservation.getStatus()) {
+    Mail mail = switch (reservationStatus) {
       case NEW -> mailManager.createNew(reservation);
       case HOLD -> mailManager.createHold(reservation);
       case CONFIRMED -> mailManager.createConfirmed(reservation);
@@ -89,7 +96,13 @@ public class ReservationDetailsView extends BaseView {
       default -> null;
     };
 
+    ReservationStatus oldStatus = reservation.getStatus();
+    ReservationStatus newStatus = reservationStatus;
+
+    reservation.setStatus(reservationStatus);
     reservations.save(reservation);
+
+    reservationChangedEvent.fireAsync(new ReservationChangedEvent(reservation, oldStatus, newStatus));
 
     if (mail != null) {
       FacesContext.getCurrentInstance().getExternalContext().getFlash().put("mail", mail);
@@ -121,6 +134,20 @@ public class ReservationDetailsView extends BaseView {
    */
   public void setReservation(Reservation reservation) {
     this.reservation = reservation;
+  }
+
+  /**
+   * @return the reservationStatus
+   */
+  public ReservationStatus getReservationStatus() {
+    return reservationStatus;
+  }
+
+  /**
+   * @param reservationStatus the reservationStatus to set
+   */
+  public void setReservationStatus(ReservationStatus reservationStatus) {
+    this.reservationStatus = reservationStatus;
   }
 
   /**

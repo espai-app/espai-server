@@ -1,5 +1,6 @@
 package app.espai.views.events;
 
+import app.espai.businesslogic.PriceManager;
 import app.espai.dao.EventTicketPrices;
 import app.espai.dao.Events;
 import app.espai.dao.ReservationSummaries;
@@ -47,6 +48,9 @@ public class EventDetailsView extends BaseView {
   @EJB
   private EventTicketPrices ticketPrices;
 
+  @EJB
+  private PriceManager priceManager;
+
   private Event event;
   private List<Event> childEventList;
   private List<ReservationSummary> reservationList;
@@ -86,7 +90,7 @@ public class EventDetailsView extends BaseView {
     HashMap<String, List<String>> params = new HashMap<>();
     params.put("seasonId", Arrays.asList(String.valueOf(event.getSeason().getId())));
     params.put("eventId", Arrays.asList(String.valueOf(event.getId())));
-    PrimeFaces.current().dialog().openDynamic("editor", Dialog.getDefaultOptions(800, 600), params);
+    PrimeFaces.current().dialog().openDynamic("editor", Dialog.getDefaultOptions(800, 780), params);
   }
 
   public void deleteEvent() {
@@ -118,16 +122,34 @@ public class EventDetailsView extends BaseView {
   }
 
   public void addTicketPrice() {
-
+    HashMap<String, List<String>> params = new HashMap<>();
+    params.put("eventId", Arrays.asList(String.valueOf(event.getId())));
+    PrimeFaces.current().dialog().openDynamic(
+            "ticketPriceEditor",
+            Dialog.getDefaultOptions(500, 400), params);
   }
 
   public void editTicketPrice(Long id) {
-
+    HashMap<String, List<String>> params = new HashMap<>();
+    params.put("ticketPriceId", Arrays.asList(String.valueOf(id)));
+    PrimeFaces.current().dialog().openDynamic(
+            "ticketPriceEditor",
+            Dialog.getDefaultOptions(500, 400), params);
   }
 
-  public void deleteTicketPrice(Long id) {
+  public void removeTicketPrice(Long id) {
     EventTicketPrice ticketPrice = ticketPrices.get(id);
-    ticketPrices.delete(event);
+    ticketPrices.delete(ticketPrice);
+    init();
+  }
+
+  public void addDefaultTicketPrices() {
+    if (ticketPriceList.isEmpty()) {
+      ticketPriceList = priceManager.getPrices(event);
+      for (EventTicketPrice p : ticketPriceList) {
+        ticketPrices.save(p);
+      }
+    }
   }
 
   public void onEventChanged(SelectEvent<Event> selectEvent) {

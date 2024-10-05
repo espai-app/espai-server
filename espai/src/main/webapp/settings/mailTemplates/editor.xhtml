@@ -20,9 +20,26 @@
 
         <div class="lg:col-6 ui-fluid">
           <div class="field">
+            <p:outputLabel for="mailAccount" value="Mail-Konto" />
+            <p:selectOneMenu id="mailAccount" value="#{mailTemplateEditorView.mailTemplate.mailAccount}">
+              <f:selectItems value="#{mailTemplateEditorView.mailAccountList}"
+                             var="account"
+                             itemLabel="#{account.name}"
+                             itemValue="#{account}" />
+            </p:selectOneMenu>
+            <h:message for="mailAccount" />
+          </div>
+
+          <div class="field">
             <p:outputLabel for="sender" value="Absender" />
             <p:inputText id="sender" value="#{mailTemplateEditorView.mailTemplate.sender}" />
             <h:message for="sender" />
+          </div>
+
+          <div class="field">
+            <p:outputLabel for="bcc" value="Blindkopie an" />
+            <p:inputText id="bcc" value="#{mailTemplateEditorView.mailTemplate.bcc}" />
+            <h:message for="bcc" />
           </div>
 
           <div class="field">
@@ -41,9 +58,9 @@
             <p:outputLabel for="htmlMessage" value="Text" />
 
             <p:textEditor id="htmlMessage"
-                          value="#{mailTemplateEditorView.mailTemplate.htmlMessage}" 
-                          height="200" 
-                          secure="false" 
+                          value="#{mailTemplateEditorView.mailTemplate.htmlMessage}"
+                          height="500"
+                          secure="false"
                           styleClass="w-full">
 
               <f:facet name="toolbar">
@@ -59,7 +76,7 @@
             <h:message for="htmlMessage" />
           </div>
         </div>
-        
+
         <div class="mt-3">
           <p:commandButton value="speichern" icon="pi pi-save" action="#{mailTemplateEditorView.save}" ajax="false" />
         </div>

@@ -15,6 +15,7 @@ public class VenueDTO {
   private String city;
   private String phone;
   private String email;
+  private String publicNotes;
 
   public static VenueDTO of(Venue venue) {
     VenueDTO result = new VenueDTO();
@@ -26,6 +27,7 @@ public class VenueDTO {
     result.setCity(venue.getCity());
     result.setPhone(venue.getPhone());
     result.setEmail(venue.getEmail());
+    result.setPublicNotes(venue.getPublicNotes());
 
     return result;
   }
@@ -128,5 +130,20 @@ public class VenueDTO {
   public void setEmail(String email) {
     this.email = email;
   }
+
+  /**
+   * @return the publicNotes
+   */
+  public String getPublicNotes() {
+    return publicNotes;
+  }
+
+  /**
+   * @param publicNotes the publicNotes to set
+   */
+  public void setPublicNotes(String publicNotes) {
+    this.publicNotes = publicNotes;
+  }
   //</editor-fold>
+
 }

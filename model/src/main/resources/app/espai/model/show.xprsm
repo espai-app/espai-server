@@ -22,7 +22,7 @@ WITH FIELDS
   fixedPrice Monetary,
   ticketShare Double,
   additionalCost Monetary
-ON DELETE 
+ON DELETE
   IN Attachment DELETE,
   IN ProductionTag DELETE,
   IN ProductionVersion DELETE;
@@ -118,6 +118,7 @@ WITH FIELDS
   city String(100),
   phone String(50),
   email String(150),
+  publicNotes String,
   internalNotes String
 ON DELETE
   IN SeasonVenue DELETE,
@@ -131,7 +132,8 @@ WITH FIELDS
   givenName String(100),
   familyName String(100),
   phone String(100),
-  email String(150);
+  email String(150),
+  notifyOnReservation Boolean;
 
 DEFINE MODEL Hall
 WITH FIELDS
@@ -151,6 +153,14 @@ WITH FIELDS
   publicNotes String,
   internalNotes String;
 
+DEFINE MODEL SeatCategory
+WITH FIELDS
+  name String(100),
+  description String,
+  hall Hall,
+  capacity Integer,
+  partOfTotalCapacity Boolean;
+
 DEFINE MODEL PriceCategory
 WITH FIELDS
   name String(50),
@@ -164,7 +174,8 @@ WITH FIELDS
   name String(50),
   start LocalDate,
   end LocalDate,
-  isArchived Boolean
+  archived Boolean,
+  mailAccount MailAccount
 ON DELETE
   IN SeasonProduction DELETE,
   IN SeasonVenue DELETE,
@@ -179,6 +190,7 @@ DEFINE MODEL SeasonVenue
 WITH FIELDS
   season Season REQUIRED,
   venue Venue REQUIRED,
+  seasonNotes String,
   selfProgramming Boolean;
 
 DEFINE MODEL VenueProduction
@@ -192,7 +204,7 @@ WITH FIELDS
   description String
 ON DELETE
   IN Event SET NULL;
-  
+
 DEFINE MODEL Event
 WITH FIELDS
   season Season,
@@ -205,6 +217,7 @@ WITH FIELDS
   production ProductionVersion REQUIRED,
   ticketLimit Integer,
   parentEvent Event,
+  reservable Boolean,
   mandatory Boolean,
   hidden Boolean
 ON DELETE
@@ -213,8 +226,15 @@ ON DELETE
 DEFINE MODEL EventTicketPrice
 WITH FIELDS
   event Event,
+  seatCategory SeatCategory,
   priceCategory PriceCategory,
   price Monetary;
+
+DEFINE MODEL EventTicketPriceTemplate
+INHERIT FROM EventTicketPrice
+WITH FIELDS
+  venue Venue,
+  hall Hall;
 
 DEFINE ENUM ReservationStatus
 WITH OPTIONS
@@ -263,6 +283,7 @@ WITH FIELDS
   givenName String(50),
   surname String(50),
   tickets Integer,
+  message String,
   status ReservationStatus;
 
 
@@ -270,9 +291,10 @@ DEFINE MODEL ReservationTicket
 WITH FIELDS
   reservation Reservation REQUIRED,
   amount Integer,
-  category PriceCategory,
+  priceCategory PriceCategory,
+  seatCategory SeatCategory,
   price Monetary;
-  
+
 DEFINE MODEL User
 WITH FIELDS
   username String(100) REQUIRED,
@@ -297,6 +319,27 @@ WITH FIELDS
   role UserRole,
   venue Venue;
 
+DEFINE ENUM MailTransportSecurity
+WITH OPTIONS
+  NONE,
+  SSL,
+  START_TLS;
+
+DEFINE MODEL MailAccount
+WITH FIELDS
+  name String(50),
+  smtpHost String(150),
+  smtpPort Integer,
+  smtpTransportSecurity MailTransportSecurity,
+  smtpUser String(150),
+  smtpPassword String(150),
+  imapHost String(150),
+  imapPort Integer,
+  imapTransportSecurity MailTransportSecurity,
+  imapUser String(150),
+  imapPassword String(150),
+  imapSentFolder String(150);
+
 DEFINE MODEL MailTemplate
 WITH FIELDS
   season Season,
@@ -305,5 +348,6 @@ WITH FIELDS
   description String,
   sender String(250),
   replyTo String(250),
+  bcc String(250),
   subject String(250),
   htmlMessage String;

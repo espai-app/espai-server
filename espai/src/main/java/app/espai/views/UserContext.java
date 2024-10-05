@@ -2,6 +2,7 @@ package app.espai.views;
 
 import app.espai.auth.EspaiPrincipal;
 import app.espai.dao.Halls;
+import app.espai.dao.Venues;
 import app.espai.filter.EventFilter;
 import app.espai.filter.HallFilter;
 import app.espai.model.AccessRight;
@@ -32,6 +33,9 @@ public class UserContext implements Serializable {
   @EJB
   private Halls halls;
 
+  @EJB
+  private Venues venues;
+
   public boolean isRestricted() {
     for (AccessRight a : getCurrentPrincipal().getAccessRights()) {
       if (a.getRole() == UserRole.MANAGER) {
@@ -42,25 +46,31 @@ public class UserContext implements Serializable {
   }
 
   public List<Venue> getVenues() {
-    return Collections.unmodifiableList(
+    if (isRestricted()) {
+      return Collections.unmodifiableList(
             getCurrentPrincipal().getAccessRights().stream()
                     .map(AccessRight::getVenue)
                     .distinct()
                     .collect(Collectors.toList()));
+    } else {
+      return (List<Venue>) venues.list().getItems();
+    }
   }
 
   public EventFilter getEventFilter() {
-
-    List<Hall> hallList = halls.list(getHallFilter()).getItems();
-
     EventFilter filter = new EventFilter();
-    filter.setHalls(hallList);
+    if (isRestricted()) {
+      List<Hall> hallList = halls.list(getHallFilter()).getItems();
+      filter.setHalls(hallList);
+    }
     return filter;
   }
 
   public HallFilter getHallFilter() {
     HallFilter filter = new HallFilter();
-    filter.setVenues(getVenues());
+    if (isRestricted()) {
+      filter.setVenues(getVenues());
+    }
     return filter;
   }
 

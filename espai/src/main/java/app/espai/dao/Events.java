@@ -16,6 +16,7 @@ import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Named;
 import jakarta.persistence.TypedQuery;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -51,12 +52,15 @@ public class Events extends AbstractEvents {
     }
   };
 
-  public List<Production> listDistinctProductions(Season season) {
+  public List<Production> listDistinctProductions(Season season, LocalDate since) {
     TypedQuery<Production> query = em.createQuery(
             "SELECT DISTINCT e.production.production FROM Event e "
-            + "WHERE e.season = :season AND e.parentEvent IS NULL",
+            + "WHERE e.season = :season AND e.parentEvent IS NULL "
+                    + "AND e.hidden = :hidden AND e.date > :since",
             Production.class);
     query.setParameter("season", season);
+    query.setParameter("hidden", false);
+    query.setParameter("since", since);
     List<Production> productionList = query.getResultList();
     productionList.sort(Productions.DEFAULT_ORDER);
 

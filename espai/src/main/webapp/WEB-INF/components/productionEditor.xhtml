@@ -1,6 +1,4 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<composite:
-
 <ui:component
   xmlns="http://www.w3.org/1999/xhtml"
   xmlns:f="http://xmlns.jcp.org/jsf/core"
@@ -19,20 +17,20 @@
       <div>
         <p:linkButton href="movies/editor.xhtml" value="neuer Film" />
       </div>
-      
+
       <p:dataTable value="#{productionIndexView.productionList}" var="p" styleClass="mt-3">
         <p:column headerText="Titel">
           <p:link value="#{p.title}" href="movies/details.xhtml">
             <f:param name="productionId" value="#{p.id}" />
           </p:link>
         </p:column>
-        
+
         <p:column headerText="Agentur/Verleih">
           <p:link value="#{p.agency.name}" href="movies/details.xhtml">
             <f:param name="productionId" value="#{p.id}" />
           </p:link>
         </p:column>
-        
+
         <p:column headerText="verfügbar">
           <p:link value="#{p.available}" href="movies/details.xhtml">
             <f:param name="productionId" value="#{p.id}" />

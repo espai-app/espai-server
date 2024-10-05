@@ -61,4 +61,11 @@ public class MailTemplateIndexView {
   }
   //</editor-fold>
 
+  /**
+   * @return the seasonContext
+   */
+  public SeasonContext getSeasonContext() {
+    return seasonContext;
+  }
+
 }

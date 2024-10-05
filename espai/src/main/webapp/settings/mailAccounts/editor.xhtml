@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/settings.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="jakarta.tags.core">
+
+  <ui:param name="title" value="E-Mail-Konto bearbeiten" />
+
+  <ui:define name="content">
+
+    <h1><h:outputText value="#{mailAccountEditView.mailAccount.id != null ? mailAccountEditView.mailAccount.name : 'Neues Mail-Konto'}" /></h1>
+
+    <h:form>
+
+      <p:card>
+        <div class="ui-fluid">
+          <div class="field">
+            <p:outputLabel for="name" value="Name" />
+            <p:inputText id="name" value="#{mailAccountEditView.mailAccount.name}" />
+            <h:message for="name" />
+          </div>
+
+          <h2>Postausgangsserver (SMTP)</h2>
+
+          <div class="grid">
+            <div class="field col-6">
+              <p:outputLabel for="smtpHost" value="Server" />
+              <p:inputText id="smtpHost" value="#{mailAccountEditView.mailAccount.smtpHost}" />
+              <h:message for="smtpHost" />
+            </div>
+
+            <div class="field col-3">
+              <p:outputLabel for="smtpPort" value="Port" />
+              <p:inputNumber id="smtpPort" value="#{mailAccountEditView.mailAccount.smtpPort}" />
+              <h:message for="smtpPort" />
+            </div>
+
+            <div class="field col-3">
+              <p:outputLabel for="smtpTransportSecurity" value="Sicherheit" />
+
+              <p:selectOneMenu id="smtpTransportSecurity" value="#{mailAccountEditView.mailAccount.smtpTransportSecurity}">
+                <f:selectItem itemLabel="keine" itemValue="NONE" />
+                <f:selectItem itemLabel="SSL" itemValue="SSL" />
+                <f:selectItem itemLabel="StartTLS" itemValue="START_TLS" />
+              </p:selectOneMenu>
+
+              <h:message for="smtpTransportSecurity" />
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="field col-6">
+              <p:outputLabel for="smtpUser" value="Benutzername" />
+              <p:inputText id="smtpUser" value="#{mailAccountEditView.mailAccount.smtpUser}" />
+              <h:message for="smtpUser" />
+            </div>
+
+            <div class="field col-6">
+              <p:outputLabel for="smtpPassword" value="Passwort" />
+              <p:inputText id="smtpPassword" value="#{mailAccountEditView.mailAccount.smtpPassword}" type="password" />
+              <h:message for="smtpPassword" />
+            </div>
+          </div>
+
+          <h2>Posteingangsserver (IMAP)</h2>
+
+          <div class="grid">
+            <div class="field col-6">
+              <p:outputLabel for="imapHost" value="Server" />
+              <p:inputText id="imapHost" value="#{mailAccountEditView.mailAccount.imapHost}" />
+              <h:message for="imapHost" />
+            </div>
+
+            <div class="field col-3">
+              <p:outputLabel for="imapPort" value="Port" />
+              <p:inputNumber id="imapPort" value="#{mailAccountEditView.mailAccount.imapPort}" />
+              <h:message for="imapPort" />
+            </div>
+
+            <div class="field col-3">
+              <p:outputLabel for="imapTransportSecurity" value="Sicherheit" />
+
+              <p:selectOneMenu id="imapTransportSecurity" value="#{mailAccountEditView.mailAccount.imapTransportSecurity}">
+                <f:selectItem itemLabel="keine" itemValue="NONE" />
+                <f:selectItem itemLabel="SSL" itemValue="SSL" />
+                <f:selectItem itemLabel="StartTLS" itemValue="START_TLS" />
+              </p:selectOneMenu>
+
+              <h:message for="imapTransportSecurity" />
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="field col-6">
+              <p:outputLabel for="imapUser" value="Benutzername" />
+              <p:inputText id="imapUser" value="#{mailAccountEditView.mailAccount.imapUser}" />
+              <h:message for="imapUser" />
+            </div>
+
+            <div class="field col-6">
+              <p:outputLabel for="imapPassword" value="Passwort" />
+              <p:inputText id="imapPassword" value="#{mailAccountEditView.mailAccount.imapPassword}" type="password" />
+              <h:message for="imapPassword" />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p:commandButton icon="pi pi-save" value="speichern" action="#{mailAccountEditView.save}" />
+        </div>
+      </p:card>
+
+    </h:form>
+
+  </ui:define>
+</ui:composition>

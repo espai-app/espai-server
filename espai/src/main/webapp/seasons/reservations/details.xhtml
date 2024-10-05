@@ -27,21 +27,21 @@
           <f:param name="seasonId" value="#{reservationDetailsView.reservation.event.season.id}" />
         </p:linkButton>
         <p:commandButton icon="pi pi-trash" value="löschen" rendered="#{request.isUserInRole('MANAGER')}" styleClass="ui-button-outlined ui-button-danger">
-          <p:confirm header="Löschen bestätigen" 
+          <p:confirm header="Löschen bestätigen"
                      message="Möchten Sie diese Buchung wirklich löschen? Damit gehen auch alle Unter-Buchungen verloren."
                      icon="pi pi-exclamation-triangle" />
         </p:commandButton>
-        
-        <p:confirmDialog global="true" 
-                       showEffect="fade" 
-                       hideEffect="fade" 
-                       responsive="true" 
+
+        <p:confirmDialog global="true"
+                       showEffect="fade"
+                       hideEffect="fade"
+                       responsive="true"
                        width="650">
-        <p:commandButton value="abbrechen" 
-                         type="button" 
+        <p:commandButton value="abbrechen"
+                         type="button"
                          styleClass="ui-confirmdialog-no ui-button-flat"/>
-        <p:commandButton value="Ja, löschen" 
-                         type="button" 
+        <p:commandButton value="Ja, löschen"
+                         type="button"
                          icon="pi pi-trash" styleClass="ui-confirmdialog-yes ui-button-danger" />
       </p:confirmDialog>
       </h:form>
@@ -81,6 +81,18 @@
     <p:card styleClass="mt-3">
       <f:facet name="title">Buchung</f:facet>
 
+      <c:if test="#{reservationDetailsView.reservation.parentReservation != null}">
+        <div class="ui-message ui-staticmessage ui-message-warn ui-widget ui-corner-all block mb-3">
+          <span class="ui-message-warn-detail">
+            Gehört zu
+            <p:link href="details.xhtml" value="Buchung #{reservationDetailsView.reservation.parentReservation.id}">
+              <f:param name="reservationId" value="#{reservationDetailsView.reservation.parentReservation.id}" />
+              <f:param name="seasonId" value="#{reservationDetailsView.reservation.event.season.id}" />
+            </p:link>
+          </span>
+        </div>
+      </c:if>
+
       <div class="grid">
         <div class="md:col-6">
           <dl class="data-list">
@@ -117,13 +129,13 @@
         </div>
         <div class="md:col-6">
           <h:form>
-            <p:selectOneMenu value="#{reservationDetailsView.reservation.status}" rendered="#{request.isUserInRole('MANAGER')}" styleClass="mr-2">
+            <p:selectOneMenu value="#{reservationDetailsView.reservationStatus}" rendered="#{request.isUserInRole('MANAGER')}" styleClass="mr-2">
               <f:selectItems value="#{reservationDetailsView.reservationStatusList}" var="s" itemValue="#{s}" itemLabel="#{r}" />
             </p:selectOneMenu>
-            
+
             <p:commandButton value="Status ändern" action="#{reservationDetailsView.updateStatus}" rendered="#{request.isUserInRole('MANAGER')}"  />
           </h:form>
-          
+
         </div>
       </div>
 
@@ -134,25 +146,37 @@
           <h:outputText value="#{ticket.amount}" />
         </p:column>
 
+        <p:column headerText="Platzkategorie">
+          <h:outputText value="#{ticket.seatCategory.name}" />
+        </p:column>
+
         <p:column headerText="Preiskategorie">
-          <h:outputText value="#{ticket.category.name}" />
+          <h:outputText value="#{ticket.priceCategory.name}" />
         </p:column>
 
         <p:column headerText="Preis" styleClass="text-right">
           <h:outputText value="#{ticket.price.amount}">
             <f:convertNumber locale="DE_de" pattern="0.00" />
-          </h:outputText> 
-          
+          </h:outputText>
+
           <h:outputText value=" #{ticket.price.currency}" />
         </p:column>
       </p:dataTable>
 
-      <h3 class="mt-5 mb-2">Gebuchte Zusatzangebote</h3>
-      <p:dataTable value="#{reservationDetailsView.childReservationList}" var="child">
-        <p:column headerText="Titel">
-          <h:outputText value="#{child.event.production.production.title}" />
-        </p:column>
-      </p:dataTable>
+      <c:if test="#{reservationDetailsView.childReservationList != null and !reservationDetailsView.childReservationList.isEmpty()}">
+        <h3 class="mt-5 mb-2">Gebuchte Zusatzangebote</h3>
+        <p:dataTable value="#{reservationDetailsView.childReservationList}" var="child">
+          <p:column headerText="Titel">
+            <p:link href="details.xhtml" value="#{child.event.production.production.title}">
+              <f:param name="reservationId" value="#{child.id}" />
+              <f:param name="seasonId" value="#{reservationDetailsView.reservation.event.season.id}" />
+            </p:link>
+          </p:column>
+          <p:column headerText="Status" style="width: 25%">
+            <h:outputText value="#{child.status}" />
+          </p:column>
+        </p:dataTable>
+      </c:if>
 
       <h3 class="mt-5 mb-2">Statistische Daten</h3>
       <p:dataTable value="#{reservationDetailsView.extraList}" var="extra">

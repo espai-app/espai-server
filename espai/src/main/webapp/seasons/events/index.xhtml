@@ -34,7 +34,7 @@
         </p:linkButton>
       </div>
     </div>
-    
+
     <!-- TOOLBAR -->
     <div class="grid mb-3">
       <div class="col">
@@ -48,7 +48,7 @@
     </div>
 
     <p:card>
-      
+
       <!-- ACTIVATED FILTERS -->
       <ui:repeat value="#{eventIndexView.selectedVenues}" var="svenue">
         <p:chip label="#{svenue.name}, #{svenue.city}" styleClass="mr-2"/>
@@ -58,19 +58,23 @@
         <p:chip label="#{sprod.title}" styleClass="mr-2"/>
       </ui:repeat>
 
-      <p:linkButton href="index.xhtml" 
-                    icon="pi pi-times" 
-                    styleClass="rounded-button ui-button-flat" 
+      <p:chip label="nur öffentliche" styleClass="mr-2" rendered="#{eventIndexView.visibility == 'ONLY_VISIBLE'}" />
+      <p:chip label="nur private" styleClass="mr-2" rendered="#{eventIndexView.visibility == 'ONLY_HIDDEN'}"/>
+
+      <p:linkButton href="index.xhtml"
+                    icon="pi pi-times"
+                    styleClass="rounded-button ui-button-flat"
                     value="Filter löschen"
-                    rendered="#{not((eventIndexView.selectedVenues == null or eventIndexView.selectedVenues.isEmpty()) and (eventIndexView.selectedProductions == null or eventIndexView.selectedProductions.isEmpty()))}">
+                    rendered="#{eventIndexView.filtered}">
         <f:param name="seasonId" value="#{eventIndexView.currentSeason.id}" />
         <f:param name="startDate" value="#{eventIndexView.startDate}" />
       </p:linkButton>
 
       <!-- EVENTS TABLE -->
-      <p:dataTable var="event" 
-                   value="#{eventIndexView.eventList}" 
+      <p:dataTable var="event"
+                   value="#{eventIndexView.eventList}"
                    sortBy="#{event.date}"
+                   rowStyleClass="#{event.hidden ? 'not-public' : null}"
                    styleClass="mt-5"
                    reflow="true">
         <p:headerRow field="date" expandable="true">
@@ -85,7 +89,7 @@
           <p:link href="details.xhtml">
             <f:param name="eventId" value="#{event.id}" />
             <f:param name="seasonId" value="#{eventIndexView.currentSeason.id}" />
-            <h:outputText value="#{event.time}"/>
+            <h:outputText value="#{event.time}" rendered="#{event.parentEvent == null}"/>
           </p:link>
         </p:column>
 
@@ -93,10 +97,10 @@
           <p:link href="details.xhtml" styleClass="block">
             <f:param name="eventId" value="#{event.id}" />
             <f:param name="seasonId" value="#{eventIndexView.currentSeason.id}" />
-            
+
             <h:outputText value=" " class="pi pi-plus mr-1" rendered="#{event.parentEvent != null}"  />
             <h:outputText value="#{event.production.fullName}" />
-            
+
           </p:link>
         </p:column>
 
@@ -110,7 +114,7 @@
       </p:dataTable>
     </p:card>
 
-    <!-- FILTER DIALOGS --> 
+    <!-- FILTER DIALOGS -->
     <form method="GET">
       <p:dialog widgetVar="filterDialog" header="Filter" modal="true" responsive="true" resizable="true" width="800" height="600" closeOnEscape="true" showEffect="fade" blockScroll="true">
         <f:facet name="footer">
@@ -124,10 +128,10 @@
 
         <p:tabView>
           <p:tab title="Spielstätte">
-            <p:selectManyCheckbox id="venue" 
+            <p:selectManyCheckbox id="venue"
                                   value="#{eventIndexView.selectedVenueIds}"
                                   layout="pageDirection"
-                                  columns="1" 
+                                  columns="1"
                                   styleClass="grid-checkbox">
 
               <f:selectItems value="#{eventIndexView.venueList}" var="v" itemLabel="#{v.name}, #{v.city}"
@@ -135,19 +139,28 @@
             </p:selectManyCheckbox>
           </p:tab>
           <p:tab title="Veranstaltung">
-            <p:selectManyCheckbox id="production" 
+            <p:selectManyCheckbox id="production"
                                   value="#{eventIndexView.selectedProductionIds}"
                                   layout="pageDirection"
-                                  columns="1" 
+                                  columns="1"
                                   styleClass="grid-checkbox">
 
-              <f:selectItems value="#{eventIndexView.productionList}" 
-                             var="p" 
+              <f:selectItems value="#{eventIndexView.productionList}"
+                             var="p"
                              itemLabel="#{p.title}"
                              itemValue="#{p.id}"/>
             </p:selectManyCheckbox>
           </p:tab>
-        </p:tabView>          
+          <p:tab title="Status">
+            <b>Nach Sichtbarkeit</b>
+            <p:selectOneRadio id="visibility" value="#{eventIndexView.visibility}">
+              <f:selectItem itemLabel="alle Veranstaltungen" itemValue="ALL" />
+              <f:selectItem itemLabel="nur öffentliche" itemValue="ONLY_VISIBLE" />
+              <f:selectItem itemLabel="nur versteckte" itemValue="ONLY_HIDDEN" />
+            </p:selectOneRadio>
+          </p:tab>
+
+        </p:tabView>
       </p:dialog>
     </form>
 

@@ -33,7 +33,7 @@ public class AttachmentsWebservice {
   private Attachments attachments;
 
   @GET
-  @Path("/{attachmentId}/dataStream")
+  @Path("/{attachmentId}/datastream")
   public Response getAttachment(@PathParam("attachmentId") long attachmentId) throws IOException {
 
     Attachment attachment = attachments.get(attachmentId);

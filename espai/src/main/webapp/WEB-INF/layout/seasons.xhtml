@@ -13,43 +13,51 @@
       <div class="sidebar">
         <div class="field">
           <p:outputLabel for="season" value="Spielzeit" />
-          <p:selectOneMenu id="season" value="#{seasonView.selectedSeason}" styleClass="block">
-            <f:selectItems value="#{seasonView.activeSeasons}" var="season" itemLabel="#{season.name}" itemValue="#{season}"/>
+          <p:selectOneMenu id="season"
+                           value="#{seasonView.selectedSeason}"
+                           styleClass="block"
+                           valueChangeListener="#{seasonView.onSeasonChanged}"
+                           converter="#{seasonConverter}">
+
+            <f:selectItems value="#{seasonView.activeSeasons}"
+                           var="season"
+                           itemLabel="#{season.name}"
+                           itemValue="#{season}"/>
+
+            <p:ajax event="valueChange" listener="#{seasonView.onSeasonChanged}" async="false" />
           </p:selectOneMenu>
         </div>
 
         <ul class="menu">
           <li>
             <p:link value="Veranstaltungen" outcome="/seasons/events/index.xhtml">
-              <f:param name="season" value="#{seasonView.selectedSeason.id}" />
+              <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
             </p:link>
           </li>
-          
+
           <li>
             <p:link value="Spielstätten" outcome="/seasons/venues/index.xhtml">
-              <f:param name="season" value="#{seasonView.selectedSeason.id}" />
+              <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
             </p:link>
           </li>
 
           <li>
             <p:link value="Buchungen" outcome="/seasons/reservations/index.xhtml">
-              <f:param name="season" value="#{seasonView.selectedSeason.id}" />
+              <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
             </p:link>
           </li>
-  
-          
-  
-          <!--<li>
-            <p:link value="Statistik" outcome="/seasons/statistics/index.xhtml">
-              <f:param name="season" value="#{seasonView.selectedSeason.id}" />
-            </p:link>
-          </li>
-          
+
           <li>
-            <p:link value="Einstellungen" outcome="seasons/settings/index.xhtml">
-              <f:param name="season" value="#{seasonView.selectedSeason.id}" />
+            <p:link value="Statistik" outcome="/seasons/analytics/index.xhtml" rendered="#{request.isUserInRole('MANAGER')}">
+              <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
             </p:link>
-          </li>-->
+          </li>
+
+          <li>
+            <p:link value="Einstellungen" outcome="/seasons/settings/index.xhtml">
+              <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
+            </p:link>
+          </li>
         </ul>
       </div>
     </h:form>

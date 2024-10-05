@@ -12,20 +12,20 @@
 
   <ui:define name="content">
     <h:form>
-      <h1>Buchungen</h1>      
+      <h1>Buchungen</h1>
 
       <div class="grid mb-3">
         <div class="md:col-9">
-          <p:linkButton href="editor.xhtml" 
-                        icon="pi pi-plus" 
-                        value="neue Buchung" 
+          <p:linkButton href="editor.xhtml"
+                        icon="pi pi-plus"
+                        value="neue Buchung"
                         styleClass="mr-4"
                         rendered="#{request.isUserInRole('MANAGER')}">
             <f:param name="seasonId" value="#{reservationIndexView.seasonContext.currentSeason.id}" />
           </p:linkButton>
 
-          <p:commandButton value="bestätigen" 
-                           icon="pi pi-check" 
+          <p:commandButton value="bestätigen"
+                           icon="pi pi-check"
                            action="#{reservationIndexView.confirmReservations}"
                            styleClass="ui-button-outlined mr-2"
                            rendered="#{request.isUserInRole('MANAGER')}"
@@ -33,8 +33,8 @@
 
           </p:commandButton>
 
-          <p:commandButton value="parken" 
-                           icon="pi pi-pause" 
+          <p:commandButton value="parken"
+                           icon="pi pi-pause"
                            action="#{reservationIndexView.holdReservations}"
                            styleClass="ui-button-outlined mr-2"
                            rendered="#{request.isUserInRole('MANAGER')}"
@@ -42,8 +42,8 @@
 
           </p:commandButton>
 
-          <p:commandButton value="stornieren" 
-                           icon="pi pi-times" 
+          <p:commandButton value="stornieren"
+                           icon="pi pi-times"
                            action="#{reservationIndexView.cancelReservations}"
                            styleClass="ui-button-outlined"
                            rendered="#{request.isUserInRole('MANAGER')}"
@@ -51,46 +51,48 @@
 
           </p:commandButton>
         </div>
-        <!--<div class="md:col-3 text-right">
-          <p:commandButton title="filtern"
+        <div class="md:col-3 text-right">
+          <p:linkButton href="#{request.contextPath}/webservice/export/season/#{reservationIndexView.seasonContext.currentSeason.id}/reservations"
+                        value="CSV"
+                        icon="pi pi-download"
+                        styleClass="ui-button-flat mr-2" />
+          <!--<p:commandButton title="filtern"
                            onclick="PF('filterDialog').show()"
-                           icon="pi pi-filter" 
+                           icon="pi pi-filter"
                            styleClass="ui-button-secondary ui-button-flat rounded-button mr-2"
                            rendered="#{request.isUserInRole('MANAGER')}">
 
-          </p:commandButton>
-        </div>-->
+          </p:commandButton>-->
+        </div>
       </div>
 
       <p:card>
         <p:dataTable value="#{reservationIndexView.reservationList}"
-                     selection="#{reservationIndexView.selectedReservationIds}"
+                     selection="#{reservationIndexView.selectedReservations}"
                      rowKey="#{r.id}"
                      rowSelectMode="none"
+                     rowStyleClass="#{r.event.hidden ? 'not-public' : null}"
                      var="r"
                      reflow="true">
 
           <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
 
           <p:column headerText="Datum" style="width: 200px;">
-            <h:outputText value="#{r.eventDate}">
-              <f:convertDateTime pattern="dd.MM.yyyy" type="localDate" />
-            </h:outputText>
-            <h:outputText value=", #{r.eventStartTime} Uhr" />
+            <h:panelGroup rendered="#{r.parentReservation == null}">
+              <h:outputText value="#{r.eventDate}">
+                <f:convertDateTime pattern="dd.MM.yyyy" type="localDate" />
+              </h:outputText>
+              <h:outputText value=", #{r.eventStartTime} Uhr" />
+            </h:panelGroup>
           </p:column>
 
           <p:column headerText="Veranstaltung">
-            <p:link outcome="details">
+            <p:link outcome="details" styleClass="block">
               <f:param name="reservationId" value="#{r.id}" />
               <f:param name="seasonId" value="#{r.event.season.id}" />
 
-              <h:outputText value="#{r.productionTitle}" class="block text-lg mb-2" />
-              <ui:repeat value="#{reservationIndexView.childReservationMap.get(r.id)}" var="c">
-                <span class="block mb-2">
-                  <i class="pi pi-plus"></i>
-                  <h:outputText value=" #{c.event.production.fullName}" />
-                </span>
-              </ui:repeat>
+              <h:outputText value=" " class="pi pi-plus mr-1" rendered="#{r.parentReservation != null}"  />
+              <h:outputText value="#{r.productionTitle}" class="text-lg mb-2" />
               <span class="block mt-3">
                 <i class="pi pi-map-marker"></i>
                 <h:outputText value=" #{r.venueName}, #{r.venueCity}" />
@@ -101,6 +103,12 @@
           <p:column headerText="Besteller:in">
             <h:outputText value="#{r.company}" /><br />
             <h:outputText value="#{r.givenName} #{r.surname}" /><br />
+          </p:column>
+
+          <p:column style="width: 50px">
+            <h:outputText rendered="#{r.message != ''}" styleClass="pi pi-comment text-xl">
+
+            </h:outputText>
           </p:column>
 
           <p:column headerText="Tickets" style="width: 70px">
@@ -120,8 +128,8 @@
     </h:form>
 
     <form method="GET">
-      <p:dialog widgetVar="filterDialog" header="Filter" modal="true" responsive="true" 
-                resizable="true" width="800" height="600" closeOnEscape="true" showEffect="fade" 
+      <p:dialog widgetVar="filterDialog" header="Filter" modal="true" responsive="true"
+                resizable="true" width="800" height="600" closeOnEscape="true" showEffect="fade"
                 blockScroll="true">
 
         <f:facet name="footer">
@@ -134,10 +142,10 @@
 
         <p:tabView>
           <p:tab title="Spielstätte">
-            <p:selectManyCheckbox id="venue" 
+            <p:selectManyCheckbox id="venue"
                                   value="#{reservationIndexView.selectedVenueIds}"
                                   layout="pageDirection"
-                                  columns="1" 
+                                  columns="1"
                                   styleClass="grid-checkbox">
 
               <f:selectItems value="#{reservationIndexView.venueList}" var="v" itemLabel="#{v.name}, #{v.city}"
@@ -145,19 +153,29 @@
             </p:selectManyCheckbox>
           </p:tab>
           <p:tab title="Veranstaltung">
-            <p:selectManyCheckbox id="production" 
+            <p:selectManyCheckbox id="production"
                                   value="#{reservationIndexView.selectedProductionIds}"
                                   layout="pageDirection"
-                                  columns="1" 
+                                  columns="1"
                                   styleClass="grid-checkbox">
 
-              <f:selectItems value="#{reservationIndexView.productionList}" 
-                             var="p" 
+              <f:selectItems value="#{reservationIndexView.productionList}"
+                             var="p"
                              itemLabel="#{p.title}"
                              itemValue="#{p.id}"/>
             </p:selectManyCheckbox>
           </p:tab>
-        </p:tabView>          
+
+          <p:tab title="Status">
+            <b>Status</b>
+            <p:selectManyCheckbox id="status">
+              <f:selectItem itemLabel="neu" itemValue="NEW" />
+              <f:selectItem itemLabel="wartet" itemValue="HOLD" />
+              <f:selectItem itemLabel="bestätigt" itemValue="CONFIRMED" />
+              <f:selectItem itemLabel="storniert" itemValue="CANCELED" />
+            </p:selectManyCheckbox>
+          </p:tab>
+        </p:tabView>
       </p:dialog>
     </form>
 

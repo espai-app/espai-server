@@ -10,6 +10,7 @@ import app.espai.model.Season;
 import app.espai.model.SeasonProduction;
 import app.espai.model.SeasonVenue;
 import app.espai.views.BaseView;
+import app.espai.views.Dialog;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
@@ -77,7 +78,7 @@ public class SeasonDetailsView extends BaseView implements Serializable {
   }
 
   public void toggleArchive() {
-    season.setIsArchived(!season.isArchived());
+    season.setArchived(!season.isArchived());
     seasons.save(season);
     redirect(
             season.isArchived() ? "Spielzeit archiviert." : "Spielzeit wiederhergestellt.",
@@ -145,6 +146,16 @@ public class SeasonDetailsView extends BaseView implements Serializable {
     params.put("seasonId", Arrays.asList(String.valueOf(season.getId())));
 
     PrimeFaces.current().dialog().openDynamic("addVenues", options, params);
+  }
+
+  public void editSeasonVenue(long seasonVenueId) {
+    Map<String, List<String>> params = new HashMap<>();
+    params.put("seasonVenueId", Arrays.asList(String.valueOf(seasonVenueId)));
+
+    PrimeFaces.current().dialog().openDynamic(
+            "seasonVenueEditor",
+            Dialog.getDefaultOptions(600, 300),
+            params);
   }
 
   public void loadVenues() {

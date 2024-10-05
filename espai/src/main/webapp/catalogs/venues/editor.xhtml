@@ -5,15 +5,15 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui"
       template="/WEB-INF/layout/dialog.xhtml">
-  
+
   <ui:param name="title" value="#{venueEditorView.venue.id == null ? 'Neue Spielstätte erstellen' : 'Spielstätte bearbeiten'}" />
 
   <ui:define name="content">
     <h:form>
       <f:passThroughAttribute name="autocomplete" value="off" />
-      
+
       <input type="hidden" name="venueId" value="#{venueEditorView.venue.id}" />
-      
+
       <div class="ui-fluid">
         <div class="field">
           <p:outputLabel for="name" value="Name" />
@@ -51,6 +51,12 @@
           <p:outputLabel for="email" value="E-Mail" />
           <p:inputText type="email" id="email" value="#{venueEditorView.venue.email}" />
           <h:message for="email" />
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="publicNotes" value="Freitext (Webseite)" />
+          <p:inputTextarea id="publicNotes" value="#{venueEditorView.venue.publicNotes}" />
+          <h:message for="publicNotes" />
         </div>
       </div>
 

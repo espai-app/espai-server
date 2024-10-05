@@ -1,13 +1,12 @@
 package app.espai.webservice;
 
-import app.espai.Mailer;
-import app.espai.ReservationMailManager;
 import app.espai.dao.EventTicketPrices;
 import app.espai.dao.Events;
 import app.espai.dao.ReservationExtras;
 import app.espai.dao.ReservationSummaries;
 import app.espai.dao.ReservationTickets;
 import app.espai.dao.Reservations;
+import app.espai.events.ReservationChangedEvent;
 import app.espai.model.Event;
 import app.espai.model.EventTicketPrice;
 import app.espai.model.Reservation;
@@ -17,18 +16,12 @@ import app.espai.model.ReservationTicket;
 import app.espai.model.TicketStatistic;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
-import jakarta.enterprise.concurrent.Asynchronous;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import rocks.xprs.mail.Mail;
 import rocks.xprs.runtime.exceptions.ResourceNotFoundException;
 
 /**
@@ -57,11 +50,8 @@ public class ReservationWebservice {
   @EJB
   private ReservationSummaries reservationSummaries;
 
-  @EJB
-  private ReservationMailManager reservationMailManager;
-
-  @EJB
-  private Mailer mailer;
+  @Inject
+  private jakarta.enterprise.event.Event<ReservationChangedEvent> reservationChangedEvent;
 
   @POST
   @Path("validate")
@@ -171,24 +161,10 @@ public class ReservationWebservice {
       }
     }
 
-    sendMail(parentReservation);
+    reservationChangedEvent.fireAsync(new ReservationChangedEvent(
+            parentReservation, ReservationStatus.UNSET, ReservationStatus.NEW));
 
     return true;
-  }
-
-  @Asynchronous
-  private void sendMail(Reservation reservation) {
-
-    try {
-      Mail mail = reservationMailManager.createNew(reservation);
-      Message message = mailer.send(mail);
-      mailer.saveSent(message);
-    } catch (IOException | MessagingException ex) {
-      Logger.getLogger(ReservationWebservice.class.getName()).log(
-              Level.SEVERE,
-              String.format("Could not sent reservation_new mail for reservation %d",
-                      reservation.getId()), ex);
-    }
   }
 
   private Reservation convert(ReservationDTO reservation) {
@@ -213,7 +189,8 @@ public class ReservationWebservice {
       ReservationTicket ticket = new ReservationTicket();
       EventTicketPrice tprice = ticketPrices.get(t.getKey());
       ticket.setPrice(tprice.getPrice());
-      ticket.setCategory(tprice.getPriceCategory());
+      ticket.setPriceCategory(tprice.getPriceCategory());
+      ticket.setSeatCategory(tprice.getSeatCategory());
       ticket.setAmount(t.getValue());
       result.add(ticket);
     }

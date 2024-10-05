@@ -27,6 +27,7 @@ public class EventDTO {
   private Integer availableTickets;
   private Integer ticketLimit;
   private boolean mandatory;
+  private boolean reservable;
   private EventSerialDTO eventSerial;
   private List<EventDTO> childEvents;
   private List<EventTicketPriceDTO> prices;
@@ -50,6 +51,7 @@ public class EventDTO {
             ? result.getTicketLimit() - ticketsSold.get(event.getId())
             : result.getTicketLimit() != null ? result.getTicketLimit() : -1);
     result.setMandatory(event.isMandatory());
+    result.setReservable(event.isReservable());
 
     if (childEvents != null) {
       LinkedList<EventDTO> childDTOs = new LinkedList<>();
@@ -62,7 +64,7 @@ public class EventDTO {
     if (prices != null && prices.containsKey(event.getId())) {
       LinkedList<EventTicketPriceDTO> priceDTOs = new LinkedList<>();
       for (EventTicketPrice p : prices.get(event.getId())) {
-        priceDTOs.add(EventTicketPriceDTO.of(p));
+        priceDTOs.add(EventTicketPriceDTO.of(p, null));
       }
       result.setPrices(priceDTOs);
     }
@@ -237,6 +239,20 @@ public class EventDTO {
    */
   public void setMandatory(boolean mandatory) {
     this.mandatory = mandatory;
+  }
+
+  /**
+   * @return the reservable
+   */
+  public boolean isReservable() {
+    return reservable;
+  }
+
+  /**
+   * @param reservable the reservable to set
+   */
+  public void setReservable(boolean reservable) {
+    this.reservable = reservable;
   }
 
   /**

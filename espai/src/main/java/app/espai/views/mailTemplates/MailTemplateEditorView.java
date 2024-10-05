@@ -1,6 +1,8 @@
 package app.espai.views.mailTemplates;
 
+import app.espai.dao.MailAccounts;
 import app.espai.dao.MailTemplates;
+import app.espai.model.MailAccount;
 import app.espai.model.MailTemplate;
 import app.espai.views.SeasonContext;
 import jakarta.annotation.PostConstruct;
@@ -12,6 +14,7 @@ import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
+import java.util.List;
 
 /**
  *
@@ -29,7 +32,12 @@ public class MailTemplateEditorView {
   @EJB
   private MailTemplates mailTemplates;
 
+  @EJB
+  private MailAccounts mailAccounts;
+
   private MailTemplate mailTemplate;
+
+  private List<? extends MailAccount> mailAccountList;
 
   @PostConstruct
   public void init() {
@@ -42,6 +50,8 @@ public class MailTemplateEditorView {
     } else {
       mailTemplate = mailTemplates.get(Long.parseLong(templateIdParam));
     }
+
+    mailAccountList = mailAccounts.list().getItems();
   }
 
   public void save() {
@@ -63,6 +73,20 @@ public class MailTemplateEditorView {
    */
   public void setMailTemplate(MailTemplate mailTemplate) {
     this.mailTemplate = mailTemplate;
+  }
+
+  /**
+   * @return the mailAccountList
+   */
+  public List<? extends MailAccount> getMailAccountList() {
+    return mailAccountList;
+  }
+
+  /**
+   * @param mailAccountList the mailAccountList to set
+   */
+  public void setMailAccountList(List<? extends MailAccount> mailAccountList) {
+    this.mailAccountList = mailAccountList;
   }
   //</editor-fold>
 

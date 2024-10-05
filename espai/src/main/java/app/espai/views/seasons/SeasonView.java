@@ -11,6 +11,7 @@ import jakarta.ejb.EJB;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.event.ValueChangeEvent;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class SeasonView extends BaseView {
   @PostConstruct
   public void init() {
     SeasonFilter filter = new SeasonFilter();
-    filter.setIsArchived(Boolean.FALSE);
+    filter.setArchived(Boolean.FALSE);
     activeSeasons = seasons.list(filter).getItems();
     selectedSeason = seasonContext.getCurrentSeason();
 
@@ -53,6 +54,20 @@ public class SeasonView extends BaseView {
         // should not happen
         throw new RuntimeException(ex);
       }
+    }
+  }
+
+  public void onSeasonChanged(ValueChangeEvent event) {
+    try {
+      ExternalContext econtext = FacesContext.getCurrentInstance().getExternalContext();
+      HttpServletRequest request = (HttpServletRequest) econtext.getRequest();
+      StringBuffer url = request.getRequestURL();
+
+      econtext.redirect(url.append("?").append(Constants.SEASON_ID).append("=")
+              .append(((Season) event.getNewValue()).getId()).toString());
+    } catch (IOException ex) {
+      // should not happen
+      throw new RuntimeException(ex);
     }
   }
 

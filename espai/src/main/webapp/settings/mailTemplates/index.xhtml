@@ -11,24 +11,24 @@
   <ui:param name="title" value="E-Mail-Vorlagen" />
 
   <ui:define name="content">
-    
-    <h1>E-Mail-Vorlagen</h1>
-    
+
+    <h1>E-Mail-Vorlagen <h:outputText value="(${mailTemplateIndexView.seasonContext.currentSeason.name})" rendered="${mailTemplateIndexView.seasonContext.currentSeason != null}"/></h1>
+
     <p:card>
       <p:dataTable value="#{mailTemplateIndexView.mailTemplateList}"
                    var="t">
-        
+
         <p:column headerText="Name">
           <p:link href="editor.xhtml" value="#{t.name}" styleClass="block">
             <f:param name="templateId" value="#{t.id}" />
           </p:link>
           <h:outputText value="#{t.description}" />
         </p:column>
-        
+
         <p:column headerText="Code" style="width: 20%;">
           <h:outputText value="#{t.shortCode}" />
         </p:column>
-        
+
       </p:dataTable>
     </p:card>
   </ui:define>

@@ -1,4 +1,4 @@
-/* 
+/*
     Created on : 08.01.2024, 06:36:32
     Author     : rborowski
 */
@@ -43,6 +43,23 @@
   border-bottom: 1px solid #a7c631;
 }
 
+.espai-event-table-time {
+  width: 15%;
+}
+
+.espai-event-table-production,
+.espai-event-table-venue {
+  width: 55%;
+}
+
+.espai-event-table-seats {
+  width: 10%;
+}
+
+.espai-event-table-reservation {
+  width: 20%;
+}
+
 .espai-presentation-list {
   list-style: none;
 }
@@ -54,27 +71,46 @@
   font-size: 1.2rem;
 }
 
+.espai-venue-list {
+  list-style: none;
+}
+
+.espai-venue-list li {
+  display: inline-block;
+  flex: 1;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  margin: 1rem 0.5rem;
+  vertical-align: top;
+}
+
+.espai-venue-list img {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
 .img-responsive {
   width: 100%;
   height: auto;
 }
 
 .video-container {
-  position: relative; 
-  overflow: hidden; 
-  width: 100%; 
+  position: relative;
+  overflow: hidden;
+  width: 100%;
   padding-top: 56.25%;
   margin: 1rem 0;
 }
 
 .video-container iframe {
   position: absolute;
-  top: 0; 
-  left: 0; 
-  bottom: 0; 
-  right: 0; 
-  width: 100%; 
-  height: 100%; 
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
   border: none;
 }
 
@@ -83,4 +119,8 @@
   padding: 0.5rem 1rem;
   background: #9e4339;
   color: white;
+}
+
+.espai-schedule {
+  width: 100%;
 }

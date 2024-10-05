@@ -5,6 +5,7 @@ import app.espai.dao.Seasons;
 import app.espai.dao.Venues;
 import app.espai.filter.SeasonVenueFilter;
 import app.espai.model.Season;
+import app.espai.model.SeasonVenue;
 import app.espai.model.Venue;
 import jakarta.ejb.EJB;
 import jakarta.ws.rs.GET;
@@ -14,6 +15,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import rocks.xprs.runtime.db.PageableList;
 
 /**
  *
@@ -43,22 +45,31 @@ public class VenueWebservice {
     filter.setSeason(season);
     filter.setVenue(venue);
 
-    if (seasonVenues.list(filter).getTotalNumberOfResults() == 0) {
+    PageableList<SeasonVenue> seasonVenueList = seasonVenues.list(filter);
+    if (seasonVenueList.getTotalNumberOfResults() == 0) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    return Response.ok(VenueDTO.of(venue), MediaType.APPLICATION_JSON).build();
+    return Response
+            .ok(SeasonVenueDTO.of(seasonVenueList.getItems().get(0)), MediaType.APPLICATION_JSON)
+            .build();
   }
 
   @GET
-  public List<VenueDTO> list(@PathParam("seasonId") Long seasonId) {
+  public List<SeasonVenueDTO> list(@PathParam("seasonId") Long seasonId) {
 
     Season season = seasons.get(seasonId);
 
-    List<Venue> seasonVenueList = seasonVenues.getVenues(season);
-    seasonVenueList.sort(Venues.DEFAULT_ORDER);
+    SeasonVenueFilter filter = new SeasonVenueFilter();
+    filter.setSeason(season);
 
-    List<VenueDTO> venueList = seasonVenueList.stream().map(v -> VenueDTO.of(v)).toList();
+    List<SeasonVenue> seasonVenueList = seasonVenues.list(filter).getItems();
+    seasonVenueList.sort(SeasonVenue.DEFAULT_ORDER);
+
+    List<SeasonVenueDTO> venueList = seasonVenueList
+            .stream()
+            .map(v -> SeasonVenueDTO.of(v))
+            .toList();
 
     return venueList;
   }

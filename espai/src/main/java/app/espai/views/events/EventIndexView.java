@@ -42,6 +42,8 @@ import rocks.xprs.runtime.db.Range;
 @RequestScoped
 public class EventIndexView {
 
+  public enum VisibilityFilter {ALL, ONLY_VISIBLE, ONLY_HIDDEN}
+
   @EJB
   private SeasonContext seasonContext;
 
@@ -74,6 +76,8 @@ public class EventIndexView {
   private List<Long> selectedProductionIds;
   private List<Venue> selectedVenues;
   private List<Long> selectedVenueIds;
+  private VisibilityFilter visibility;
+  private boolean filtered = false;
 
   private LocalDate prevWeek;
   private LocalDate nextWeek;
@@ -188,6 +192,10 @@ public class EventIndexView {
       if (k.endsWith(":production")) {
         productionParameterName = k;
       }
+
+      if (k.endsWith(":visibility")) {
+        visibility = VisibilityFilter.valueOf(econtext.getRequestParameterMap().get(k));
+      }
     }
 
     // filter by selected venues
@@ -210,6 +218,8 @@ public class EventIndexView {
         hallFilter.setVenues(selectedVenues);
         List<Hall> hallList = halls.list(hallFilter).getItems();
         eventFilter.setHalls(hallList);
+
+        filtered |= !selectedVenues.isEmpty();
       }
 
       // filter by production
@@ -231,6 +241,13 @@ public class EventIndexView {
             // ignore
           }
         }
+
+        filtered |= !selectedProductions.isEmpty();
+      }
+
+      if (visibility != null && visibility != VisibilityFilter.ALL) {
+        eventFilter.setHidden(visibility == VisibilityFilter.ONLY_HIDDEN);
+        filtered = true;
       }
     }
 
@@ -240,7 +257,7 @@ public class EventIndexView {
   public void createEvent() {
     HashMap<String, List<String>> params = new HashMap<>();
     params.put("seasonId", Arrays.asList(String.valueOf(currentSeason.getId())));
-    PrimeFaces.current().dialog().openDynamic("editor", Dialog.getDefaultOptions(800, 600), params);
+    PrimeFaces.current().dialog().openDynamic("editor", Dialog.getDefaultOptions(800, 780), params);
   }
 
   private Range<LocalDate> calculateWeekForDate(LocalDate currentDate) {
@@ -353,6 +370,34 @@ public class EventIndexView {
    */
   public void setSelectedVenueIds(List<Long> selectedVenueIds) {
     this.selectedVenueIds = selectedVenueIds;
+  }
+
+  /**
+   * @return the visibility
+   */
+  public VisibilityFilter getVisibility() {
+    return visibility;
+  }
+
+  /**
+   * @param visibility the visibility to set
+   */
+  public void setVisibility(VisibilityFilter visibility) {
+    this.visibility = visibility;
+  }
+
+  /**
+   * @return the filtered
+   */
+  public boolean isFiltered() {
+    return filtered;
+  }
+
+  /**
+   * @param filtered the filtered to set
+   */
+  public void setFiltered(boolean filtered) {
+    this.filtered = filtered;
   }
 
   /**

@@ -55,7 +55,7 @@ public class VenueIndexView extends BaseView {
   public void createVenue() {
     PrimeFaces.current().dialog().openDynamic(
             "editor.xhtml",
-            Dialog.getDefaultOptions(600, 700),
+            Dialog.getDefaultOptions(600, 660),
             null);
   }
 

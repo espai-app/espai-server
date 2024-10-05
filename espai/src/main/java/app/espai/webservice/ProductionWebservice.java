@@ -10,6 +10,7 @@ import app.espai.filter.AttachmentFilter;
 import app.espai.filter.ProductionTagFilter;
 import app.espai.filter.SeasonProductionFilter;
 import app.espai.model.Attachment;
+import app.espai.model.Movie;
 import app.espai.model.Production;
 import app.espai.model.ProductionTag;
 import app.espai.model.Season;
@@ -21,6 +22,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -72,11 +75,17 @@ public class ProductionWebservice {
   @GET
   public List<ProductionDTO> list(
           @PathParam("seasonId") Long seasonId,
-          @QueryParam("type") String type) {
+          @QueryParam("type") String type,
+          @QueryParam("since") String sinceParam) {
 
     Season season = seasons.get(seasonId);
 
-    List<Production> productionList = events.listDistinctProductions(season);
+    LocalDate since = LocalDate.now();
+    if (sinceParam != null && sinceParam.matches("\\d{4}-\\d{2}-\\d{2}")) {
+      since = LocalDate.parse(sinceParam, DateTimeFormatter.ISO_DATE);
+    }
+
+    List<Production> productionList = events.listDistinctProductions(season, since);
 
     if (type != null && !type.isBlank()) {
       productionList = productionList.stream().filter(
@@ -97,6 +106,9 @@ public class ProductionWebservice {
     tagFilter.setProduction(production);
     List<ProductionTag> tagList = productionTags.list(tagFilter).getItems();
 
+    if (production instanceof Movie) {
+      return MovieDTO.of((Movie) production, attachmentList, tagList);
+    }
     return ProductionDTO.of(production, attachmentList, tagList);
   }
 
