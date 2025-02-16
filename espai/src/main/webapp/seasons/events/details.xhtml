@@ -50,6 +50,9 @@
             <h:outputText value=" #{eventDetailsView.event.hall.name} " />
             (<h:outputText value="#{eventDetailsView.event.hall.capacity}" /> Pers.)
           </dd>
+          
+          <dt><p:outputLabel value="Veranstaltungsreihe" /></dt>
+          <dd><h:outputText value="#{eventDetailsView.event.eventSerial.name}" /></dd>
 
           <dt><p:outputLabel value="Moderation" /></dt>
           <dd><h:outputText value="#{eventDetailsView.event.host != null ? eventDetailsView.event.host.surname.concat(', ').concat(eventDetailsView.event.host.givenName) : ''}" /></dd>

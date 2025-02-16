@@ -3,10 +3,12 @@ package app.espai.webservice;
 import app.espai.dao.SeasonVenues;
 import app.espai.dao.Seasons;
 import app.espai.dao.Venues;
+import app.espai.dto.SeasonVenueDTOConverter;
 import app.espai.filter.SeasonVenueFilter;
 import app.espai.model.Season;
 import app.espai.model.SeasonVenue;
 import app.espai.model.Venue;
+import app.espai.sdk.model.SeasonVenueDTO;
 import jakarta.ejb.EJB;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -51,7 +53,7 @@ public class VenueWebservice {
     }
 
     return Response
-            .ok(SeasonVenueDTO.of(seasonVenueList.getItems().get(0)), MediaType.APPLICATION_JSON)
+            .ok(SeasonVenueDTOConverter.of(seasonVenueList.getItems().get(0)), MediaType.APPLICATION_JSON)
             .build();
   }
 
@@ -68,7 +70,7 @@ public class VenueWebservice {
 
     List<SeasonVenueDTO> venueList = seasonVenueList
             .stream()
-            .map(v -> SeasonVenueDTO.of(v))
+            .map(v -> SeasonVenueDTOConverter.of(v))
             .toList();
 
     return venueList;

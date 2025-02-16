@@ -1,4 +1,7 @@
 target
 nbproject
+nbactions.xml
+\.idea
+jshell.history
 nb-configuration.xml
 *.zip

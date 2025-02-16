@@ -25,7 +25,7 @@ class Venue {
 
   public static function getImage($venueId) {
     $espai = Espai::getInstance();
-    return $espai->baseUrl . "webservice/attachments/first/original/venue/" . $venueId . "/Profilbild/";
+    return $espai->baseUrl . "webservice/attachments/first/fit/venue/" . $venueId . "/Profilbild/400/300";
   }
 
   public static function list() {

@@ -27,6 +27,9 @@
             <p:outputLabel for="venue" value="Spielstätte" />
             <p:selectOneMenu id="venue" value="#{reservationEditorView.selectedVenue}">
               <p:ajax listener="#{reservationEditorView.onVenueChanged}" update="event" />
+              <f:selectItem itemLabel="(bitte auswählen)" 
+                            itemValue="#{null}" 
+                            rendered="#{reservationEditorView.selectedVenue == null}"/>
               <f:selectItems value="#{reservationEditorView.venueList}"
                              var="v"
                              itemValue="#{v}"
@@ -40,6 +43,9 @@
             <p:outputLabel for="event" value="Veranstaltung" />
             <p:selectOneMenu id="event" value="#{reservationEditorView.reservation.event}">
               <p:ajax listener="#{reservationEditorView.onEventChanged}" update="@form" />
+              <f:selectItem itemLabel="(bitte auswählen)" 
+                            itemValue="#{null}" 
+                            rendered="#{reservationEditorView.reservation.event == null}" />
               <f:selectItems value="#{reservationEditorView.eventList}"
                              var="e"
                              itemLabel="#{reservationEditorView.formatDate(e.date, e.time)} - #{e.production.fullName} (#{reservationEditorView.seatsAvailable.get(e.id) != null ? reservationEditorView.seatsAvailable.get(e.id) : ''} Plätze frei)"
@@ -129,15 +135,31 @@
             <h:message for="ticketAmount" />
           </p:column>
 
+          <p:column headerText="Sitzplatzkategorie">
+            <p:selectOneMenu id="seatCategory" 
+                             value="#{t.seatCategory}" 
+                             converter="#{seatCategoryConverter}">
+              <f:selectItem itemLabel="#{t.seatCategory.name}" itemValue="#{t.seatCategory}" />
+              <f:selectItems value="#{reservationEditorView.seatCategoryList}"
+                             var="p"
+                             itemLabel="#{p.name}"
+                             itemValue="#{p}" />
+
+            </p:selectOneMenu>
+            <h:message for="seatCategory" />
+          </p:column>
+          
           <p:column headerText="Preiskategorie">
-            <p:selectOneMenu id="ticketCategory" value="#{t.category}">
+            <p:selectOneMenu id="priceCategory" 
+                             value="#{t.priceCategory}"
+                             converter="#{priceCategoryConverter}">
+              <f:selectItem itemLabel="#{t.priceCategory.name}" itemValue="#{t.priceCategory}" />
               <f:selectItems value="#{reservationEditorView.priceCategoryList}"
                              var="p"
                              itemLabel="#{p.name}"
                              itemValue="#{p}" />
-              <f:converter binding="#{priceCategoryConverter}" />
             </p:selectOneMenu>
-            <h:message for="ticketCategory" />
+            <h:message for="priceCategory" />
           </p:column>
 
           <p:column headerText="Preis" style="width: 100px;">

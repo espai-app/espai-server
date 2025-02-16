@@ -29,6 +29,13 @@
       <scope>provided</scope>
     </dependency>
     
+    <!-- espai SDK -->
+    <dependency>
+      <groupId>app.espai</groupId>
+      <artifactId>sdk</artifactId>
+      <version>1.0</version>
+    </dependency>
+        
     <!-- PrimeFaces -->
     <dependency>
       <groupId>org.primefaces</groupId>

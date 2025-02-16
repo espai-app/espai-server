@@ -59,7 +59,7 @@ $espaiInstance = Espai::getInstance();
 
 $espaiInstance->baseUrl ="https://skwmanager.schulkinowoche.de/";
 // $espaiInstance->baseUrl ="http://192.168.56.1:8080/espai/";
-$espaiInstance->seasonId = 2002;
+$espaiInstance->seasonId = 3001;
 
 class EspaiPlugin {
 

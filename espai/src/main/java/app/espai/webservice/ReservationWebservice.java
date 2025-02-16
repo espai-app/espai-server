@@ -1,5 +1,6 @@
 package app.espai.webservice;
 
+import app.espai.businesslogic.CapacityCalculator;
 import app.espai.dao.EventTicketPrices;
 import app.espai.dao.Events;
 import app.espai.dao.ReservationExtras;
@@ -13,7 +14,7 @@ import app.espai.model.Reservation;
 import app.espai.model.ReservationExtra;
 import app.espai.model.ReservationStatus;
 import app.espai.model.ReservationTicket;
-import app.espai.model.TicketStatistic;
+import app.espai.sdk.model.ReservationDTO;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -52,6 +53,46 @@ public class ReservationWebservice {
 
   @Inject
   private jakarta.enterprise.event.Event<ReservationChangedEvent> reservationChangedEvent;
+  
+  @Inject
+  private CapacityCalculator capacityCalculator;
+  
+  @POST
+  @Path("checkTicketAvailability")
+  public List<String> checkTicketAvailability(ReservationDTO reservation) {
+    List<String> errors = new LinkedList<>();
+
+    try {
+      List<Event> eventsToCheck = new LinkedList<>();
+
+      // check if event exists
+      Event event = events.get(reservation.getEvent());
+      eventsToCheck.add(event);
+      
+      List<ReservationTicket> requestedTickets = convert(reservation.getTickets());
+
+      if (reservation.getChildEvents() != null && !reservation.getChildEvents().isEmpty()) {
+        for (Long cid : reservation.getChildEvents()) {
+          eventsToCheck.add(events.get(cid));
+        }
+      }
+
+      for (Event e : eventsToCheck) {
+        if (!e.isReservable()) {
+          errors.add(String.format("Die Veranstaltung '%s' kann nicht gebucht werden.", 
+                  e.getProduction().getProduction().getTitle()));
+          continue;
+        }
+        
+        errors.addAll(capacityCalculator.checkCapacity(e, requestedTickets));
+      }
+
+    } catch (ResourceNotFoundException ex) {
+      errors.add("Technischer Fehler 741.");
+    }
+
+    return errors;
+  }
 
   @POST
   @Path("validate")
@@ -60,49 +101,28 @@ public class ReservationWebservice {
     List<String> errors = new LinkedList<>();
 
     try {
-      List<Event> capacityCheck = new LinkedList<>();
+      List<Event> eventsToCheck = new LinkedList<>();
 
       // check if event exists
       Event event = events.get(reservation.getEvent());
-      capacityCheck.add(event);
+      eventsToCheck.add(event);
+      
+      List<ReservationTicket> requestedTickets = convert(reservation.getTickets());
 
       if (reservation.getChildEvents() != null && !reservation.getChildEvents().isEmpty()) {
         for (Long cid : reservation.getChildEvents()) {
-          capacityCheck.add(events.get(cid));
+          eventsToCheck.add(events.get(cid));
         }
       }
 
-      // sum up tickets
-      int totalTickets = 0;
-      if (reservation.getTickets() != null) {
-        for (Integer t : reservation.getTickets().values()) {
-          totalTickets += t;
+      for (Event e : eventsToCheck) {
+        if (!e.isReservable()) {
+          errors.add(String.format("Die Veranstaltung '%s' kann nicht gebucht werden.", 
+                  e.getProduction().getProduction().getTitle()));
+          continue;
         }
-      }
-
-      if (totalTickets <= 0) {
-        errors.add("Die Anzahl der Tickets muss größer 0 sein.");
-      } else {
-
-        List<TicketStatistic> soldTickets = reservationSummaries.getTicketSales(capacityCheck);
-        Integer capacity = event.getTicketLimit() != null
-                ? event.getTicketLimit()
-                : event.getHall().getCapacity();
-
-        // check capacities
-        for (Event e : capacityCheck) {
-          if (e.getCapacity() - totalTickets < 0) {
-            errors.add("Die Ticketanzahl übersteigt die Saalkapazität.");
-            break;
-          }
-        }
-
-        for (TicketStatistic s : soldTickets) {
-          if (capacity - s.getTicketsSold() - totalTickets < 0) {
-            errors.add("Es gibt nicht genügend freie Plätze in dieser Veranstaltung.");
-            break;
-          }
-        }
+        
+        errors.addAll(capacityCalculator.checkCapacity(e, requestedTickets));
       }
 
     } catch (ResourceNotFoundException ex) {

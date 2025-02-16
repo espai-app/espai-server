@@ -5,9 +5,109 @@
   xmlns:f="http://xmlns.jcp.org/jsf/core"
   xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
   xmlns:p="http://primefaces.org/ui"
-  template="/WEB-INF/layout/seasons.xhtml"
+  template="/WEB-INF/layout/seasonSettings.xhtml"
   xmlns:h="http://xmlns.jcp.org/jsf/html">
 
   <ui:param name="title" value="Einstellungen zur Spielzeit" />
+
+  <ui:define name="tab-content">
+    <h:form>
+      
+      <h2>Über diese Spielzeit</h2>
+      <div class="ui-fluid col-12 md:col-6">
+        <div class="field"><p:outputLabel for="name" value="Name" />
+
+          <p:inputText id="name" value="#{seasonSettingsView.currentSeason.name}" />
+          <p:message for="name" />
+        </div>
+
+        <div class="grid">
+
+          <div class="field col-6">
+            <p:outputLabel for="start" value="Start" />
+
+            <p:inputMask id="start" value="#{seasonSettingsView.currentSeason.start}" mask="99.99.9999">
+              <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+            </p:inputMask>
+            <p:message for="start" />
+          </div>
+
+          <div class="field col-6">
+            <p:outputLabel for="end" value="Ende" />
+
+            <p:inputMask id="end" value="#{seasonSettingsView.currentSeason.end}" mask="99.99.9999">
+              <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+            </p:inputMask>
+            <p:message for="end" />
+          </div>
+        </div>
+      </div>
+
+      <p:commandButton type="submit" 
+                       value="speichern" 
+                       action="#{seasonSettingsView.save}"
+                       update="@form"/>
+      
+      <h2>Preisgestaltung</h2>
+      
+      <p>Sie können im folgenden einheitliche Preise für alle Sitzplatzkategorien festlegen. 
+        Alternativ können Sie die Eintrittspreise direkt an der Veranstaltung festlegen.</p>
+      
+      <p:commandButton value="Preiskategorie hinzufügen"
+                       icon="pi pi-plus"
+                       action="#{seasonSettingsView.addPriceTemplate}">
+        <p:ajax event="dialogReturn" update="@form" listener="#{seasonSettingsView.init()}" />
+      </p:commandButton>
+      
+      <p:commandButton value="für alle setzen"
+                       icon="pi pi-caret-right"
+                       styleClass="ui-button-outlined ml-2"
+                       action="#{seasonSettingsView.applyPriceTemplates}"
+                       update="@form">
+        
+        <p:confirm header="Bestätigung nötig" 
+                   message="Möchten Sie die Preise wirklich für alle Veranstaltungen setzen? Bestehende Preise werden dadurch ersetzt." />
+                         
+      </p:commandButton>
+      
+      <p:dataTable value="#{seasonSettingsView.priceTemplateList}" 
+                   var="price"
+                   styleClass="mt-4">
+        <p:column headerText="Preiskategorie">
+          <h:outputText value="#{price.priceCategory.name}" /> 
+        </p:column>
+        
+        <p:column headerText="Preis">
+          <h:outputText value="#{price.price.amount}">
+            <f:convertNumber locale="de" minFractionDigits="2" maxFractionDigits="2" />
+          </h:outputText> 
+        </p:column>
+        
+        <p:column style="width: 5rem">
+          <p:commandButton title="Preisvorlage bearbeiten"
+                           icon="pi pi-pencil"
+                           styleClass="ui-button-flat ui-rounded-button"
+                           action="#{seasonSettingsView.editPriceTemplate(price)}"
+                           update="@form" />
+          
+          <p:commandButton title="Preisvorlage löschen"
+                           icon="pi pi-trash"
+                           styleClass="ui-button-flat ui-rounded-button ui-button-danger"
+                           action="#{seasonSettingsView.deletePriceTemplate(price)}"
+                           update="@form">
+            <p:confirm header="Löschen bestätigen" 
+                   message="Möchten Sie diese Preisvorlage wirklich löschen?" />
+          </p:commandButton>
+        </p:column>
+      </p:dataTable>
+      
+      <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="650">
+        <p:commandButton value="abbrechen" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+        <p:commandButton value="bestätigen" type="button" icon="pi pi-check" styleClass="ui-confirmdialog-yes ui-button-danger" />
+      </p:confirmDialog>
+      
+      <p:growl globalOnly="true" />
+    </h:form>
+  </ui:define>
 
 </ui:composition>

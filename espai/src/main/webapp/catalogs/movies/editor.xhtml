@@ -116,43 +116,7 @@
             </div>
           </p:card>
 
-          <p:card styleClass="mt-3">
-            <f:facet name="title">
-              Konditionen
-            </f:facet>
-            <div class="field">
-              <p:outputLabel for="agency" value="Verleih" />
-
-              <p:selectOneMenu id="agency" value="#{movieEditorView.movie.agency}">
-                <f:selectItems value="#{movieEditorView.agencyList}" var="agency" itemLabel="#{agency.name}" itemValue="#{agency}">
-                </f:selectItems>
-              </p:selectOneMenu>
-              <h:message for="agency" />
-            </div>
-
-            <div class="grid">
-              <div class="col-12 sm:col-4 field">
-                <p:outputLabel for="fixedPrice" value="Festpreis" styleClass="w-full"/>
-
-                <p:inputNumber id="fixedPrice" value="#{movieEditorView.movie.fixedPrice.amount}" styleClass="w-4 sm:w-8" minValue="0" decimalPlaces="2" modifyValueOnWheel="false" symbol=" #{movieEditorView.movie.fixedPrice.currency}" symbolPosition="s" />
-                <h:message for="fixedPrice" />
-              </div>
-
-              <div class="col-12 sm:col-4 field">
-                <p:outputLabel for="ticketShare" value="Prozentsatz" styleClass="w-full" />
-
-                <p:inputNumber id="ticketShare" value="#{movieEditorView.movie.ticketShare}" styleClass="w-4 sm:w-8"  minValue="0" maxValue="100" decimalPlaces="2" modifyValueOnWheel="false" symbol=" %" symbolPosition="s"/>
-                <h:message for="ticketShare" />
-              </div>
-
-              <div class="col-12 sm:col-4 field">
-                <p:outputLabel for="additionalCost" value="weitere Kosten" styleClass="w-full" />
-
-                <p:inputNumber id="additionalCost" value="#{movieEditorView.movie.additionalCost.amount}" styleClass="w-4 sm:w-8" minValue="0" decimalPlaces="2" modifyValueOnWheel="false" symbol=" #{movieEditorView.movie.additionalCost.currency}" symbolPosition="s"/>
-                <h:message for="additionalCost" />
-              </div>
-            </div>
-          </p:card>
+          
         </div>
       </div>
 

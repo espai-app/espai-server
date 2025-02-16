@@ -17,34 +17,35 @@ if (isset($_POST['tickets'])) {
   $reservation->tickets = $_POST['tickets'];
 
   // validate ticket amounts
-  $total = 0;
-  foreach ($_POST['tickets'] as $t) {
-    $total += $t;
-  }
-
-  if ($total <= 0) {
-    $errors['tickets'] = "Bitte reservieren Sie min. ein Ticket.";
-  }
-
-  if ($total > $event->availableTickets) {
-    $errors['tickets'] = "Die gewünschte Anzahl an Tickets übersteigt die Anzahl der verfügbaren Sitzplätze. Sprechen Sie uns gern an. Manchmal ist eine zusätzliche Vorstellung oder ein Wechsel in einen größeren Saal möglich.";
-  }
-
-  if (!empty($_POST['childEvents'])) {
-    $reservation->childEvents = $_POST['childEvents'];
-
-    foreach ($_POST['childEvents'] as $childId) {
-      foreach ($event->childEvents as $child) {
-        if ($child->id == $childId && $child->availableTickets < $total && !$child->mandatory) {
-
-          $errors['childEvents'] = "Die gewünschte Teilnehmeranzahl übersteigt maximale Kapazität des Filmgespräches.";
-          if ($total <= $event->availableTickets) {
-            $errors['childEvents'] .= " Wenn Sie mögen, können Sie den Film dennoch schauen. Sie müssen aber nach der Vorführung den Saal verlassen.";
-          }
-        }
-      }
-    }
-  }
+  $errors = \app\espai\wordpress\Reservation::checkTicketAvailability($reservation);
+//  $total = 0;
+//  foreach ($_POST['tickets'] as $t) {
+//    $total += $t;
+//  }
+//
+//  if ($total <= 0) {
+//    $errors['tickets'] = "Bitte reservieren Sie min. ein Ticket.";
+//  }
+//
+//  if ($total > $event->availableTickets) {
+//    $errors['tickets'] = "Die gewünschte Anzahl an Tickets übersteigt die Anzahl der verfügbaren Sitzplätze. Sprechen Sie uns gern an. Manchmal ist eine zusätzliche Vorstellung oder ein Wechsel in einen größeren Saal möglich.";
+//  }
+//
+//  if (!empty($_POST['childEvents'])) {
+//    $reservation->childEvents = $_POST['childEvents'];
+//
+//    foreach ($_POST['childEvents'] as $childId) {
+//      foreach ($event->childEvents as $child) {
+//        if ($child->id == $childId && $child->availableTickets < $total && !$child->mandatory) {
+//
+//          $errors['childEvents'] = "Die gewünschte Teilnehmeranzahl übersteigt maximale Kapazität des Filmgespräches.";
+//          if ($total <= $event->availableTickets) {
+//            $errors['childEvents'] .= " Wenn Sie mögen, können Sie den Film dennoch schauen. Sie müssen aber nach der Vorführung den Saal verlassen.";
+//          }
+//        }
+//      }
+//    }
+//  }
 
   // save to session
   $_SESSION['reservation'] = $reservation;
@@ -82,12 +83,18 @@ if (isset($_POST['tickets'])) {
 
 <form method="POST" class="espai-form">
 
-  <h3>Tickets für Ihre Kita-/Hortgruppe reservieren</h3>
+  <h3>Tickets reservieren</h3>
 
-  <p>Verfügbare Plätze: <?= $event->availableTickets ?></p>
+  <p>Verfügbare Plätze:
+  <?php foreach ($event->availableTickets as $key => $value) { ?>
+    <br /><?= $key ?>: <?= $value ?>
+  <?php } ?>
+  </p>
 
-  <?php if (isset($errors['tickets'])) { ?>
-    <p class="validation-error"><?= $errors['tickets'] ?></p>
+  <?php if (isset($errors)) { ?>
+    <?php foreach ($errors as $error) { ?>
+      <p class="validation-error"><?= $error ?></p>
+    <?php } ?>
   <?php } ?>
 
   <table>
@@ -121,7 +128,7 @@ if (isset($_POST['tickets'])) {
       <p class="validation-error"><?= $errors['childEvents'] ?></p>
     <?php } ?>
 
-    <ul>
+    <ul class="espai-event-child-events">
       <?php foreach ($event->childEvents as $child) { ?>
       <?php if ($child->availableTickets > 0 || $child->mandatory) { ?>
       <li>
@@ -129,7 +136,11 @@ if (isset($_POST['tickets'])) {
         <h3><?= $child->title ?></h3>
         <div><?= $child->production->description ?></div>
         <p>Dauer: <?= $child->production->durationInMinutes ?> min.</p>
-        <p>Freie Plätze: <?= $child->availableTickets ?>
+        <p>Verfügbare Plätze:
+        <?php foreach ($child->availableTickets as $key => $value) { ?>
+          <br /><?= $key ?>: <?= $value ?>
+        <?php } ?>
+        </p>
         <?php if ($child->mandatory) { ?><p class="hint-danger">Dieses Zusatzangebot ist fester Bestandteil der Veranstaltung und kann nicht abgewählt werden.</p><?php } ?>
       </li>
       <?php } ?>

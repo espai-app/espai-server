@@ -7,7 +7,7 @@
   xmlns:p="http://primefaces.org/ui"
   template="/WEB-INF/layout/settings.xhtml"
   xmlns:h="http://xmlns.jcp.org/jsf/html">
-  
+
   <ui:param name="title" value="Spielzeiten verwalten" />
 
   <ui:define name="content">
@@ -18,23 +18,42 @@
 
       <p:dataTable value="#{seasonIndexView.seasonList}" var="s" styleClass="mt-3">
         <p:column headerText="Name">
-          <p:link value="#{s.name}" href="details.xhtml">
-            <f:param name="seasonId" value="#{s.id}" />
-          </p:link>
+          <h:outputText value="#{s.name}" />
         </p:column>
-        
+
         <p:column headerText="von">
           <h:outputText value="#{s.start}">
             <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
           </h:outputText>
         </p:column>
-        
+
         <p:column headerText="bis">
           <h:outputText value="#{s.end}">
             <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
           </h:outputText>
         </p:column>
+
+        <p:column>
+          <p:commandButton value="wiederherstellen" 
+                           icon="pi pi-lock-open" 
+                           action="#{seasonDetailsView.toggleArchive}" 
+                           rendered="#{seasonDetailsView.season.archived}" 
+                           styleClass="mr-2 ui-button-outlined ui-button-secondary" />
+          <p:commandButton value="Spielzeit löschen" 
+                           icon="pi pi-trash" 
+                           action="#{seasonDetailsView.deleteSeason}" 
+                           styleClass="ui-button-outlined ui-button-secondary">
+            <p:confirm header="Spielzeit löschen" 
+                       message="Möchten Sie die Spielzeit wirklich löschen? Beim Löschen gehen auch alle programmierten Veranstaltungen und reservierungen verloren." 
+                       icon="pi pi-trash"/>
+          </p:commandButton>
+        </p:column>
       </p:dataTable>
+      
+      <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="450">
+        <p:commandButton value="Nein" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+        <p:commandButton value="Ja" type="button" styleClass="ui-confirmdialog-yes" />
+      </p:confirmDialog>
 
       <p:dialog header="Neue Spielzeit" widgetVar="createDialog" showEffect="fade" modal="true">
         <dl>

@@ -1,0 +1,114 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/seasonSettings.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+  <ui:param name="title" value="Einstellungen zur Spielzeit" />
+  <ui:param name="activeTab" value="1" />
+
+  <ui:define name="tab-content">
+    <h:form>
+
+      <h2>E-Mail-Konto</h2>
+      <p>Wählen Sie ein E-Mail-Konto, über das die E-Mails gesendet werden sollen. Weitere E-Mail-Konten können Sie <a href="../../settings/mailAccounts/index.xhtml">in den Einstellungen hinzufügen</a>.</p>
+
+      <div class="ui-fluid">
+        <div class="field col-15 md:col-4">
+          <p:outputLabel for="mailAccount" value="Mail-Konto" />
+          <p:selectOneMenu id="mailAccount" value="#{seasonSettingsView.currentSeason.mailAccount}">
+            <f:selectItem itemLabel="(bitte auswählen)" itemValue="#{null}" />
+            <f:selectItems value="#{seasonSettingsView.mailAccountList}"
+                           var="account"
+                           itemLabel="#{account.name}"
+                           itemValue="#{account}" />
+          </p:selectOneMenu>
+          <h:message for="mailAccount" />
+        </div>
+      </div>
+
+      <p:commandButton value="speichern"
+                       icon="pi pi-save"
+                       action="#{seasonSettingsView.save}" 
+                       update="@form"/>
+
+      <h2>E-Mail-Vorlagen</h2>
+
+      <p:commandButton value="Vorlage hinzufügen"
+                       icon="pi pi-plus" 
+                       onclick="PF('addTemplateDialog').show()"
+                       rendered="#{not mailTemplateIndexView.selectableGlobalTemplates.isEmpty()}"/>
+
+      <p:commandButton value="alle Vorlagen hinzufügen"
+                       icon="pi pi-plus"
+                       styleClass="ui-button-outlined ml-2"
+                       action="#{mailTemplateIndexView.addAllTemplates}"
+                       rendered="#{not mailTemplateIndexView.selectableGlobalTemplates.isEmpty()}"
+                       update="@parent"/>
+
+      <p>
+        Wenn Sie die Inhalte der automatisch versendeten E-Mails an die Spielzeit anpassen möchten, 
+        können Sie hier einzelne oder alle Vorlagen hinzufügen. Andernfalls wird die 
+        <a href="../../settings/mailTemplates/index.xhtml">Standard-Vorlage</a> verwendet.
+      </p>
+
+      <p:dataTable value="#{mailTemplateIndexView.mailTemplateList}"
+                   var="t"
+                   styleClass="mt-4">
+
+        <p:column headerText="Name" styleClass="#{t.season == null}">
+          <p:link href="../../settings/mailTemplates/editor.xhtml" 
+                  value="#{t.name}" 
+                  styleClass="block">
+            <f:param name="templateId" value="#{t.id}" />
+          </p:link>
+          <h:outputText value="#{t.description}" />
+        </p:column>
+
+        <p:column headerText="Code" style="width: 20%;">
+          <h:outputText value="#{t.shortCode}" />
+        </p:column>
+
+        <p:column style="width: 10%">
+
+        </p:column>
+
+      </p:dataTable>
+
+      <p:dialog widgetVar="addTemplateDialog" 
+                modal="true"
+                header="Vorlage hinzufügen"
+                rendered="#{not mailTemplateIndexView.selectableGlobalTemplates.isEmpty()}" >
+
+        <div class="ui-fluid">
+          <div class="field">
+            <p:outputLabel for="globalTemplates" value="Globale E-Mail-Vorlagen" />
+            <p:selectOneMenu id="globalTemplates" 
+                             value="#{mailTemplateIndexView.selectedGlobalTemplate}"
+                             converter="#{mailTemplateConverter}">
+              <f:selectItems value="#{mailTemplateIndexView.selectableGlobalTemplates}"
+                             var="g"
+                             itemLabel="#{g.name}"
+                             itemValue="#{g}" />
+            </p:selectOneMenu>
+            <p:message for="globalTemplates" />
+          </div>
+        </div>
+
+        <div class="text-right">
+          <p:commandButton value="hinzufügen"
+                           icon="pi pi-plus"
+                           action="#{mailTemplateIndexView.addTemplate}" />
+        </div>
+
+      </p:dialog>
+      
+      <p:growl globalOnly="true" />
+    </h:form>
+  </ui:define>
+
+</ui:composition>

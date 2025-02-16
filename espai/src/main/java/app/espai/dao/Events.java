@@ -10,8 +10,6 @@ import app.espai.model.Event;
 import app.espai.model.Production;
 import app.espai.model.Reservation;
 import app.espai.model.Season;
-import app.espai.model.Venue;
-import app.espai.model.VenueEventStatistic;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Named;
@@ -19,7 +17,6 @@ import jakarta.persistence.TypedQuery;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -65,26 +62,6 @@ public class Events extends AbstractEvents {
     productionList.sort(Productions.DEFAULT_ORDER);
 
     return productionList;
-  }
-
-  public List<VenueEventStatistic> getNumberOfEvents(List<Venue> venues, Season season) {
-
-    List<VenueEventStatistic> result = new LinkedList<>();
-
-    for (Venue v : venues) {
-      TypedQuery<Long> query = em.createQuery(
-              "SELECT COUNT(e) "
-              + "FROM Event e "
-              + "WHERE e.hall.venue = :venue AND e.season = :season",
-              Long.class);
-      query.setParameter("venue", v);
-      query.setParameter("season", season);
-
-      Long count = query.getSingleResult();
-      result.add(new VenueEventStatistic(v.getId(), v.getName(), v.getCity(), count));
-    }
-
-    return result;
   }
 
   public void delete(Event event) {

@@ -10,12 +10,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.microprofile.config.ConfigProvider;
-import rocks.xprs.util.Streams;
 
 /**
  *
@@ -24,6 +28,8 @@ import rocks.xprs.util.Streams;
 @Named
 @Stateless
 public class MediaManager {
+
+  private static final String DIGEST_ALGORITHM = "SHA1";
 
   private File dataFolder;
 
@@ -99,9 +105,19 @@ public class MediaManager {
               parentFolder.getAbsolutePath()));
     }
 
-    try (inputStream;
-            FileOutputStream outputStream = new FileOutputStream(targetFile)) {
-      Streams.copy(inputStream, outputStream);
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA1");
+
+      try (DigestInputStream dis = new DigestInputStream(inputStream, md);
+              FileOutputStream outputStream = new FileOutputStream(targetFile)) {
+
+        dis.transferTo(outputStream);
+      }
+
+      String fx = "%0" + (md.getDigestLength()*2) + "x";
+      attachment.setChecksum(String.format(fx, new BigInteger(1, md.digest())));
+    } catch (NoSuchAlgorithmException ex) {
+      throw new IOException("Could not create checksum for upload.", ex);
     }
   }
 
@@ -146,6 +162,17 @@ public class MediaManager {
     }
 
     return result;
+  }
+
+  public String createSha1Checksum(File file) throws IOException {
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA1");
+      md.digest(Files.readAllBytes(file.toPath()));
+      String fx = "%0" + (md.getDigestLength()*2) + "x";
+      return String.format(fx, new BigInteger(1, md.digest()));
+    } catch (NoSuchAlgorithmException ex) {
+      throw new IOException("Could not create checksum for upload.", ex);
+    }
   }
 
   public class Derivative {

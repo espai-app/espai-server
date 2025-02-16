@@ -43,6 +43,10 @@ public class NotificationMailListener {
   private ReservationMailManager mailManager;
 
   public void notifyCustomer(@ObservesAsync ReservationChangedEvent event) {
+    if (event.getReservation().getEmail() == null || event.getReservation().getEmail().isBlank()) {
+      return;
+    }
+    
     if (event.getOldStatus() == ReservationStatus.UNSET
             && event.getNewStatus() == ReservationStatus.NEW) {
 

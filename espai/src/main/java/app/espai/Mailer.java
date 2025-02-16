@@ -26,7 +26,7 @@ public class Mailer {
 
     Properties sessionProperties = new Properties();
     String smtpProtocol = mailAccount.getSmtpTransportSecurity() == MailTransportSecurity.SSL
-            ? "smpts" : "smtp";
+            ? "smtps" : "smtp";
     String imapProtocol = mailAccount.getSmtpTransportSecurity() == MailTransportSecurity.SSL
             ? "imaps" : "imap";
 
@@ -34,7 +34,7 @@ public class Mailer {
     sessionProperties.put("mail." + smtpProtocol + ".host", mailAccount.getSmtpHost());
     sessionProperties.put("mail." + smtpProtocol + ".port", String.valueOf(mailAccount.getSmtpPort()));
     if (mailAccount.getSmtpUser() != null && !mailAccount.getSmtpUser().isBlank()) {
-        sessionProperties.put("mail." + smtpProtocol + ".user", mailAccount.getSmtpUser());
+        sessionProperties.put("mail." + smtpProtocol + ".username", mailAccount.getSmtpUser());
         sessionProperties.put("mail." + smtpProtocol + ".password", mailAccount.getSmtpPassword());
         sessionProperties.put("mail." + smtpProtocol + ".auth", "true");
     }
@@ -44,15 +44,15 @@ public class Mailer {
     }
 
     sessionProperties.put("mail.store.protocol", imapProtocol);
-    sessionProperties.put("mail." + imapProtocol + ".host", mailAccount.getSmtpHost());
-    sessionProperties.put("mail." + imapProtocol + ".port", String.valueOf(mailAccount.getSmtpPort()));
-    if (mailAccount.getSmtpUser() != null && !mailAccount.getSmtpUser().isBlank()) {
-      sessionProperties.put("mail." + imapProtocol + ".user", mailAccount.getSmtpUser());
-      sessionProperties.put("mail." + imapProtocol + ".password", mailAccount.getSmtpPassword());
+    sessionProperties.put("mail." + imapProtocol + ".host", mailAccount.getImapHost());
+    sessionProperties.put("mail." + imapProtocol + ".port", String.valueOf(mailAccount.getImapPort()));
+    if (mailAccount.getImapUser()!= null && !mailAccount.getImapUser().isBlank()) {
+      sessionProperties.put("mail." + imapProtocol + ".username", mailAccount.getImapUser());
+      sessionProperties.put("mail." + imapProtocol + ".password", mailAccount.getImapPassword());
       sessionProperties.put("mail." + imapProtocol + ".auth", "true");
     }
     if (mailAccount.getImapTransportSecurity() == MailTransportSecurity.SSL) {
-      sessionProperties.put("mail." + smtpProtocol + ".ssl.enable", "true");
+      sessionProperties.put("mail." + imapProtocol + ".ssl.enable", "true");
     }
 
     mailSession = Session.getInstance(sessionProperties);

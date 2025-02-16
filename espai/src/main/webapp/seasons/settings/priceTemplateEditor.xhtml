@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/dialog.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+  <ui:define name="content">
+    <h:form>
+      <input type="hidden" name="priceTemplateId" value="#{param.priceTemplateId}" />
+      <input type="hidden" name="seasonId" value="#{param.seasonId}" />
+      
+      <div class="ui-fluid">
+        <div class="field">
+          <p:outputLabel for="priceCategory" value="Preiskategorie" />
+          <p:selectOneMenu id="priceCategory"
+                           value="#{seasonPriceTemplateEditorView.priceTemplate.priceCategory}">
+            <f:selectItems value="#{seasonPriceTemplateEditorView.priceCategoryList}"
+                           var="p"
+                           itemLabel="#{p.name}"
+                           itemValue="#{p}" />
+            <p:message for="priceCategory" />
+          </p:selectOneMenu>
+        </div>
+        
+        <div class="field">
+          <p:outputLabel for="price" value="Preis" />
+          <p:inputNumber id="price"
+                         value="#{seasonPriceTemplateEditorView.priceTemplate.price.amount}"
+                         decimalPlaces="2"
+                         decimalSeparator=","
+                         symbol=" #{seasonPriceTemplateEditorView.priceTemplate.price.currency}"
+                         symbolPosition="s" />
+          <h:message for="price" />
+        </div>
+      </div>
+
+
+      <div class="dialog-footer">
+        <p:commandButton value="speichern"
+                         icon="pi pi-save"
+                         action="#{seasonPriceTemplateEditorView.save}" />
+      </div>
+    </h:form>
+  </ui:define>
+</ui:composition>

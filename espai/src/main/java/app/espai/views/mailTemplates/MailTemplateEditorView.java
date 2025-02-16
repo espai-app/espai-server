@@ -1,29 +1,24 @@
 package app.espai.views.mailTemplates;
 
-import app.espai.dao.MailAccounts;
 import app.espai.dao.MailTemplates;
-import app.espai.model.MailAccount;
 import app.espai.model.MailTemplate;
 import app.espai.views.SeasonContext;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.EJB;
-import jakarta.ejb.Stateful;
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
-import java.util.List;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author rborowski
  */
 @Named
-@Stateful
 @RequestScoped
-@RolesAllowed({"MANAGER"})
 public class MailTemplateEditorView {
 
   @EJB
@@ -32,12 +27,7 @@ public class MailTemplateEditorView {
   @EJB
   private MailTemplates mailTemplates;
 
-  @EJB
-  private MailAccounts mailAccounts;
-
   private MailTemplate mailTemplate;
-
-  private List<? extends MailAccount> mailAccountList;
 
   @PostConstruct
   public void init() {
@@ -50,14 +40,31 @@ public class MailTemplateEditorView {
     } else {
       mailTemplate = mailTemplates.get(Long.parseLong(templateIdParam));
     }
-
-    mailAccountList = mailAccounts.list().getItems();
   }
 
   public void save() {
     mailTemplates.save(mailTemplate);
-    FacesContext.getCurrentInstance()
-            .addMessage(null, new FacesMessage("E-Mail-Vorlage gespeichert."));
+
+    try {
+      FacesContext context = FacesContext.getCurrentInstance();
+      ExternalContext econtext = context.getExternalContext();
+
+      if (mailTemplate.getSeason() != null) {
+        econtext.redirect(String.format(
+                "../../seasons/settings/mail.xhtml?seasonId=%d", 
+                mailTemplate.getSeason().getId()));
+      } else {
+        econtext.redirect("index.xhtml");
+      }
+      
+      context.responseComplete();
+    } catch (IOException ex) {
+      Logger.getLogger(MailTemplateEditorView.class.getName()).log(
+              Level.SEVERE, 
+              "Could not redirect.", 
+              ex);
+    }
+
   }
 
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
@@ -73,20 +80,6 @@ public class MailTemplateEditorView {
    */
   public void setMailTemplate(MailTemplate mailTemplate) {
     this.mailTemplate = mailTemplate;
-  }
-
-  /**
-   * @return the mailAccountList
-   */
-  public List<? extends MailAccount> getMailAccountList() {
-    return mailAccountList;
-  }
-
-  /**
-   * @param mailAccountList the mailAccountList to set
-   */
-  public void setMailAccountList(List<? extends MailAccount> mailAccountList) {
-    this.mailAccountList = mailAccountList;
   }
   //</editor-fold>
 

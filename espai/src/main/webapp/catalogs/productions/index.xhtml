@@ -18,22 +18,22 @@
       <div>
         <p:linkButton href="../movies/editor.xhtml" value="neuer Film" />
       </div>
-      
+
       <p:dataTable value="#{productionIndexView.productionList}" var="p" styleClass="mt-3">
         <p:column headerText="Titel">
           <p:link value="#{p.title}" href="../movies/editor.xhtml">
             <f:param name="productionId" value="#{p.id}" />
           </p:link>
         </p:column>
-        
-        <p:column headerText="Agentur/Verleih">
+
+        <p:column headerText="Verleih">
           <p:link value="#{p.agency.name}" href="../movies/editor.xhtml">
             <f:param name="productionId" value="#{p.id}" />
           </p:link>
         </p:column>
-        
-        <p:column headerText="verfügbar">
-          <p:link value="#{p.available}" href="../movies/editor.xhtml">
+
+        <p:column headerText="Jahr" style="width: 4rem">
+          <p:link value="#{p.productionYear}" href="../movies/editor.xhtml">
             <f:param name="productionId" value="#{p.id}" />
           </p:link>
         </p:column>

@@ -8,17 +8,21 @@ import app.espai.dao.ReservationSummaries;
 import app.espai.dao.ReservationTickets;
 import app.espai.dao.Reservations;
 import app.espai.dao.SeasonVenues;
+import app.espai.dao.SeatCategories;
 import app.espai.filter.EventFilter;
 import app.espai.filter.HallFilter;
 import app.espai.filter.ReservationExtraFilter;
 import app.espai.filter.ReservationFilter;
 import app.espai.filter.ReservationTicketFilter;
+import app.espai.filter.SeatCategoryFilter;
 import app.espai.model.Event;
 import app.espai.model.Hall;
 import app.espai.model.PriceCategory;
 import app.espai.model.Reservation;
 import app.espai.model.ReservationExtra;
+import app.espai.model.ReservationStatus;
 import app.espai.model.ReservationTicket;
+import app.espai.model.SeatCategory;
 import app.espai.model.TicketStatistic;
 import app.espai.model.Venue;
 import app.espai.views.BaseView;
@@ -31,6 +35,7 @@ import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -40,6 +45,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import rocks.xprs.types.Monetary;
 
 /**
  *
@@ -71,6 +77,9 @@ public class ReservationEditorView extends BaseView implements Serializable {
   private Halls halls;
 
   @EJB
+  private SeatCategories seatCategories;
+
+  @EJB
   private PriceCategories priceCategories;
 
   @EJB
@@ -85,6 +94,7 @@ public class ReservationEditorView extends BaseView implements Serializable {
   private List<Event> eventList;
   private List<Event> childEventList;
   private List<? extends PriceCategory> priceCategoryList;
+  private List<SeatCategory> seatCategoryList;
 
   private Map<Long, Integer> seatsAvailable = new HashMap<>();
   private Venue selectedVenue;
@@ -102,6 +112,8 @@ public class ReservationEditorView extends BaseView implements Serializable {
     // open or create reservation?
     if (reservationIdParam == null || !reservationIdParam.matches("\\d+")) {
       reservation = new Reservation();
+      reservation.setStatus(ReservationStatus.NEW);
+      
       ticketList = new LinkedList<>();
       childReservationList = new LinkedList<>();
       selectedChildEventList = new LinkedList<>();
@@ -239,13 +251,24 @@ public class ReservationEditorView extends BaseView implements Serializable {
   }
 
   public void onEventChanged() {
-    EventFilter childFilter = new EventFilter();
-    childFilter.setParentEvent(reservation.getEvent());
-    childEventList = events.list(childFilter).getItems();
+    if (reservation.getEvent() != null) {
+      EventFilter childFilter = new EventFilter();
+      childFilter.setParentEvent(reservation.getEvent());
+      childEventList = events.list(childFilter).getItems();
+
+      SeatCategoryFilter seatCategoryFilter = new SeatCategoryFilter();
+      seatCategoryFilter.setHall(reservation.getEvent().getHall());
+      seatCategoryList = seatCategories.list(seatCategoryFilter).getItems();
+    } else {
+      childEventList = new LinkedList<>();
+      seatCategoryList = new LinkedList<>();
+    }
   }
 
   public void addTickets() {
-    ticketList.add(new ReservationTicket());
+    ReservationTicket ticket = new ReservationTicket();
+    ticket.setPrice(new Monetary(BigDecimal.ZERO, "EUR"));
+    ticketList.add(ticket);
 
   }
 
@@ -408,6 +431,20 @@ public class ReservationEditorView extends BaseView implements Serializable {
    */
   public void setPriceCategoryList(List<? extends PriceCategory> priceCategoryList) {
     this.priceCategoryList = priceCategoryList;
+  }
+
+  /**
+   * @return the seatCategoryList
+   */
+  public List<SeatCategory> getSeatCategoryList() {
+    return seatCategoryList;
+  }
+
+  /**
+   * @param seatCategoryList the seatCategoryList to set
+   */
+  public void setSeatCategoryList(List<SeatCategory> seatCategoryList) {
+    this.seatCategoryList = seatCategoryList;
   }
 
   /**

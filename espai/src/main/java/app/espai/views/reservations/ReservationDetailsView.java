@@ -23,7 +23,9 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.primefaces.PrimeFaces;
 import rocks.xprs.mail.Mail;
 import rocks.xprs.runtime.exceptions.InvalidDataException;
@@ -106,10 +108,14 @@ public class ReservationDetailsView extends BaseView {
 
     if (mail != null) {
       FacesContext.getCurrentInstance().getExternalContext().getFlash().put("mail", mail);
+      Map<String, List<String>> params = new HashMap<>();
+      
+      params.put("seasonId", List.of(String.valueOf(reservation.getEvent().getSeason().getId())));
+      
       PrimeFaces.current().dialog().openDynamic(
               "/mail/editor",
               Dialog.getDefaultOptions(800, 800),
-              null);
+              params);
     }
   }
 

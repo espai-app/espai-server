@@ -37,6 +37,10 @@ public class AttachmentsWebservice {
   public Response getAttachment(@PathParam("attachmentId") long attachmentId) throws IOException {
 
     Attachment attachment = attachments.get(attachmentId);
+    
+    if (attachment == null) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
 
     switch (attachment.getMediaType()) {
       case URL:
@@ -59,6 +63,10 @@ public class AttachmentsWebservice {
           @PathParam("category") String category) throws IOException {
 
     Attachment attachment = getFirstAttachment(entityType, entityId, category);
+    
+    if (attachment == null) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
 
     switch (attachment.getMediaType()) {
       case URL:
@@ -81,9 +89,13 @@ public class AttachmentsWebservice {
           @PathParam("width") int width,
           @PathParam("height") int height)
           throws IOException {
-
+    
     Attachment attachment = getFirstAttachment(entityType, entityId, category);
 
+    if (attachment == null) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
+    
     switch (attachment.getMediaType()) {
       case URL:
         return Response.seeOther(URI.create(attachment.getLocation())).build();
@@ -106,8 +118,12 @@ public class AttachmentsWebservice {
           @PathParam("width") int width,
           @PathParam("height") int height)
           throws IOException {
-
+    
     Attachment attachment = getFirstAttachment(entityType, entityId, category);
+    
+    if (attachment == null) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
 
     switch (attachment.getMediaType()) {
       case URL:

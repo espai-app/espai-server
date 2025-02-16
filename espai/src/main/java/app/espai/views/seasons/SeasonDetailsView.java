@@ -5,12 +5,9 @@ import app.espai.dao.SeasonProductions;
 import app.espai.dao.SeasonVenues;
 import app.espai.dao.Seasons;
 import app.espai.filter.SeasonProductionFilter;
-import app.espai.filter.SeasonVenueFilter;
 import app.espai.model.Season;
 import app.espai.model.SeasonProduction;
-import app.espai.model.SeasonVenue;
 import app.espai.views.BaseView;
-import app.espai.views.Dialog;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
@@ -50,9 +47,7 @@ public class SeasonDetailsView extends BaseView implements Serializable {
 
   private Season season;
   private List<SeasonProduction> productionList;
-  private List<SeasonProduction> selectedProductions;
-  private List<SeasonVenue> venueList;
-  private List<SeasonVenue> selectedVenues;
+  private List<SeasonProduction> selectedProductions;  
 
   @PostConstruct
   public void init() {
@@ -67,7 +62,6 @@ public class SeasonDetailsView extends BaseView implements Serializable {
       if (seasonId != null && seasonId.matches("\\d+")) {
         season = seasons.get(Long.parseLong(seasonId));
         loadProductions();
-        loadVenues();
         return;
       }
 
@@ -130,51 +124,7 @@ public class SeasonDetailsView extends BaseView implements Serializable {
     }
     loadProductions();
   }
-
-  public void addVenues() {
-    DialogFrameworkOptions options = DialogFrameworkOptions.builder()
-            .headerElement("Spielstätten hinzufügen")
-            .width("900px")
-            .height("630px")
-            .contentWidth("100%")
-            .modal(true)
-            .responsive(true)
-            .resizable(true)
-            .build();
-
-    Map<String, List<String>> params = new HashMap<>();
-    params.put("seasonId", Arrays.asList(String.valueOf(season.getId())));
-
-    PrimeFaces.current().dialog().openDynamic("addVenues", options, params);
-  }
-
-  public void editSeasonVenue(long seasonVenueId) {
-    Map<String, List<String>> params = new HashMap<>();
-    params.put("seasonVenueId", Arrays.asList(String.valueOf(seasonVenueId)));
-
-    PrimeFaces.current().dialog().openDynamic(
-            "seasonVenueEditor",
-            Dialog.getDefaultOptions(600, 300),
-            params);
-  }
-
-  public void loadVenues() {
-    SeasonVenueFilter venueFilter = new SeasonVenueFilter();
-    venueFilter.setSeason(season);
-    venueList = seasonVenues.list(venueFilter).getItems();
-    venueList.sort((v1, v2) -> {return String.CASE_INSENSITIVE_ORDER.compare(
-            v1.getVenue().getCity() + v1.getVenue().getName(),
-            v2.getVenue().getCity() + v2.getVenue().getName());});
-    PrimeFaces.current().ajax().update("venueList");
-  }
-
-  public void deleteVenues() {
-    for (ListIterator<SeasonVenue> i = selectedVenues.listIterator(); i.hasNext();) {
-      seasonVenues.delete(i.next());
-      i.remove();
-    }
-    loadVenues();
-  }
+  
 
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
   /**
@@ -217,34 +167,6 @@ public class SeasonDetailsView extends BaseView implements Serializable {
    */
   public void setSelectedProductions(List<SeasonProduction> selectedProductions) {
     this.selectedProductions = selectedProductions;
-  }
-
-  /**
-   * @return the venueList
-   */
-  public List<SeasonVenue> getVenueList() {
-    return venueList;
-  }
-
-  /**
-   * @param venueList the venueList to set
-   */
-  public void setVenueList(List<SeasonVenue> venueList) {
-    this.venueList = venueList;
-  }
-
-  /**
-   * @return the selectedVenues
-   */
-  public List<SeasonVenue> getSelectedVenues() {
-    return selectedVenues;
-  }
-
-  /**
-   * @param selectedVenues the selectedVenues to set
-   */
-  public void setSelectedVenues(List<SeasonVenue> selectedVenues) {
-    this.selectedVenues = selectedVenues;
   }
   //</editor-fold>
 

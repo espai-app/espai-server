@@ -1,7 +1,7 @@
 <?php
 
 $productionId = get_query_var('espai_production_id');
-$highlight_id = $_GET['highlight'];
+$highlight_id = isset($_GET['highlight']) ? $_GET['highlight'] : -1;
 $production = app\espai\wordpress\Production::getById($productionId);
 $espai_title = $production->title;
 
@@ -30,6 +30,9 @@ $espai = app\espai\wordpress\Espai::getInstance();
 
       <dt>Altersfreigabe</dt>
       <dd><?= $production->rating ?></dd>
+      
+      <dt>Altersempfehlung</dt>
+      <dd><?= $production->fromAge ?></dd>
 
       <dt>Produktion</dt>
       <dd><?= $production->productionCountries ?>, <?= $production->productionYear ?></dd>
@@ -78,15 +81,23 @@ $espai = app\espai\wordpress\Espai::getInstance();
 </div>
 
 <?php if (!empty($production->attachments['Trailer'])) { ?>
-<div class="video-container">
-  <iframe src="<?= str_replace("watch?v=", "embed/", $production->attachments['Trailer'][0]->location) ?>" title="Video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</div>
+  <div class="video-container">
+    <?php
+            $video_src = $production->attachments['Trailer'][0]->location;
+            if (strpos($video_src, "watch") > -1) {
+                    $video_src = str_replace("watch?v=", "embed/", $production->attachments['Trailer'][0]->location);
+            } elseif (strpos($video_src, "youtu.be") > -1) {
+                    $video_src = "https://www.youtube.com/embed" . substr($video_src, 16);
+            }
+    ?>
+    <iframe src="<?= $video_src ?>" title="Video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  </div>
 <?php } ?>
 
 <h2>Hier im Kino</h2>
 
-<p>Für eine bessere Planbarkeit seitens der Veranstaltungsorte bitten wir Hort- und Kitagruppen um eine Reservierung. Diese können Sie ganz einfach über unser Buchungsformular vornehmen. Private Besucher:innen
-  können sich ihre Tickets direkt vor Ort kaufen. Sollten Sie dennoch eine Reservierung wünschen, wenden Sie sich bitte direkt an den Veranstaltungsort.</p>
+<!--<p>Für eine bessere Planbarkeit seitens der Veranstaltungsorte bitten wir Hort- und Kitagruppen um eine Reservierung. Diese können Sie ganz einfach über unser Buchungsformular vornehmen. Private Besucher:innen
+  können sich ihre Tickets direkt vor Ort kaufen. Sollten Sie dennoch eine Reservierung wünschen, wenden Sie sich bitte direkt an den Veranstaltungsort.</p>-->
 
 <?php \app\espai\wordpress\EventListShortcode::render($events, true, false, $highlight_id); ?>
 </div>

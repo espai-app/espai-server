@@ -21,7 +21,9 @@ WITH FIELDS
   available Boolean,
   fixedPrice Monetary,
   ticketShare Double,
-  additionalCost Monetary
+  additionalCost Monetary,
+  externalId String(250),
+  internalNote String
 ON DELETE
   IN Attachment DELETE,
   IN ProductionTag DELETE,
@@ -45,7 +47,8 @@ WITH FIELDS
   category String(100),
   caption String(200) REQUIRED,
   location String(300),
-  copyright String(200);
+  copyright String(300),
+  checksum String(100);
 
 DEFINE MODEL AttachmentCategory
 WITH FIELDS
@@ -73,6 +76,25 @@ WITH FIELDS
   position Integer,
   category String(50),
   value String;
+
+DEFINE MODEL LicenseCondition
+WITH FIELDS
+  production Production,
+  agency Agency,
+  commercial Boolean,
+  guarantee Monetary,
+  fixedPrice Monetary,
+  ticketShare Monetary,
+  additionalCost Monetary,
+  notes String;
+
+DEFINE MODEL ProductionMedium
+WITH FIELDS
+  production Production,
+  name String(150),
+  format String(50),
+  reference String(300),
+  note String;
 
 DEFINE MODEL Movie
 INHERIT FROM Production
@@ -193,6 +215,12 @@ WITH FIELDS
   seasonNotes String,
   selfProgramming Boolean;
 
+DEFINE MODEL SeasonPriceTemplate
+WITH FIELDS
+  season Season,
+  priceCategory PriceCategory,
+  price Monetary;
+
 DEFINE MODEL VenueProduction
 WITH FIELDS
   venue Venue REQUIRED,
@@ -201,7 +229,8 @@ WITH FIELDS
 DEFINE MODEL EventSerial
 WITH FIELDS
   name String(150),
-  description String
+  description String,
+  season Season
 ON DELETE
   IN Event SET NULL;
 

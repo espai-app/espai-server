@@ -11,26 +11,60 @@
   <ui:param name="title" value="Spielstätten" />
 
   <ui:define name="content">
-    
-    <h2>Spielstätten</h2>
-    
-    <p:dataTable value="#{seasonVenueIndex.venueList}" var="venue">
-    
-      <p:column headerText="Name">
-        <p:link value="#{venue.venueName}" href="../events/programming.xhtml">
-          <f:param name="seasonId" value="#{seasonContext.currentSeason.id}" />
-          <f:param name="venueId" value="#{venue.venueId}" />
-        </p:link>
-      </p:column>
-      
-      <p:column headerText="Ort">
-        <h:outputText value="#{venue.venueCity}" />
-      </p:column>
-      
-      <p:column headerText="Anz. Veranstaltungen">
-        <h:outputText value="#{venue.countEvents}" />
-      </p:column>
-    </p:dataTable>
-    
+
+    <h1>Spielstätten</h1>
+
+    <h:form>
+      <p:commandButton value="hinzufügen" icon="pi pi-plus" action="#{seasonVenueIndexView.addVenues}" styleClass="mr-2">
+        <p:ajax event="dialogReturn" listener="#{seasonVenueIndexView.init}" update="@form" />
+      </p:commandButton>
+      <p:commandButton value="markierte entfernen" icon="pi pi-trash" action="#{seasonVenueIndexView.deleteVenues}" styleClass="ui-button-outlined ui-button-secondary" update="venueList">
+        <p:confirm header="Spielstätten entfernen" message="Möchten Sie die ausgewählten Spielstätten wirklich aus der Spielzeit entfernen?" icon="pi pi-trash"/>
+      </p:commandButton>
+
+      <p:dataTable id="venueList"
+                   value="#{seasonVenueIndexView.venueList}"
+                   var="v"
+                   rowKey="#{v.id}"
+                   rowSelector="none"
+                   selection="#{seasonVenueIndexView.selectedVenues}"
+                   styleClass="mt-3">
+
+        <p:autoUpdate />
+
+        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+        <p:column headerText="Name">
+          <h:outputText value="#{v.venue.name}" />
+        </p:column>
+
+        <p:column headerText="Ort">
+          <h:outputText value="#{v.venue.city}" />
+        </p:column>
+
+        <p:column headerText="Anz. Veranstaltungen" style="width: 5rem">
+          <h:outputText value="#{seasonVenueIndexView.eventCounterMap.containsKey(v.venue.id) ? seasonVenueIndexView.eventCounterMap.get(v.venue.id) : 0}" />
+        </p:column>
+
+        <p:column headerText="programmiert selbst"  style="width: 7rem">
+          <h:outputText value="#{v.selfProgramming ? 'ja' : 'nein'}" />
+        </p:column>
+
+        <p:column style="width: 100px;" styleClass="text-right">
+          <p:commandButton title="bearbeiten"
+                           icon="pi pi-pencil"
+                           styleClass="ui-button-flat ui-rounded-button"
+                           action="#{seasonVenueIndexView.editSeasonVenue(v.id)}" >
+
+            <p:ajax event="dialogReturn" listener="#{seasonVenueIndexView.init}" update="@form"/>
+          </p:commandButton>
+        </p:column>
+      </p:dataTable>
+
+      <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="450">
+        <p:commandButton value="Nein" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+        <p:commandButton value="Ja" type="button" styleClass="ui-confirmdialog-yes" />
+      </p:confirmDialog>
+    </h:form>
   </ui:define>
 </ui:composition>

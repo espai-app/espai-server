@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import rocks.xprs.mail.Mail;
 
 /**
  *
@@ -45,35 +44,35 @@ public class ReservationMailManager {
   @EJB
   private MailTemplates mailTemplates;
 
-  public Mail createNew(Reservation reservation) {
+  public EspaiMail createNew(Reservation reservation) {
     MailTemplate template = mailTemplates.getByCode(
             "RESERVATION_NEW", reservation.getEvent().getSeason());
     return toMail(reservation, reservation.getGivenName(), reservation.getSurname(),
             reservation.getEmail(), template);
   }
 
-  public Mail createHold(Reservation reservation) {
+  public EspaiMail createHold(Reservation reservation) {
     MailTemplate template = mailTemplates.getByCode(
             "RESERVATION_HOLD", reservation.getEvent().getSeason());
     return toMail(reservation, reservation.getGivenName(), reservation.getSurname(),
             reservation.getEmail(), template);
   }
 
-  public Mail createConfirmed(Reservation reservation) {
+  public EspaiMail createConfirmed(Reservation reservation) {
     MailTemplate template = mailTemplates.getByCode(
             "RESERVATION_CONFIRMED", reservation.getEvent().getSeason());
     return toMail(reservation, reservation.getGivenName(), reservation.getSurname(),
             reservation.getEmail(), template);
   }
 
-  public Mail createCanceled(Reservation reservation) {
+  public EspaiMail createCanceled(Reservation reservation) {
     MailTemplate template = mailTemplates.getByCode(
             "RESERVATION_CANCELED", reservation.getEvent().getSeason());
     return toMail(reservation, reservation.getGivenName(), reservation.getSurname(),
             reservation.getEmail(), template);
   }
 
-  public Mail toMail(Reservation reservation, String givenName, String surname, String email,
+  public EspaiMail toMail(Reservation reservation, String givenName, String surname, String email,
           MailTemplate template) {
 
     Event currentEvent = reservation.getEvent();
@@ -147,9 +146,10 @@ public class ReservationMailManager {
     StringBuilder ticketTable = new StringBuilder(
             "<ul>");
     for (ReservationTicket t : tickets) {
-      ticketTable.append(String.format("<li>%d x %s (%.2f € pro Person)</li>",
+      ticketTable.append(String.format("<li>%d x %s, %s (%.2f € pro Person)</li>",
               t.getAmount(),
               escHtml(t.getPriceCategory().getName()),
+              escHtml(t.getSeatCategory().getName()),
               t.getPrice().getAmount()
       ));
     }
@@ -171,7 +171,7 @@ public class ReservationMailManager {
       replacements.put("attachments." + i.getKey(), renderedList);
     }
 
-    Mail result = new Mail();
+    EspaiMail result = new EspaiMail();
     result.setFrom(template.getSender());
     result.addTo(email);
     if (template.getBcc() != null && !template.getBcc().isBlank()) {

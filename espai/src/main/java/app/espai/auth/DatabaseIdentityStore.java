@@ -58,7 +58,7 @@ public class DatabaseIdentityStore implements IdentityStore {
 
     try {
       User user = users.getByUsername(userPass.getCaller());
-      if (userPasswordManager.checkPassword(user, userPass.getPasswordAsString())) {
+      if (user != null && userPasswordManager.checkPassword(user, userPass.getPasswordAsString())) {
         AccessRightFilter rightFilter = new AccessRightFilter();
         rightFilter.setUser(user);
         List<AccessRight> accessRightList = accessRights.list(rightFilter).getItems();
@@ -66,7 +66,9 @@ public class DatabaseIdentityStore implements IdentityStore {
         EspaiPrincipal principal = new EspaiPrincipal(user, accessRightList);
 
         Set<String> roles = principal.getRoles();
-        return new CredentialValidationResult(principal, roles);
+        if (!roles.isEmpty()) {
+          return new CredentialValidationResult(principal, roles);
+        }
       }
     } catch (ResourceNotFoundException ex) {
       // ignore

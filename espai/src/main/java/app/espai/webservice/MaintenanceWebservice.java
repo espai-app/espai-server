@@ -1,6 +1,8 @@
 package app.espai.webservice;
 
+import app.espai.businesslogic.MovieImporter;
 import app.espai.businesslogic.PriceManager;
+import app.espai.businesslogic.VisionKinoMovieImportFilter;
 import app.espai.dao.EventTicketPrices;
 import app.espai.dao.Events;
 import app.espai.dao.Halls;
@@ -18,9 +20,12 @@ import app.espai.model.Event;
 import app.espai.model.EventTicketPrice;
 import app.espai.model.Season;
 import jakarta.ejb.EJB;
+import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -63,6 +68,9 @@ public class MaintenanceWebservice {
   @EJB
   private PriceManager priceManager;
 
+  @EJB
+  private MovieImporter movieImporter;
+
   @GET
   @Path("fixPrices")
   public String fixPrices(@QueryParam("seasonId") Long seasonId) {
@@ -97,5 +105,25 @@ public class MaintenanceWebservice {
     }
 
     return String.format("%d Preise ergänzt", counter);
+  }
+
+  @POST
+  @Path("importMovies")
+  public String importMovies(@FormParam("url") String url, @FormParam("username") String username,
+          @FormParam("password") String password) throws IOException {
+
+    VisionKinoMovieImportFilter vikiFilter = new VisionKinoMovieImportFilter();
+    vikiFilter.setConnection(url, username, password);
+    List<MovieImport> movieList = vikiFilter.getMovies();
+
+    for (MovieImport m : movieList) {
+      if (m.getAttachments() == null) {
+        continue;
+      }
+    }
+
+    movieImporter.importMovies(movieList);
+
+    return "Import beendet.";
   }
 }

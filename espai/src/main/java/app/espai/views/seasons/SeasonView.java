@@ -16,6 +16,7 @@ import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
+import rocks.xprs.runtime.db.PageableFilter;
 
 /**
  *
@@ -38,6 +39,9 @@ public class SeasonView extends BaseView {
   public void init() {
     SeasonFilter filter = new SeasonFilter();
     filter.setArchived(Boolean.FALSE);
+    filter.setOrder(PageableFilter.Order.DESC);
+    filter.setOrderBy("start");
+
     activeSeasons = seasons.list(filter).getItems();
     selectedSeason = seasonContext.getCurrentSeason();
 

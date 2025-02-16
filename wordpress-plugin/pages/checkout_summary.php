@@ -22,13 +22,11 @@ if (isset($_POST['action'])) {
   }
   
   if (empty($errors)) {
-    $reservation_transfer = json_decode(json_encode($reservation));
-    $reservation_transfer->event = $reservation->event->id;
     
-    $errors = \app\espai\wordpress\Reservation::validate($reservation_transfer);
+    $errors = \app\espai\wordpress\Reservation::validate($reservation);
     
     if (empty($errors)) {
-      \app\espai\wordpress\Reservation::send($reservation_transfer);
+      \app\espai\wordpress\Reservation::send($reservation);
       unset($_SESSION['reservation']);
       
       header('Location: ' . trailingslashit(get_home_url()) . 'buchen/danke');

@@ -15,4 +15,16 @@ public class MailTemplate extends AbstractMailTemplate {
 
   private static final long serialVersionUID = 1L;
   
+  public MailTemplate duplicate() {
+    MailTemplate result = new MailTemplate();
+    result.setBcc(getBcc());
+    result.setDescription(getDescription());
+    result.setHtmlMessage(getHtmlMessage());
+    result.setName(getName());
+    result.setReplyTo(getReplyTo());
+    result.setSender(getSender());
+    result.setShortCode(getShortCode());
+    return result;
+  }
+  
 }

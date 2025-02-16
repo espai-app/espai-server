@@ -7,6 +7,7 @@ import app.espai.dao.Presenters;
 import app.espai.dao.ProductionVersions;
 import app.espai.dao.SeasonProductions;
 import app.espai.dao.SeasonVenues;
+import app.espai.filter.EventSerialFilter;
 import app.espai.filter.HallFilter;
 import app.espai.filter.ProductionVersionFilter;
 import app.espai.model.Event;
@@ -68,7 +69,7 @@ public class EventEditorView implements Serializable {
   private Event event;
   private Venue venue;
   private Production production;
-  private List<? extends EventSerial> eventSerialList;
+  private List<EventSerial> eventSerialList;
   private List<Venue> venueList;
   private List<Hall> hallList;
   private List<? extends Presenter> presenterList;
@@ -89,7 +90,9 @@ public class EventEditorView implements Serializable {
       throw new InvalidDataException("seasonId missing.");
     }
 
-    eventSerialList = eventSerials.list().getItems();
+    EventSerialFilter eventSerialFilter = new EventSerialFilter();
+    eventSerialFilter.setSeason(currentSeason);
+    eventSerialList = eventSerials.list(eventSerialFilter).getItems();
 
     venueList = userContext.isRestricted()
             ? userContext.getVenues()
@@ -201,7 +204,7 @@ public class EventEditorView implements Serializable {
   /**
    * @return the eventSerialList
    */
-  public List<? extends EventSerial> getEventSerialList() {
+  public List<EventSerial> getEventSerialList() {
     return eventSerialList;
   }
 

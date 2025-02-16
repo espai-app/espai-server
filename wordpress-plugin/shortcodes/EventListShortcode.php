@@ -35,19 +35,42 @@ class EventListShortcode {
               <?php } ?>
 
               <?php $old_date = $event->date ?>
+              <?php 
+                $seats_available = 0;
+                if (isset($event->availableTickets->Sitzplatz)) {
+                  $seats_available += $event->availableTickets->Sitzplatz;
+                }
+                if (isset($event->availableTickets->Rollstuhl)) {
+                  $seats_available += $event->availableTickets->Rollstuhl;
+                }
+              ?>
 
               <h4><?= EspaiPlugin::formatDate($event->date) ?></h4>
               <table class="espai-table espai-event-table">
                 <thead>
-                  <th>Uhrzeit</th>
-                  <?php if ($showProduction) { ?>
-                    <th>Film</th>
-                  <?php } ?>
-                  <?php if ($showVenue) { ?>
-                    <th>Kino</th>
-                  <?php } ?>
-                  <th>freie Plätze</th>
-                  <th></th>
+                  <tr>
+                    <th>Uhrzeit</th>
+                    <?php if ($showProduction) { ?>
+                      <th>Film</th>
+                    <?php } ?>
+                    <?php if ($showVenue) { ?>
+                      <th>Kino</th>
+                    <?php } ?>
+                    <th colspan="2">freie Plätze</th>
+                    <th></th>
+                  </tr>
+                  <tr>
+                    <th></th>
+                    <?php if ($showProduction) { ?>
+                      <th></th>
+                    <?php } ?>
+                    <?php if ($showVenue) { ?>
+                      <th></th>
+                    <?php } ?>
+                    <th>Sitzplatz</th>
+                    <th>Rollstuhlplatz</th>
+                    <th></th>
+                  </tr>
                 </thead>
                 <tbody>
             <?php } ?>
@@ -58,17 +81,35 @@ class EventListShortcode {
               <?php if ($showProduction) { ?>
                 <td class="espai-event-production">
                   <a href="<?= trailingslashit(get_home_url()) ?>filme/<?= \app\espai\wordpress\EspaiPlugin::slugify($event->title) . '-' . $event->production->id ?>?highlight=<?= $event->id ?>">
-                    <?= $event->title ?> <?= !empty($event->version) ? '(' . $event->version . ')' : '' ?></td>
+                    <?= $event->title ?> <?= !empty($event->version) ? '(' . $event->version . ')' : '' ?>
                   </a>
+                  <?php if (!empty($event->childEvents)) { ?>
+                    <ul>
+                      <?php foreach ($event->childEvents as $c) { ?>
+                        <li><?= $c->title ?></li>
+                      <?php } ?>
+                    </ul>
+                  <?php } ?>
+                </td>
               <?php } ?>
               <?php if ($showVenue) { ?>
-                <td class="espai-event-venue"><?= $event->venue->city ?>, <?= $event->venue->name ?></td>
+                <td class="espai-event-venue">
+                  <?= $event->venue->city ?>, <?= $event->venue->name ?>
+                  <?php if (!empty($event->childEvents) && !$showProduction) { ?>
+                    <ul>
+                      <?php foreach ($event->childEvents as $c) { ?>
+                        <li><?= $c->title ?></li>
+                      <?php } ?>
+                    </ul>
+                  <?php } ?>
+                </td>
               <?php } ?>
-                <td class="espai-event-table-seats"><?= ($event->reservable && $event->availableTickets > 0) ? $event->availableTickets : '' ?></td>
+                <td class="espai-event-table-seats"><?= ($event->reservable && isset($event->availableTickets->Sitzplatz)) ? $event->availableTickets->Sitzplatz : '' ?></td>
+                <td class="espai-event-table-seats"><?= ($event->reservable && isset($event->availableTickets->Rollstuhlplatz)) ? $event->availableTickets->Rollstuhlplatz : '' ?></td>
                 <td class="espai-event-table-reservation">
-                  <?php if ($event->reservable && $event->availableTickets > 0) { ?>
+                  <?php if ($event->reservable && $seats_available > 0) { ?>
                   <a href="<?= trailingslashit(get_home_url()) ?>buchen/veranstaltung/<?= EspaiPlugin::slugify($event->title) ?>-<?= $event->id ?>" rel="nofollow" class="button">
-                      als Hort/Kita buchen
+                      buchen
                     </a>
                   <?php } ?>
                 </td>

@@ -1,5 +1,6 @@
 package app.espai.views.reservations;
 
+import app.espai.EspaiMail;
 import app.espai.Mailer;
 import app.espai.ReservationMailManager;
 import app.espai.dao.Productions;
@@ -30,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import rocks.xprs.mail.Mail;
 import rocks.xprs.runtime.db.PageableFilter;
 
 /**
@@ -58,9 +58,6 @@ public class ReservationIndexView {
 
   @EJB
   private Productions productions;
-
-  @EJB
-  private Mailer mailer;
 
   @EJB
   private ReservationMailManager reservationMailManager;
@@ -150,13 +147,16 @@ public class ReservationIndexView {
 
   public void confirmReservations() {
     int counter = 0;
+
     for (ReservationSummary s : selectedReservations) {
       Reservation r = reservations.get(s.getId());
       r.setStatus(ReservationStatus.CONFIRMED);
       reservations.save(r);
 
       try {
-        Mail mail = reservationMailManager.createConfirmed(r);
+        EspaiMail mail = reservationMailManager.createConfirmed(r);
+
+        Mailer mailer = new Mailer(mail.getMailAccount());
         Message message = mailer.send(mail);
         mailer.saveSent(message);
         counter++;
@@ -184,7 +184,9 @@ public class ReservationIndexView {
       reservations.save(r);
 
       try {
-        Mail mail = reservationMailManager.createHold(r);
+        EspaiMail mail = reservationMailManager.createHold(r);
+
+        Mailer mailer = new Mailer(mail.getMailAccount());
         Message message = mailer.send(mail);
         mailer.saveSent(message);
         counter++;
@@ -211,7 +213,9 @@ public class ReservationIndexView {
       reservations.save(r);
 
       try {
-        Mail mail = reservationMailManager.createCanceled(r);
+        EspaiMail mail = reservationMailManager.createCanceled(r);
+        
+        Mailer mailer = new Mailer(mail.getMailAccount());
         Message message = mailer.send(mail);
         mailer.saveSent(message);
         counter++;

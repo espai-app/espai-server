@@ -70,6 +70,7 @@ a:hover {
 
 .content {
   padding: 1rem;
+  flex: 1;
 }
 
 /* UI Buttons */

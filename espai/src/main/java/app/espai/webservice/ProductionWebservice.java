@@ -6,6 +6,8 @@ import app.espai.dao.ProductionTags;
 import app.espai.dao.Productions;
 import app.espai.dao.SeasonProductions;
 import app.espai.dao.Seasons;
+import app.espai.dto.MovieDTOConverter;
+import app.espai.dto.ProductionDTOConverter;
 import app.espai.filter.AttachmentFilter;
 import app.espai.filter.ProductionTagFilter;
 import app.espai.filter.SeasonProductionFilter;
@@ -14,6 +16,7 @@ import app.espai.model.Movie;
 import app.espai.model.Production;
 import app.espai.model.ProductionTag;
 import app.espai.model.Season;
+import app.espai.sdk.model.ProductionDTO;
 import jakarta.ejb.EJB;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -107,9 +110,9 @@ public class ProductionWebservice {
     List<ProductionTag> tagList = productionTags.list(tagFilter).getItems();
 
     if (production instanceof Movie) {
-      return MovieDTO.of((Movie) production, attachmentList, tagList);
+      return MovieDTOConverter.of((Movie) production, attachmentList, tagList);
     }
-    return ProductionDTO.of(production, attachmentList, tagList);
+    return ProductionDTOConverter.of(production, attachmentList, tagList);
   }
 
 }

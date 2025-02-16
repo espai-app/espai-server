@@ -107,6 +107,12 @@
               <h:message for="imapPassword" />
             </div>
           </div>
+
+          <div class="field">
+            <p:outputLabel for="imapSentFolder" value="Ordner für gesendete Mails" />
+            <p:inputText id="imapSentFolder" value="#{mailAccountEditView.mailAccount.imapSentFolder}" />
+            <h:message for="imapSentFolder" />
+          </div>
         </div>
 
         <div>

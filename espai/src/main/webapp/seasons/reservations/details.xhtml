@@ -26,24 +26,28 @@
           <f:param name="reservationId" value="#{reservationDetailsView.reservation.id}" />
           <f:param name="seasonId" value="#{reservationDetailsView.reservation.event.season.id}" />
         </p:linkButton>
-        <p:commandButton icon="pi pi-trash" value="löschen" rendered="#{request.isUserInRole('MANAGER')}" styleClass="ui-button-outlined ui-button-danger">
+        <p:commandButton icon="pi pi-trash" 
+                         value="löschen" 
+                         rendered="#{request.isUserInRole('MANAGER')}" 
+                         styleClass="ui-button-outlined ui-button-danger"
+                         action="#{reservationDetailsView.delete}">
           <p:confirm header="Löschen bestätigen"
                      message="Möchten Sie diese Buchung wirklich löschen? Damit gehen auch alle Unter-Buchungen verloren."
                      icon="pi pi-exclamation-triangle" />
         </p:commandButton>
 
         <p:confirmDialog global="true"
-                       showEffect="fade"
-                       hideEffect="fade"
-                       responsive="true"
-                       width="650">
-        <p:commandButton value="abbrechen"
-                         type="button"
-                         styleClass="ui-confirmdialog-no ui-button-flat"/>
-        <p:commandButton value="Ja, löschen"
-                         type="button"
-                         icon="pi pi-trash" styleClass="ui-confirmdialog-yes ui-button-danger" />
-      </p:confirmDialog>
+                         showEffect="fade"
+                         hideEffect="fade"
+                         responsive="true"
+                         width="650">
+          <p:commandButton value="abbrechen"
+                           type="button"
+                           styleClass="ui-confirmdialog-no ui-button-flat"/>
+          <p:commandButton value="Ja, löschen"
+                           type="button"
+                           icon="pi pi-trash" styleClass="ui-confirmdialog-yes ui-button-danger" />
+        </p:confirmDialog>
       </h:form>
     </div>
 
@@ -133,7 +137,11 @@
               <f:selectItems value="#{reservationDetailsView.reservationStatusList}" var="s" itemValue="#{s}" itemLabel="#{r}" />
             </p:selectOneMenu>
 
-            <p:commandButton value="Status ändern" action="#{reservationDetailsView.updateStatus}" rendered="#{request.isUserInRole('MANAGER')}"  />
+            <p:commandButton value="Status ändern" action="#{reservationDetailsView.updateStatus}" rendered="#{request.isUserInRole('MANAGER')}">
+              <p:ajax event="dialogReturn" update="@form" />
+            </p:commandButton>
+            
+            <p:growl globalOnly="true" />
           </h:form>
 
         </div>
@@ -190,6 +198,5 @@
         </p:column>
       </p:dataTable>
     </p:card>
-
   </ui:define>
 </ui:composition>

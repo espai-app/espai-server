@@ -20,17 +20,6 @@
 
         <div class="lg:col-6 ui-fluid">
           <div class="field">
-            <p:outputLabel for="mailAccount" value="Mail-Konto" />
-            <p:selectOneMenu id="mailAccount" value="#{mailTemplateEditorView.mailTemplate.mailAccount}">
-              <f:selectItems value="#{mailTemplateEditorView.mailAccountList}"
-                             var="account"
-                             itemLabel="#{account.name}"
-                             itemValue="#{account}" />
-            </p:selectOneMenu>
-            <h:message for="mailAccount" />
-          </div>
-
-          <div class="field">
             <p:outputLabel for="sender" value="Absender" />
             <p:inputText id="sender" value="#{mailTemplateEditorView.mailTemplate.sender}" />
             <h:message for="sender" />

@@ -107,6 +107,10 @@
         <p:column headerText="Ort">
           <h:outputText value="#{event.hall.venue.name}"/>, <h:outputText value="#{event.hall.venue.city}"/>
         </p:column>
+        
+        <p:column headerText="Saal" style="width:7rem">
+          <h:outputText value="#{event.hall.name}"/>
+        </p:column>
 
         <p:column headerText="Auslastung" style="width: 100px;">
           <p:progressBar id="seatsTaken" value="#{eventIndexView.ticketsSold.get(event.id) / event.capacity * 100}" displayOnly="true" />

@@ -176,6 +176,10 @@ public class ProgrammingView extends BaseView implements Serializable {
     for (Event e : eventList) {
       if (e.getDate() != null && e.getTime()!= null) {
         e.setSeason(currentSeason);
+        
+        if (e.getId() == null) {
+          e.setReservable(true);
+        }
         events.save(e);
       }
     }

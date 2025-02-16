@@ -1,5 +1,6 @@
 package app.espai.webservice;
 
+import app.espai.businesslogic.CapacityCalculator;
 import app.espai.dao.Attachments;
 import app.espai.dao.EventSerials;
 import app.espai.dao.EventTicketPrices;
@@ -10,6 +11,7 @@ import app.espai.dao.Productions;
 import app.espai.dao.ReservationSummaries;
 import app.espai.dao.Seasons;
 import app.espai.dao.Venues;
+import app.espai.dto.EventDTOConverter;
 import app.espai.filter.AttachmentFilter;
 import app.espai.filter.EventFilter;
 import app.espai.filter.EventTicketPriceFilter;
@@ -21,7 +23,9 @@ import app.espai.model.EventTicketPrice;
 import app.espai.model.Production;
 import app.espai.model.Season;
 import app.espai.model.Venue;
+import app.espai.sdk.model.EventDTO;
 import jakarta.ejb.EJB;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -75,6 +79,9 @@ public class EventWebservice {
   @EJB
   private EventSerials eventSerials;
 
+  @Inject
+  private CapacityCalculator capacityCalculator;
+
   @GET
   @Path("{id}")
 
@@ -84,8 +91,11 @@ public class EventWebservice {
     if (!event.getSeason().getId().equals(seasonId)) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
+    
+    EventDTO result = toDTO(event);
+    addChildEvents(event, result);
 
-    return Response.ok(toDTO(event)).build();
+    return Response.ok(result).build();
   }
 
   @GET
@@ -161,15 +171,13 @@ public class EventWebservice {
       eventList = eventList.stream().filter(e -> e.getDate().equals(filterDate)).toList();
     }
 
-    Map<Long, Integer> ticketsSold = new HashMap<>();
-    reservationSummaries.getTicketSales(eventList)
-            .stream()
-            .forEach(e -> ticketsSold.put(e.getEvent().getId(), e.getTicketsSold().intValue()));
+    List<EventDTO> eventDTOList = new LinkedList<>();
+    for (Event e : eventList) {
+      EventDTO target = toDTO(e);
+      addChildEvents(e, target);
+      eventDTOList.add(target);
+    }
 
-    List<EventDTO> eventDTOList = eventList
-            .stream()
-            .map(e -> EventDTO.of(e, null, null, null, ticketsSold))
-            .toList();
     return eventDTOList;
   }
 
@@ -191,24 +199,29 @@ public class EventWebservice {
     List<Event> allEvents = new LinkedList<>(childEventList);
     allEvents.add(event);
 
-    EventTicketPriceFilter priceFilter = new EventTicketPriceFilter();
-    priceFilter.setEvents(allEvents);
-
-    List<EventTicketPrice> priceList = ticketPrices.list(priceFilter).getItems();
-    Map<Long, List<EventTicketPrice>> priceMap = new HashMap<>();
-    for (EventTicketPrice p : priceList) {
-      if (!priceMap.containsKey(p.getEvent().getId())) {
-        priceMap.put(p.getEvent().getId(), new LinkedList<>());
-      }
-      priceMap.get(p.getEvent().getId()).add(p);
-    }
-
     Map<Long, Integer> ticketsSold = new HashMap<>();
     reservationSummaries.getTicketSales(allEvents)
             .stream()
             .forEach(e -> ticketsSold.put(e.getEvent().getId(), e.getTicketsSold().intValue()));
 
-    return EventDTO.of(event, childEventList, attachmentList, priceMap, ticketsSold);
+    return EventDTOConverter.of(event, attachmentList, getPriceList(event), capacityCalculator.getSeats(event));
+  }
+
+  private void addChildEvents(Event parentEvent, EventDTO target) {
+    EventFilter childEventFilter = new EventFilter();
+    childEventFilter.setParentEvent(parentEvent);
+    childEventFilter.setHidden(false);
+
+    List<Event> childEventList = events.list(childEventFilter).getItems();
+    target.setChildEvents(childEventList.stream()
+            .map(e-> EventDTOConverter.of(e, null, null, capacityCalculator.getSeats(e)))
+            .toList());
+  }
+
+  private List<EventTicketPrice> getPriceList(Event event) {
+    EventTicketPriceFilter pricesFilter = new EventTicketPriceFilter();
+    pricesFilter.setEvent(event);
+    return ticketPrices.list(pricesFilter).getItems();
   }
 
 }

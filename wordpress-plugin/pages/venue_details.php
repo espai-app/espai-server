@@ -41,8 +41,8 @@ $eventList = \app\espai\wordpress\Event::listForVenue($venueId);
 
   <h3>Veranstaltungen in diesem Kino</h3>
 
-  <p>Für eine bessere Planbarkeit seitens der Veranstaltungsorte bitten wir Hort- und Kitagruppen um eine Reservierung. Diese können Sie ganz einfach über unser Buchungsformular vornehmen. Private Besucher:innen
-  können sich ihre Tickets direkt vor Ort kaufen. Sollten Sie dennoch eine Reservierung wünschen, wenden Sie sich bitte direkt an den Veranstaltungsort.</p>
+  <!--<p>Für eine bessere Planbarkeit seitens der Veranstaltungsorte bitten wir Hort- und Kitagruppen um eine Reservierung. Diese können Sie ganz einfach über unser Buchungsformular vornehmen. Private Besucher:innen
+  können sich ihre Tickets direkt vor Ort kaufen. Sollten Sie dennoch eine Reservierung wünschen, wenden Sie sich bitte direkt an den Veranstaltungsort.</p>-->
 
   <?php \app\espai\wordpress\EventListShortcode::render($eventList, false, true) ?>
 </div>
