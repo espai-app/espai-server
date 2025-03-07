@@ -34,10 +34,8 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import rocks.xprs.runtime.db.PageableFilter;
 import rocks.xprs.runtime.db.Range;
 
@@ -198,11 +196,6 @@ public class EventWebservice {
 
     List<Event> allEvents = new LinkedList<>(childEventList);
     allEvents.add(event);
-
-    Map<Long, Integer> ticketsSold = new HashMap<>();
-    reservationSummaries.getTicketSales(allEvents)
-            .stream()
-            .forEach(e -> ticketsSold.put(e.getEvent().getId(), e.getTicketsSold().intValue()));
 
     return EventDTOConverter.of(event, attachmentList, getPriceList(event), capacityCalculator.getSeats(event));
   }

@@ -64,9 +64,9 @@ public class CapacityCalculator {
 
       for (SeatCategory currentSeatCategory : seatCategoryList) {
         
-        Map<SeatCategory, Integer> soldTickets = ticketList.stream().collect(
+        Map<Long, Integer> soldTickets = ticketList.stream().collect(
             Collectors.toMap(
-                    ReservationTicket::getSeatCategory,
+                    t -> t.getSeatCategory().getId(),
                     ReservationTicket::getAmount,
                     (a1, a2) -> a1 + a2));
 
@@ -74,8 +74,8 @@ public class CapacityCalculator {
                 ? event.getCapacity() 
                 : currentSeatCategory.getCapacity();
 
-        if (soldTickets.containsKey(currentSeatCategory)) {
-          currentSeatCategory.setSeatsTaken(soldTickets.get(currentSeatCategory));
+        if (soldTickets.containsKey(currentSeatCategory.getId())) {
+          currentSeatCategory.setSeatsTaken(soldTickets.get(currentSeatCategory.getId()));
           currentSeatCategory.setSeatsAvailable(
                   capacity - currentSeatCategory.getSeatsTaken());
         } else {
