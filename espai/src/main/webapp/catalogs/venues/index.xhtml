@@ -21,14 +21,14 @@
         </p:commandButton>
       </div>
       
-      <p:dataTable value="#{venueIndexView.venueList}" var="v" styleClass="mt-3">
-        <p:column headerText="Name">
+      <p:dataTable value="#{venueIndexView.venueList}" var="v" styleClass="mt-3" allowUnsorting="true" sortMode="single">
+        <p:column headerText="Name" sortBy="#{v.name}">
           <p:link value="#{v.name}" href="../venues/details.xhtml">
             <f:param name="venueId" value="#{v.id}" />
           </p:link>
         </p:column>
         
-        <p:column headerText="Stadt">
+        <p:column headerText="Stadt" sortBy="#{v.city}">
           <p:link value="#{v.city}" href="../venues/details.xhtml">
             <f:param name="venueId" value="#{v.id}" />
           </p:link>

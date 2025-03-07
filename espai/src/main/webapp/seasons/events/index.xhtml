@@ -76,7 +76,9 @@
                    sortBy="#{event.date}"
                    rowStyleClass="#{event.hidden ? 'not-public' : null}"
                    styleClass="mt-5"
-                   reflow="true">
+                   reflow="true"
+                   allowUnsorting="true" 
+                   sortMode="single">
         <p:headerRow field="date" expandable="true">
           <p:column colspan="4">
             <h:outputText value="#{event.date}">
@@ -93,7 +95,7 @@
           </p:link>
         </p:column>
 
-        <p:column headerText="Veranstaltung">
+        <p:column headerText="Veranstaltung" sortBy="#{event.production.fullName}">
           <p:link href="details.xhtml" styleClass="block">
             <f:param name="eventId" value="#{event.id}" />
             <f:param name="seasonId" value="#{eventIndexView.currentSeason.id}" />
@@ -104,16 +106,19 @@
           </p:link>
         </p:column>
 
-        <p:column headerText="Ort">
+        <p:column headerText="Ort" sortBy="#{event.hall.venue.name}">
           <h:outputText value="#{event.hall.venue.name}"/>, <h:outputText value="#{event.hall.venue.city}"/>
         </p:column>
-        
-        <p:column headerText="Saal" style="width:7rem">
+
+        <p:column headerText="Saal" style="width:7rem" sortBy="#{event.hall.venue.name}">
           <h:outputText value="#{event.hall.name}"/>
         </p:column>
 
-        <p:column headerText="Auslastung" style="width: 100px;">
-          <p:progressBar id="seatsTaken" value="#{eventIndexView.ticketsSold.get(event.id) / event.capacity * 100}" displayOnly="true" />
+        <p:column headerText="Auslastung" style="width: 100px;" sortBy="#{0 + eventIndexView.ticketsSold.get(event.id)}">
+          <p:column headerText="Auslastung">
+            <h:outputText value="#{0 + eventIndexView.ticketsSold.get(event.id)} / #{event.capacity}, frei: #{event.capacity-eventIndexView.ticketsSold.get(event.id)} "/>
+            <p:progressBar id="seatsTaken" value="#{eventIndexView.ticketsSold.get(event.id) / event.capacity * 100}" displayOnly="true" />
+          </p:column>
         </p:column>
       </p:dataTable>
     </p:card>

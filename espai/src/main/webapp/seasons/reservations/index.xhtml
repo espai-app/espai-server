@@ -73,11 +73,22 @@
                      rowSelectMode="none"
                      rowStyleClass="#{r.event.hidden ? 'not-public' : null}"
                      var="r"
-                     reflow="true">
+                     reflow="true"
+                     allowUnsorting="true"
+                     sortMode="single">
 
           <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+          
+          <p:column headerText="Eingang" style="width: 10rem;" 
+                    sortBy="#{r.eventDate}#{r.eventStartTime}">
+            <h:panelGroup rendered="#{r.parentReservation == null}">
+              <h:outputText value="#{r.createDate}">
+                <f:convertDateTime pattern="dd.MM.yyyy" type="date" />
+              </h:outputText>
+            </h:panelGroup>
+          </p:column>
 
-          <p:column headerText="Datum" style="width: 200px;">
+          <p:column headerText="Datum" style="width: 200px;" sortBy="#{r.eventDate}#{r.eventStartTime}">
             <h:panelGroup rendered="#{r.parentReservation == null}">
               <h:outputText value="#{r.eventDate}">
                 <f:convertDateTime pattern="dd.MM.yyyy" type="localDate" />
@@ -86,7 +97,7 @@
             </h:panelGroup>
           </p:column>
 
-          <p:column headerText="Veranstaltung">
+          <p:column headerText="Veranstaltung" sortBy="#{r.productionTitle}">
             <p:link outcome="details" styleClass="block">
               <f:param name="reservationId" value="#{r.id}" />
               <f:param name="seasonId" value="#{r.event.season.id}" />
@@ -100,22 +111,22 @@
             </p:link>
           </p:column>
 
-          <p:column headerText="Besteller:in">
+          <p:column headerText="Besteller:in" sortBy="#{r.company}">
             <h:outputText value="#{r.company}" /><br />
             <h:outputText value="#{r.givenName} #{r.surname}" /><br />
           </p:column>
 
-          <p:column style="width: 50px">
+          <p:column style="width: 50px" sortBy="#{r.message}">
             <h:outputText rendered="#{r.message != ''}" styleClass="pi pi-comment text-xl">
 
             </h:outputText>
           </p:column>
 
-          <p:column headerText="Tickets" style="width: 70px">
+          <p:column headerText="Tickets" style="width: 70px" sortBy="#{r.tickets}">
             <h:outputText value="#{r.tickets}" />
           </p:column>
 
-          <p:column headerText="Status" style="width: 100px">
+          <p:column headerText="Status" style="width: 100px" sortBy="#{r.status}">
             <h:outputText value="#{r.status}" />
           </p:column>
 

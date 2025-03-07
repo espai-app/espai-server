@@ -15,7 +15,7 @@
     <div class="flex justify-content-between align-items-center flex-wrap">
       <h1 class="">Statistiken</h1>
 
-      <p:dataTable value="#{analyticsIndexView.cityStatistics}" var="cs">
+      <p:dataTable value="#{analyticsIndexView.cityStatistics}" var="cs" allowUnsorting="true" sortMode="single">
         <p:columnGroup type="header">
           <p:row>
             <p:column />
@@ -26,21 +26,21 @@
             <p:column colspan="2" headerText="storniert" styleClass="text-center"/>
           </p:row>
           <p:row>
-            <p:column headerText="Stadt" />
-            <p:column headerText="Buchungen" styleClass="text-center" />
-            <p:column headerText="Tickets" styleClass="text-center" />
-            <p:column headerText="Buchungen" styleClass="text-center" />
-            <p:column headerText="Tickets" styleClass="text-center" />
-            <p:column headerText="Buchungen" styleClass="text-center" />
-            <p:column headerText="Tickets" styleClass="text-center" />
-            <p:column headerText="Buchungen" styleClass="text-center" />
-            <p:column headerText="Tickets" styleClass="text-center" />
-            <p:column headerText="Buchungen" styleClass="text-center" />
-            <p:column headerText="Tickets" styleClass="text-center" />
+            <p:column headerText="Stadt"  sortBy="#{cs.name}" />
+            <p:column headerText="Buchungen" styleClass="text-center" sortBy="#{cs.get('totals').reservations}"/>
+            <p:column headerText="Tickets" styleClass="text-center" sortBy="#{cs.get('totals').tickets}"/>
+            <p:column headerText="Buchungen" styleClass="text-center" sortBy="#{cs.get('NEW').reservations}"/>
+            <p:column headerText="Tickets" styleClass="text-center" sortBy="#{cs.get('NEW').tickets}"/>
+            <p:column headerText="Buchungen" styleClass="text-center" sortBy="#{cs.get('HOLD').reservations}"/>
+            <p:column headerText="Tickets" styleClass="text-center" sortBy="#{cs.get('HOLD').tickets}"/>
+            <p:column headerText="Buchungen" styleClass="text-center" sortBy="#{cs.get('CONFIRMED').reservations}" />
+            <p:column headerText="Tickets" styleClass="text-center" sortBy="#{cs.get('CONFIRMED').tickets}"/>
+            <p:column headerText="Buchungen" styleClass="text-center" sortBy="#{cs.get('CANCELED').reservations}"/>
+            <p:column headerText="Tickets" styleClass="text-center" sortBy="#{cs.get('CANCELED').tickets}"/>
           </p:row>
         </p:columnGroup>
 
-        <p:column>
+        <p:column sortBy="#{cs.name}">
           <h:outputText value="#{cs.name}" />
         </p:column>
 

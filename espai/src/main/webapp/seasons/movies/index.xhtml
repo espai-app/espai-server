@@ -38,25 +38,27 @@
                    rowKey="#{p.id}"
                    rowSelector="none"
                    selection="#{seasonDetailsView.selectedProductions}"
-                   styleClass="mt-3">
+                   styleClass="mt-3"
+                   allowUnsorting="true"
+                   sortMode="single">
 
         <p:autoUpdate />
 
         <p:column selectionMode="multiple" style="width:16px;text-align:center" rendered="#{not userContext.restricted}" />
 
-        <p:column headerText="Titel" style="width: 40%">
+        <p:column headerText="Titel" style="width: 40%" sortBy="#{p.production.title}">
           <p:link value="#{p.production.title}" href="details.xhtml">
             <f:param name="movieId" value="#{p.production.id}" />
             <f:param name="seasonId" value="#{seasonContext.currentSeason.id}" />
           </p:link>
         </p:column>
-        <p:column headerText="Alter" style="width: 10%">
+        <p:column headerText="Alter" style="width: 10%" sortBy="#{p.production.fromAge}">
           <h:outputText value="#{p.production.fromAge}" /> - <h:outputText value="#{p.production.toAge}" />
         </p:column>
-        <p:column headerText="Freigabe" style="width: 10%">
+        <p:column headerText="Freigabe" style="width: 10%" sortBy="#{p.production.rating}">
           <h:outputText value="#{p.production.rating}" />
         </p:column>
-        <p:column headerText="Agentur/Verleih">
+        <p:column headerText="Agentur/Verleih" sortBy="#{p.production.agency.name}">
           <h:outputText value="#{p.production.agency.name}" />
         </p:column>
       </p:dataTable>

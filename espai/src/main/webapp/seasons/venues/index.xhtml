@@ -28,25 +28,27 @@
                    rowKey="#{v.id}"
                    rowSelector="none"
                    selection="#{seasonVenueIndexView.selectedVenues}"
-                   styleClass="mt-3">
+                   styleClass="mt-3"
+                   allowUnsorting="true"
+                   sortMode="single">
 
         <p:autoUpdate />
 
         <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
 
-        <p:column headerText="Name">
+        <p:column headerText="Name" sortBy="#{v.venue.name}">
           <h:outputText value="#{v.venue.name}" />
         </p:column>
 
-        <p:column headerText="Ort">
+        <p:column headerText="Ort" sortBy="#{v.venue.city}">
           <h:outputText value="#{v.venue.city}" />
         </p:column>
 
-        <p:column headerText="Anz. Veranstaltungen" style="width: 5rem">
+        <p:column headerText="Anz. Veranstaltungen" style="width: 5rem" sortBy="#{seasonVenueIndexView.eventCounterMap.containsKey(v.venue.id) ? seasonVenueIndexView.eventCounterMap.get(v.venue.id) : 0}">
           <h:outputText value="#{seasonVenueIndexView.eventCounterMap.containsKey(v.venue.id) ? seasonVenueIndexView.eventCounterMap.get(v.venue.id) : 0}" />
         </p:column>
 
-        <p:column headerText="programmiert selbst"  style="width: 7rem">
+        <p:column headerText="programmiert selbst"  style="width: 7rem" sortBy="#{v.selfProgramming}">
           <h:outputText value="#{v.selfProgramming ? 'ja' : 'nein'}" />
         </p:column>
 
