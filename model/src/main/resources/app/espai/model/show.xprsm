@@ -178,7 +178,11 @@ WITH FIELDS
 DEFINE MODEL SeatCategory
 WITH FIELDS
   name String(100),
-  description String,
+  description String;  
+
+DEFINE MODEL HallCapacity
+WITH FIELDS
+  seatCategory SeatCategory,
   hall Hall,
   capacity Integer,
   partOfTotalCapacity Boolean;

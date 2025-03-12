@@ -3,18 +3,19 @@ package app.espai.views.seasons;
 import app.espai.dao.EventSerials;
 import app.espai.dao.EventTicketPrices;
 import app.espai.dao.Events;
+import app.espai.dao.HallCapacities;
 import app.espai.dao.MailAccounts;
 import app.espai.dao.SeasonPriceTemplates;
 import app.espai.dao.Seasons;
-import app.espai.dao.SeatCategories;
 import app.espai.filter.EventFilter;
 import app.espai.filter.EventTicketPriceFilter;
+import app.espai.filter.HallCapacityFilter;
 import app.espai.filter.SeasonPriceTemplateFilter;
-import app.espai.filter.SeatCategoryFilter;
 import app.espai.model.Event;
 import app.espai.model.EventSerial;
 import app.espai.model.EventTicketPrice;
 import app.espai.model.Hall;
+import app.espai.model.HallCapacity;
 import app.espai.model.MailAccount;
 import app.espai.model.Season;
 import app.espai.model.SeasonPriceTemplate;
@@ -58,7 +59,7 @@ public class SeasonSettingsView {
   private Events events;
   
   @EJB
-  private SeatCategories seatCategories;
+  private HallCapacities hallCapacities;
   
   @EJB
   private EventTicketPrices ticketPrices;
@@ -127,12 +128,13 @@ public class SeasonSettingsView {
             .stream()
             .collect(Collectors.groupingBy(p -> p.getEvent().getId()));
     
-    SeatCategoryFilter seatCategoryFilter = new SeatCategoryFilter();
-    seatCategoryFilter.setHalls(allHalls);
-    Map<Long, List<SeatCategory>> seatCategoryMap = seatCategories.list(seatCategoryFilter)
-            .getItems()
+    HallCapacityFilter capacityFilter = new HallCapacityFilter();
+    capacityFilter.setHalls(allHalls);
+    Map<Long, List<SeatCategory>> seatCategoryMap = hallCapacities.list(capacityFilter).getItems()
             .stream()
-            .collect(Collectors.groupingBy(c -> c.getHall().getId()));
+            .collect(Collectors.groupingBy(
+                    h -> h.getHall().getId(), 
+                    Collectors.mapping(HallCapacity::getSeatCategory, Collectors.toList())));
 
     for (Event currentEvent : allEvents) {
       

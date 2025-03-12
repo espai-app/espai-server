@@ -18,34 +18,6 @@ if (isset($_POST['tickets'])) {
 
   // validate ticket amounts
   $errors = \app\espai\wordpress\Reservation::checkTicketAvailability($reservation);
-//  $total = 0;
-//  foreach ($_POST['tickets'] as $t) {
-//    $total += $t;
-//  }
-//
-//  if ($total <= 0) {
-//    $errors['tickets'] = "Bitte reservieren Sie min. ein Ticket.";
-//  }
-//
-//  if ($total > $event->availableTickets) {
-//    $errors['tickets'] = "Die gewünschte Anzahl an Tickets übersteigt die Anzahl der verfügbaren Sitzplätze. Sprechen Sie uns gern an. Manchmal ist eine zusätzliche Vorstellung oder ein Wechsel in einen größeren Saal möglich.";
-//  }
-//
-//  if (!empty($_POST['childEvents'])) {
-//    $reservation->childEvents = $_POST['childEvents'];
-//
-//    foreach ($_POST['childEvents'] as $childId) {
-//      foreach ($event->childEvents as $child) {
-//        if ($child->id == $childId && $child->availableTickets < $total && !$child->mandatory) {
-//
-//          $errors['childEvents'] = "Die gewünschte Teilnehmeranzahl übersteigt maximale Kapazität des Filmgespräches.";
-//          if ($total <= $event->availableTickets) {
-//            $errors['childEvents'] .= " Wenn Sie mögen, können Sie den Film dennoch schauen. Sie müssen aber nach der Vorführung den Saal verlassen.";
-//          }
-//        }
-//      }
-//    }
-//  }
 
   // save to session
   $_SESSION['reservation'] = $reservation;

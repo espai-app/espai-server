@@ -5,14 +5,15 @@
 package app.espai.views.priceTemplates;
 
 import app.espai.dao.EventTicketPriceTemplates;
+import app.espai.dao.HallCapacities;
 import app.espai.dao.Halls;
 import app.espai.dao.PriceCategories;
-import app.espai.dao.SeatCategories;
 import app.espai.dao.Venues;
+import app.espai.filter.HallCapacityFilter;
 import app.espai.filter.HallFilter;
-import app.espai.filter.SeatCategoryFilter;
 import app.espai.model.EventTicketPriceTemplate;
 import app.espai.model.Hall;
+import app.espai.model.HallCapacity;
 import app.espai.model.PriceCategory;
 import app.espai.model.SeatCategory;
 import app.espai.model.Venue;
@@ -50,7 +51,7 @@ public class PriceTemplateEditorView implements Serializable {
   private PriceCategories priceCategories;
 
   @EJB
-  private SeatCategories seatCategories;
+  private HallCapacities hallCapacities;
 
   private Venue venue;
   private EventTicketPriceTemplate priceTemplate;
@@ -91,9 +92,11 @@ public class PriceTemplateEditorView implements Serializable {
       seatCategoryList = Collections.EMPTY_LIST;
     }
 
-    SeatCategoryFilter seatFilter = new SeatCategoryFilter();
-    seatFilter.setHall(priceTemplate.getHall());
-    seatCategoryList = seatCategories.list(seatFilter).getItems();
+    HallCapacityFilter capacityFilter = new HallCapacityFilter();
+    capacityFilter.setHall(priceTemplate.getHall());
+    seatCategoryList = hallCapacities.list(capacityFilter).getItems().stream()
+            .map(HallCapacity::getSeatCategory)
+            .toList();
   }
 
   public void save() {

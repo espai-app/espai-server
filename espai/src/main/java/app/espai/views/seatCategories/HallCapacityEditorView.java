@@ -4,9 +4,12 @@
  */
 package app.espai.views.seatCategories;
 
+import app.espai.dao.HallCapacities;
 import app.espai.dao.Halls;
 import app.espai.dao.SeatCategories;
+import app.espai.filter.SeatCategoryFilter;
 import app.espai.model.Hall;
+import app.espai.model.HallCapacity;
 import app.espai.model.SeatCategory;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
@@ -14,6 +17,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
+import java.util.List;
 import org.primefaces.PrimeFaces;
 
 /**
@@ -22,45 +26,51 @@ import org.primefaces.PrimeFaces;
  */
 @Named
 @RequestScoped
-public class SeatCategoryEditorView {
+public class HallCapacityEditorView {
 
   @EJB
   private Halls halls;
 
   @EJB
+  private HallCapacities hallCapacities;
+  
+  @EJB
   private SeatCategories seatCategories;
 
   private Hall hall;
-  private SeatCategory seatCategory;
+  private HallCapacity hallCapacity;
+  private List<SeatCategory> seatCategoryList;
 
   @PostConstruct
   public void init() {
 
     ExternalContext econtext = FacesContext.getCurrentInstance().getExternalContext();
     String hallIdString = econtext.getRequestParameterMap().get("hallId");
-    String seatCategoryIdString = econtext.getRequestParameterMap().get("seatCategoryId");
+    String hallCapacityIdString = econtext.getRequestParameterMap().get("hallCapacityId");
 
-    if (hallIdString == null && seatCategoryIdString == null) {
-      throw new RuntimeException("Hall or SeatCategoryId missing.");
+    if (hallIdString == null && hallCapacityIdString == null) {
+      throw new RuntimeException("hallId or hallCapacityId missing.");
     }
 
-    if (seatCategoryIdString != null && !seatCategoryIdString.isBlank()) {
-      seatCategory = seatCategories.get(Long.parseLong(seatCategoryIdString));
-      hall = seatCategory.getHall();
+    if (hallCapacityIdString != null && !hallCapacityIdString.isBlank()) {
+      hallCapacity = hallCapacities.get(Long.parseLong(hallCapacityIdString));
+      hall = hallCapacity.getHall();
     } else if (hallIdString != null && !hallIdString.isBlank()) {
       hall = halls.get(Long.parseLong(hallIdString));
 
-      seatCategory = new SeatCategory();
-      seatCategory.setHall(hall);
+      hallCapacity = new HallCapacity();
+      hallCapacity.setHall(hall);
     }
 
     if (hall == null) {
       throw new RuntimeException("Hall missing.");
     }
+    
+    seatCategoryList = seatCategories.list(new SeatCategoryFilter()).getItems();
   }
 
   public void save() {
-    seatCategories.save(seatCategory);
+    hallCapacities.save(hallCapacity);
     PrimeFaces.current().dialog().closeDynamic(null);
   }
 
@@ -71,27 +81,41 @@ public class SeatCategoryEditorView {
   public Hall getHall() {
     return hall;
   }
-
+  
   /**
    * @param hall the hall to set
    */
   public void setHall(Hall hall) {
     this.hall = hall;
   }
-
+  
   /**
-   * @return the seatCategory
+   * @return the hallCapacity
    */
-  public SeatCategory getSeatCategory() {
-    return seatCategory;
+  public HallCapacity getHallCapacity() {
+    return hallCapacity;
   }
-
+  
   /**
-   * @param seatCategory the seatCategory to set
+   * @param hallCapacity the hallCapacity to set
    */
-  public void setSeatCategory(SeatCategory seatCategory) {
-    this.seatCategory = seatCategory;
+  public void setHallCapacity(HallCapacity hallCapacity) {
+    this.hallCapacity = hallCapacity;
+  }
+  
+  /**
+   * @return the seatCategoryList
+   */
+  public List<SeatCategory> getSeatCategoryList() {
+    return seatCategoryList;
+  }
+  
+  /**
+   * @param seatCategoryList the seatCategoryList to set
+   */
+  public void setSeatCategoryList(List<SeatCategory> seatCategoryList) {
+    this.seatCategoryList = seatCategoryList;
   }
   //</editor-fold>
-
+  
 }

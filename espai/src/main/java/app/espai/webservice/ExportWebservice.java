@@ -14,10 +14,12 @@ import app.espai.filter.ReservationExtraFilter;
 import app.espai.filter.ReservationFilter;
 import app.espai.filter.ReservationTicketFilter;
 import app.espai.model.Event;
+import app.espai.model.PriceCategory;
 import app.espai.model.Reservation;
 import app.espai.model.ReservationExtra;
 import app.espai.model.ReservationTicket;
 import app.espai.model.Season;
+import app.espai.model.SeatCategory;
 import app.espai.views.UserContext;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
@@ -32,12 +34,13 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.supercsv.io.CsvListWriter;
 import org.supercsv.prefs.CsvPreference;
 
@@ -77,6 +80,7 @@ public class ExportWebservice {
               .build();
     }
 
+    // collect events, reservations, tickets...
     Season season = seasons.get(seasonId);
     EventFilter eventFilter = userContext.getEventFilter();
     eventFilter.setSeason(season);
@@ -92,41 +96,65 @@ public class ExportWebservice {
 
     ReservationExtraFilter extraFilter = new ReservationExtraFilter();
     extraFilter.setReservations(reservationList);
-    List<ReservationExtra> extralist = extras.list(extraFilter).getItems();
+    List<ReservationExtra> extraList = extras.list(extraFilter).getItems();
 
-    Map<Long, List<ReservationTicket>> ticketMap = new HashMap<>();
-    List<String> ticketCategories = new LinkedList<>();
-    ticketList.forEach(t -> {
-      if (!ticketMap.containsKey(t.getReservation().getId())) {
-        ticketMap.put(t.getReservation().getId(), new LinkedList<>());
-      }
-      ticketMap.get(t.getReservation().getId()).add(t);
+    // group data by reservation
+    Map<Long, List<ReservationTicket>> ticketMap = ticketList.stream().collect(
+            Collectors.groupingBy(r -> r.getReservation().getId()));
 
-      if (!ticketCategories.contains(t.getPriceCategory().getName())) {
-        ticketCategories.add(t.getPriceCategory().getName());
-      }
-    });
+    List<PriceCategory> priceCategoryList = ticketList.stream()
+            .map(ReservationTicket::getPriceCategory)
+            .distinct()
+            .toList();
 
-    Map<Long, Map<String, String>> extraMap = new HashMap<>();
-    List<String> extraCategories = new LinkedList<>();
-    extralist.forEach(e -> {
-      if (!extraMap.containsKey(e.getReservation().getId())) {
-        extraMap.put(e.getReservation().getId(), new HashMap<String, String>());
-      }
-      extraMap.get(e.getReservation().getId()).put(e.getFieldName(), e.getValue());
+    List<SeatCategory> seatCategoryList = ticketList.stream()
+            .map(ReservationTicket::getSeatCategory)
+            .distinct()
+            .toList();
 
-      if (!extraCategories.contains(e.getFieldName())) {
-        extraCategories.add(e.getFieldName());
+    List<String> combinedCategoryList = new LinkedList<>();
+    for (SeatCategory sc : seatCategoryList) {
+      for (PriceCategory pc : priceCategoryList) {
+        combinedCategoryList.add(String.format("%s - %s", sc.getName(), pc.getName()));
       }
-    });
+    }
+
+    Map<Long, List<ReservationExtra>> extraMap = extraList.stream()
+            .collect(Collectors.groupingBy(r -> r.getReservation().getId()));
+
+    List<String> extraCategories = extraList.stream()
+            .map(ReservationExtra::getFieldName)
+            .distinct()
+            .toList();
+
+    // generate lines for the export
+    List<ReservationExport> reservationExports = new LinkedList<>();
+    for (Reservation r : reservationList) {
+
+      Map<String, Integer> ticketsByCategory = new HashMap<>();
+      combinedCategoryList.forEach(c -> ticketsByCategory.put(c, 0));
+
+      for (ReservationTicket t : ticketMap.getOrDefault(r.getId(), Collections.emptyList())) {
+        String categoryName = String.format("%s - %s",
+                t.getSeatCategory().getName(), t.getPriceCategory().getName());
+
+        ticketsByCategory.put(categoryName, ticketsByCategory.get(categoryName) + t.getAmount());
+      }
+
+      Map<String, String> extrasForReservation = new HashMap<>();
+      extraCategories.forEach(e -> extrasForReservation.put(e, ""));
+      for (ReservationExtra e : extraMap.getOrDefault(r.getId(), Collections.emptyList())) {
+        extrasForReservation.put(e.getFieldName(), e.getValue());
+      }
+
+      reservationExports.add(new ReservationExport(r, ticketsByCategory, extrasForReservation));
+    }
 
     return Response
             .ok(
                     new CsvResponse(
-                            reservationList,
-                            ticketMap,
-                            ticketCategories,
-                            extraMap,
+                            reservationExports,
+                            combinedCategoryList,
                             extraCategories,
                             userContext.isRestricted()),
                     "application/csv")
@@ -135,26 +163,79 @@ public class ExportWebservice {
             .build();
   }
 
+  private static class ReservationExport {
+
+    private Reservation reservation;
+    private Map<String, Integer> tickets;
+    private Map<String, String> extras;
+
+    public ReservationExport(Reservation reservation, Map<String, Integer> ticketsByCategory,
+            Map<String, String> reservationMeta) {
+      this.reservation = reservation;
+      this.tickets = ticketsByCategory;
+      this.extras = reservationMeta;
+    }
+
+    //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
+    /**
+     * @return the reservation
+     */
+    public Reservation getReservation() {
+      return reservation;
+    }
+
+    /**
+     * @param reservation the reservation to set
+     */
+    public void setReservation(Reservation reservation) {
+      this.reservation = reservation;
+    }
+
+    /**
+     * @return the ticketsByCategory
+     */
+    public Map<String, Integer> getTickets() {
+      return tickets;
+    }
+
+    /**
+     * @param tickets the tickets to set
+     */
+    public void setTickets(Map<String, Integer> tickets) {
+      this.tickets = tickets;
+    }
+
+    /**
+     * @return the reservationMeta
+     */
+    public Map<String, String> getExtras() {
+      return extras;
+    }
+
+    /**
+     * @param extras the extras to set
+     */
+    public void setExtras(Map<String, String> extras) {
+      this.extras = extras;
+    }
+    //</editor-fold>
+
+  }
+
   private static class CsvResponse implements StreamingOutput {
 
-    private final List<Reservation> reservations;
-    private final Map<Long, List<ReservationTicket>> ticketMap;
+    private final List<ReservationExport> reservations;
     private final List<String> ticketCategories;
-    private final Map<Long, Map<String, String>> extraMap;
     private final List<String> extraCategories;
     private final boolean restricted;
 
-    private CsvResponse(List<Reservation> reservations,
-            Map<Long, List<ReservationTicket>> ticketMap,
+    private CsvResponse(List<ReservationExport> reservations,
             List<String> ticketCategories,
-            Map<Long, Map<String, String>> extraMap,
             List<String> extraCategories,
             boolean restricted) {
 
       this.reservations = reservations;
-      this.ticketMap = ticketMap;
       this.ticketCategories = ticketCategories;
-      this.extraMap = extraMap;
       this.extraCategories = extraCategories;
       this.restricted = restricted;
     }
@@ -172,8 +253,8 @@ public class ExportWebservice {
         if (!restricted) {
           line.addAll(List.of("Adresse", "PLZ", "Ort", "Telefon", "E-Mail"));
           for (String category : extraCategories) {
-              line.add(category);
-            }
+            line.add(category);
+          }
         }
 
         line.add("Status");
@@ -194,52 +275,40 @@ public class ExportWebservice {
                 .ofLocalizedTime(FormatStyle.MEDIUM)
                 .localizedBy(Locale.GERMANY);
 
-        ArrayList<Integer> tickets = new ArrayList<>();
-
-        for (Reservation r : reservations) {
+        for (ReservationExport r : reservations) {
           line.clear();
+          Reservation currentReservation = r.getReservation();
 
-          line.add(r.getEvent().getDate().format(dateFormatter));
-          line.add(r.getEvent().getTime().format(timeFormatter));
-          line.add(r.getEvent().getProduction().getFullName());
-          line.add(r.getEvent().getHall().getVenue().getName());
-          line.add(r.getEvent().getHall().getVenue().getCity());
-          line.add(r.getEvent().getHall().getName());
-          line.add(r.getParentReservation() == null ? "nein" : "ja");
-          line.add(r.getCompany());
-          line.add(r.getGivenName());
-          line.add(r.getSurname());
+          line.add(currentReservation.getEvent().getDate().format(dateFormatter));
+          line.add(currentReservation.getEvent().getTime().format(timeFormatter));
+          line.add(currentReservation.getEvent().getProduction().getFullName());
+          line.add(currentReservation.getEvent().getHall().getVenue().getName());
+          line.add(currentReservation.getEvent().getHall().getVenue().getCity());
+          line.add(currentReservation.getEvent().getHall().getName());
+          line.add(currentReservation.getParentReservation() == null ? "nein" : "ja");
+          line.add(currentReservation.getCompany());
+          line.add(currentReservation.getGivenName());
+          line.add(currentReservation.getSurname());
 
           if (!restricted) {
-            line.add(r.getAddress());
-            line.add(r.getPostcode());
-            line.add(r.getCity());
-            line.add(r.getPhone());
-            line.add(r.getEmail());
+            line.add(currentReservation.getAddress());
+            line.add(currentReservation.getPostcode());
+            line.add(currentReservation.getCity());
+            line.add(currentReservation.getPhone());
+            line.add(currentReservation.getEmail());
 
-            for (String category : extraCategories) {
-              if (extraMap.containsKey(r.getId()) && extraMap.get(r.getId()).containsKey(category)) {
-                line.add(extraMap.get(r.getId()).get(category));
-              } else {
-                line.add("");
-              }
+            for (String c : extraCategories) {
+              line.add(r.getExtras().get(c));
             }
           }
 
-          line.add(r.getStatus().toString());
+          line.add(currentReservation.getStatus().toString());
 
-          tickets.clear();
-          ticketCategories.forEach(t -> tickets.add(0));
-          List<ReservationTicket> currentTickets = ticketMap.get(r.getId());
-          if (currentTickets != null) {
-            currentTickets.forEach(t -> {
-              tickets.set(ticketCategories.indexOf(t.getPriceCategory().getName()), t.getAmount());
-            });
+          for (String c : ticketCategories) {
+            line.add(r.getTickets().get(c));
           }
 
-          line.addAll(tickets);
-
-          line.add(r.getMessage());
+          line.add(currentReservation.getMessage());
 
           csvWriter.write(line);
         }

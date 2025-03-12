@@ -1,6 +1,7 @@
 package app.espai.views.reservations;
 
 import app.espai.ReservationMailManager;
+import app.espai.businesslogic.CapacityCalculator;
 import app.espai.dao.ReservationExtras;
 import app.espai.dao.ReservationTickets;
 import app.espai.dao.Reservations;
@@ -13,6 +14,7 @@ import app.espai.model.Reservation;
 import app.espai.model.ReservationExtra;
 import app.espai.model.ReservationStatus;
 import app.espai.model.ReservationTicket;
+import app.espai.model.SeatCategory;
 import app.espai.views.BaseView;
 import app.espai.views.Dialog;
 import jakarta.annotation.PostConstruct;
@@ -49,6 +51,9 @@ public class ReservationDetailsView extends BaseView {
 
   @EJB
   private ReservationMailManager mailManager;
+  
+  @Inject
+  private CapacityCalculator capacityCalculator;
 
   @Inject
   private jakarta.enterprise.event.Event<ReservationChangedEvent> reservationChangedEvent;
@@ -59,6 +64,7 @@ public class ReservationDetailsView extends BaseView {
   private List<ReservationTicket> ticketList;
   private List<Reservation> childReservationList;
   private List<ReservationExtra> extraList;
+  private List<SeatCategory> seats;
 
   private final ReservationStatus[] reservationStatusList = ReservationStatus.values();
 
@@ -86,6 +92,8 @@ public class ReservationDetailsView extends BaseView {
     ReservationExtraFilter extraFilter = new ReservationExtraFilter();
     extraFilter.setReservation(reservation);
     extraList = reservationExtras.list(extraFilter).getItems();
+    
+    seats = capacityCalculator.getSeats(reservation.getEvent());
   }
 
   public void updateStatus() {
@@ -210,6 +218,20 @@ public class ReservationDetailsView extends BaseView {
    */
   public void setExtraList(List<ReservationExtra> extraList) {
     this.extraList = extraList;
+  }
+
+  /**
+   * @return the seats
+   */
+  public List<SeatCategory> getSeats() {
+    return seats;
+  }
+
+  /**
+   * @param seats the seats to set
+   */
+  public void setSeats(List<SeatCategory> seats) {
+    this.seats = seats;
   }
 
   /**

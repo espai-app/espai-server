@@ -144,7 +144,7 @@
                 <p:commandButton title="Platzkategorie hinzufügen"
                                  icon="pi pi-plus"
                                  styleClass="ui-button-flat rounded-button"
-                                 action="#{venueDetailsView.addSeatCategory(hall.id)}">
+                                 action="#{venueDetailsView.addHallCapacity(hall.id)}">
                   <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
                 </p:commandButton>
                 <p:commandButton title="bearbeiten"
@@ -166,30 +166,29 @@
               </div>
             </div>
 
-            <p:dataTable value="#{venueDetailsView.seatCategoryMap.get(hall.id)}"
-                         var="seatCategory">
+            <p:dataTable value="#{venueDetailsView.hallCapacityMap.get(hall.id)}"
+                         var="hallCapacity">
 
-              <p:column headerText="Name">
-                <h:outputText value="#{seatCategory.name}" class="block mb-2" />
-                <h:outputText value="#{seatCategory.description}" />
+              <p:column headerText="Platzkategorie">
+                <h:outputText value="#{hallCapacity.seatCategory.name}" class="block mb-2" />
+                <h:outputText value="#{hallCapacity.seatCategory.description}" />
               </p:column>
 
               <p:column headerText="Plätze" style="width: 100px;" styleClass="text-right">
-                <h:outputText value="#{seatCategory.capacity}" />
+                <h:outputText value="#{hallCapacity.capacity}" />
               </p:column>
 
               <p:column styleClass="text-right" style="width: 150px">
                 <p:commandButton title="bearbeiten"
                                  icon="pi pi-pencil"
                                  styleClass="ui-button-flat rounded-button"
-                                 action="#{venueDetailsView.editSeatCategory(seatCategory.id)}">
+                                 action="#{venueDetailsView.editHallCapacity(hallCapacity.id)}">
                   <p:ajax event="dialogReturn" listener="#{venueDetailsView.onDataChanged}" update="@form"/>
                 </p:commandButton>
                 <p:commandButton title="löschen"
                                  icon="pi pi-trash"
                                  styleClass="ui-button-flat rounded-button ui-button-danger ml-2"
-                                 action="#{venueDetailsView.removeSeatCategory(seatCategory.id)}"
-                                 rendered="false"
+                                 action="#{venueDetailsView.removeHallCapacity(hallCapacity.id)}"
                                  update="@form">
                   <p:confirm header="Löschen bestätigen" message="Möchten Sie diese Platzkategorie wirklich löschen?" icon="pi pi-exclamation-triangle"/>
                 </p:commandButton>

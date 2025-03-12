@@ -6,11 +6,12 @@ package app.espai.views.eventTicketPrice;
 
 import app.espai.dao.EventTicketPrices;
 import app.espai.dao.Events;
+import app.espai.dao.HallCapacities;
 import app.espai.dao.PriceCategories;
-import app.espai.dao.SeatCategories;
-import app.espai.filter.SeatCategoryFilter;
+import app.espai.filter.HallCapacityFilter;
 import app.espai.model.Event;
 import app.espai.model.EventTicketPrice;
+import app.espai.model.HallCapacity;
 import app.espai.model.PriceCategory;
 import app.espai.model.SeatCategory;
 import jakarta.annotation.PostConstruct;
@@ -36,7 +37,9 @@ public class EventTicketPriceEditorView {
   private Events events;
 
   @EJB
-  private SeatCategories seatCategories;
+  private HallCapacities hallCapacities;
+  
+  
 
   @EJB
   private PriceCategories priceCategories;
@@ -65,10 +68,12 @@ public class EventTicketPriceEditorView {
       ticketPrice.setEvent(event);
       ticketPrice.setPrice(new Monetary(BigDecimal.ZERO, "EUR"));
     }
-
-    SeatCategoryFilter seatCategoryFilter = new SeatCategoryFilter();
-    seatCategoryFilter.setHall(event.getHall());
-    seatCategoryList = seatCategories.list(seatCategoryFilter).getItems();
+    
+    HallCapacityFilter capacityFilter = new HallCapacityFilter();
+    capacityFilter.setHall(event.getHall());
+    seatCategoryList = hallCapacities.list(capacityFilter).getItems().stream()
+            .map(HallCapacity::getSeatCategory)
+            .toList();
 
     priceCategoryList = priceCategories.list().getItems();
   }

@@ -22,6 +22,18 @@ public class SeatCategory extends AbstractSeatCategory {
   @Transient
   private int seatsTaken = 0;
   
+  @Transient
+  private int capacity = 0;
+  
+  public SeatCategory duplicate() {
+    SeatCategory result = new SeatCategory();
+    result.setId(getId());
+    result.setName(getName());
+    result.setDescription(getDescription());
+    
+    return result;
+  }
+  
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
   /**
    * @return the seatsAvailable
@@ -49,6 +61,20 @@ public class SeatCategory extends AbstractSeatCategory {
    */
   public void setSeatsTaken(int seatsTaken) {
     this.seatsTaken = seatsTaken;
+  }
+
+  /**
+   * @return the capacity
+   */
+  public int getCapacity() {
+    return capacity;
+  }
+
+  /**
+   * @param capacity the capacity to set
+   */
+  public void setCapacity(int capacity) {
+    this.capacity = capacity;
   }
   //</editor-fold>
   

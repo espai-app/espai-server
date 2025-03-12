@@ -2,19 +2,20 @@ package app.espai.views.venues;
 
 import app.espai.dao.Attachments;
 import app.espai.dao.EventTicketPriceTemplates;
+import app.espai.dao.HallCapacities;
 import app.espai.dao.Halls;
-import app.espai.dao.SeatCategories;
 import app.espai.dao.VenueContacts;
 import app.espai.dao.Venues;
 import app.espai.filter.AttachmentFilter;
 import app.espai.filter.EventTicketPriceTemplateFilter;
+import app.espai.filter.HallCapacityFilter;
 import app.espai.filter.HallFilter;
-import app.espai.filter.SeatCategoryFilter;
 import app.espai.filter.VenueContactFilter;
 import app.espai.model.Attachment;
 import app.espai.model.AttachmentType;
 import app.espai.model.EventTicketPriceTemplate;
 import app.espai.model.Hall;
+import app.espai.model.HallCapacity;
 import app.espai.model.SeatCategory;
 import app.espai.model.Venue;
 import app.espai.model.VenueContact;
@@ -32,6 +33,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import rocks.xprs.runtime.db.PageableFilter;
@@ -62,7 +64,7 @@ public class VenueDetailsView extends BaseView {
   private Halls halls;
 
   @EJB
-  private SeatCategories seatCategories;
+  private HallCapacities hallCapacities;
 
   @EJB
   private EventTicketPriceTemplates priceTemplates;
@@ -71,7 +73,7 @@ public class VenueDetailsView extends BaseView {
   private List<Attachment> imageList;
   private List<Hall> hallList;
   private List<VenueContact> venueContactList;
-  private Map<Long, List<SeatCategory>> seatCategoryMap = new HashMap<>();
+  private Map<Long, List<HallCapacity>> hallCapacityMap = new HashMap<>();
   private List<SeatCategory> seatCategoryList;
   private List<EventTicketPriceTemplate> priceTemplateList;
 
@@ -110,14 +112,11 @@ public class VenueDetailsView extends BaseView {
     hallFilter.setOrderBy("name");
     hallFilter.setOrder(PageableFilter.Order.ASC);
     hallList = halls.list(hallFilter).getItems();
-
-    SeatCategoryFilter seatCategoryFilter = new SeatCategoryFilter();
-    for (Hall hall : hallList) {
-      seatCategoryFilter.setHall(hall);
-      seatCategoryMap.put(hall.getId(), seatCategories.list(seatCategoryFilter).getItems());
-    }
-    seatCategoryFilter.setHalls(hallList);
-    seatCategoryList = seatCategories.list(seatCategoryFilter).getItems();
+    
+    HallCapacityFilter capacityFilter = new HallCapacityFilter();
+    capacityFilter.setHalls(hallList);
+    hallCapacityMap = hallCapacities.list(capacityFilter).getItems().stream()
+            .collect(Collectors.groupingBy(hc -> hc.getHall().getId()));
 
     EventTicketPriceTemplateFilter priceTemplateFilter = new EventTicketPriceTemplateFilter();
     priceTemplateFilter.setVenue(venue);
@@ -192,29 +191,29 @@ public class VenueDetailsView extends BaseView {
             null, new FacesMessage("Saal gelöscht."));
   }
 
-  public void addSeatCategory(long hallId) {
+  public void addHallCapacity(long hallId) {
     HashMap<String, List<String>> params = new HashMap<>();
     params.put("hallId", Arrays.asList(String.valueOf(hallId)));
 
     PrimeFaces.current().dialog().openDynamic(
-            "/catalogs/venues/halls/seatCategoryEditor",
+            "/catalogs/venues/halls/hallCapacityEditor",
             Dialog.getDefaultOptions(600, 500),
             params);
   }
 
-  public void editSeatCategory(long seatCategoryId) {
+  public void editHallCapacity(long hallCapacityId) {
     HashMap<String, List<String>> params = new HashMap<>();
-    params.put("seatCategoryId", Arrays.asList(String.valueOf(seatCategoryId)));
+    params.put("hallCapacityId", Arrays.asList(String.valueOf(hallCapacityId)));
 
     PrimeFaces.current().dialog().openDynamic(
-            "/catalogs/venues/halls/seatCategoryEditor",
+            "/catalogs/venues/halls/hallCapacityEditor",
             Dialog.getDefaultOptions(600, 500),
             params);
   }
 
-  public void removeSeatCategory(long seatCategoryId) {
-    SeatCategory seatCategory = seatCategories.get(seatCategoryId);
-    seatCategories.delete(seatCategory);
+  public void removeHallCapacity(long seatCategoryId) {
+    HallCapacity hallCapacity = hallCapacities.get(seatCategoryId);
+    hallCapacities.delete(hallCapacity);
     init();
     FacesContext.getCurrentInstance().addMessage(
             null, new FacesMessage("Platzkategorie gelöscht."));
@@ -339,17 +338,17 @@ public class VenueDetailsView extends BaseView {
   }
 
   /**
-   * @return the seatCategoryMap
+   * @return the hallCapacityMap
    */
-  public Map<Long, List<SeatCategory>> getSeatCategoryMap() {
-    return seatCategoryMap;
+  public Map<Long, List<HallCapacity>> getHallCapacityMap() {
+    return hallCapacityMap;
   }
 
   /**
-   * @param seatCategoryMap the seatCategoryMap to set
+   * @param hallCapacityMap the hallCapacityMap to set
    */
-  public void setSeatCategoryMap(Map<Long, List<SeatCategory>> seatCategoryMap) {
-    this.seatCategoryMap = seatCategoryMap;
+  public void setHallCapacityMap(Map<Long, List<HallCapacity>> hallCapacityMap) {
+    this.hallCapacityMap = hallCapacityMap;
   }
 
   /**

@@ -151,3 +151,13 @@ body.dialog {
   max-width: 250px;
 }
 
+/* TABLES */
+.table-inline {
+  margin: -0.25rem -0.25rem 0.5rem -0.25rem;
+}
+
+.table-inline th,
+.table-inline td {
+  padding: 0.25rem;
+}
+

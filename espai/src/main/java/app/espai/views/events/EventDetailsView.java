@@ -1,5 +1,6 @@
 package app.espai.views.events;
 
+import app.espai.businesslogic.CapacityCalculator;
 import app.espai.businesslogic.PriceManager;
 import app.espai.dao.EventTicketPrices;
 import app.espai.dao.Events;
@@ -10,6 +11,7 @@ import app.espai.filter.ReservationSummaryFilter;
 import app.espai.model.Event;
 import app.espai.model.EventTicketPrice;
 import app.espai.model.ReservationSummary;
+import app.espai.model.SeatCategory;
 import app.espai.views.BaseView;
 import app.espai.views.Dialog;
 import app.espai.views.UserContext;
@@ -19,10 +21,12 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import rocks.xprs.runtime.exceptions.AccessDeniedException;
@@ -50,11 +54,16 @@ public class EventDetailsView extends BaseView {
 
   @EJB
   private PriceManager priceManager;
+  
+  @Inject
+  private CapacityCalculator capacityCalculator;
 
   private Event event;
   private List<Event> childEventList;
   private List<ReservationSummary> reservationList;
   private List<EventTicketPrice> ticketPriceList;
+  private List<SeatCategory> seats;
+  private int totalTickets;
 
   @PostConstruct
   public void init() {
@@ -84,6 +93,10 @@ public class EventDetailsView extends BaseView {
     EventTicketPriceFilter ticketFilter = new EventTicketPriceFilter();
     ticketFilter.setEvent(event);
     ticketPriceList = ticketPrices.list(ticketFilter).getItems();
+    
+    seats = capacityCalculator.getSeats(event);
+    totalTickets = reservationList.stream()
+            .collect(Collectors.summingInt(ReservationSummary::getTickets));
   }
 
   public void editEvent() {
@@ -211,6 +224,34 @@ public class EventDetailsView extends BaseView {
    */
   public void setTicketPriceList(List<EventTicketPrice> ticketPriceList) {
     this.ticketPriceList = ticketPriceList;
+  }
+
+  /**
+   * @return the seats
+   */
+  public List<SeatCategory> getSeats() {
+    return seats;
+  }
+
+  /**
+   * @param seats the seats to set
+   */
+  public void setSeats(List<SeatCategory> seats) {
+    this.seats = seats;
+  }
+
+  /**
+   * @return the totalTickets
+   */
+  public int getTotalTickets() {
+    return totalTickets;
+  }
+
+  /**
+   * @param totalTickets the totalTickets to set
+   */
+  public void setTotalTickets(int totalTickets) {
+    this.totalTickets = totalTickets;
   }
   //</editor-fold>
 }

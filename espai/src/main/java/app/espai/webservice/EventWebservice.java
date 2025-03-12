@@ -22,6 +22,7 @@ import app.espai.model.Event;
 import app.espai.model.EventTicketPrice;
 import app.espai.model.Production;
 import app.espai.model.Season;
+import app.espai.model.SeatCategory;
 import app.espai.model.Venue;
 import app.espai.sdk.model.EventDTO;
 import jakarta.ejb.EJB;
@@ -36,6 +37,7 @@ import jakarta.ws.rs.core.Response;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import rocks.xprs.runtime.db.PageableFilter;
 import rocks.xprs.runtime.db.Range;
 
@@ -90,7 +92,7 @@ public class EventWebservice {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
     
-    EventDTO result = toDTO(event);
+    EventDTO result = toDTO(event, capacityCalculator.getSeats(event));
     addChildEvents(event, result);
 
     return Response.ok(result).build();
@@ -168,10 +170,12 @@ public class EventWebservice {
 
       eventList = eventList.stream().filter(e -> e.getDate().equals(filterDate)).toList();
     }
+    
+    Map<Long, List<SeatCategory>> seats = capacityCalculator.getSeats(eventList);
 
     List<EventDTO> eventDTOList = new LinkedList<>();
     for (Event e : eventList) {
-      EventDTO target = toDTO(e);
+      EventDTO target = toDTO(e, seats.get(e.getId()));
       addChildEvents(e, target);
       eventDTOList.add(target);
     }
@@ -179,7 +183,7 @@ public class EventWebservice {
     return eventDTOList;
   }
 
-  private EventDTO toDTO(Event event) {
+  private EventDTO toDTO(Event event, List<SeatCategory> seats) {
 
     EventFilter childEventFilter = new EventFilter();
     childEventFilter.setParentEvent(event);
@@ -197,7 +201,7 @@ public class EventWebservice {
     List<Event> allEvents = new LinkedList<>(childEventList);
     allEvents.add(event);
 
-    return EventDTOConverter.of(event, attachmentList, getPriceList(event), capacityCalculator.getSeats(event));
+    return EventDTOConverter.of(event, attachmentList, getPriceList(event), seats);
   }
 
   private void addChildEvents(Event parentEvent, EventDTO target) {
@@ -206,8 +210,9 @@ public class EventWebservice {
     childEventFilter.setHidden(false);
 
     List<Event> childEventList = events.list(childEventFilter).getItems();
+    Map<Long, List<SeatCategory>> seats = capacityCalculator.getSeats(childEventList);
     target.setChildEvents(childEventList.stream()
-            .map(e-> EventDTOConverter.of(e, null, null, capacityCalculator.getSeats(e)))
+            .map(e-> EventDTOConverter.of(e, null, null, seats.get(e.getId())))
             .toList());
   }
 

@@ -5,13 +5,13 @@
 package app.espai.businesslogic;
 
 import app.espai.dao.EventTicketPriceTemplates;
-import app.espai.dao.SeatCategories;
+import app.espai.dao.HallCapacities;
 import app.espai.filter.EventTicketPriceTemplateFilter;
-import app.espai.filter.SeatCategoryFilter;
+import app.espai.filter.HallCapacityFilter;
 import app.espai.model.Event;
 import app.espai.model.EventTicketPrice;
 import app.espai.model.EventTicketPriceTemplate;
-import app.espai.model.SeatCategory;
+import app.espai.model.HallCapacity;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import java.util.LinkedList;
@@ -25,7 +25,7 @@ import java.util.List;
 public class PriceManager {
 
   @EJB
-  private SeatCategories seatCategories;
+  private HallCapacities hallCapacities;
 
   @EJB
   private EventTicketPriceTemplates priceTemplates;
@@ -53,16 +53,16 @@ public class PriceManager {
       filter.setVenue(event.getHall().getVenue());
       filter.setHallIsNull(true);
       templates = priceTemplates.list(filter).getItems();
+      
+      HallCapacityFilter capacityFilter = new HallCapacityFilter();
+      capacityFilter.setHall(event.getHall());
+      List<HallCapacity> hallCapacityList = hallCapacities.list(capacityFilter).getItems();
 
-      SeatCategoryFilter seatCatFilter = new SeatCategoryFilter();
-      seatCatFilter.setHall(event.getHall());
-      List<SeatCategory> seatCategoryList = seatCategories.list(seatCatFilter).getItems();
-
-      for (SeatCategory s : seatCategoryList) {
+      for (HallCapacity s : hallCapacityList) {
         for (EventTicketPriceTemplate t : templates) {
           EventTicketPrice r = new EventTicketPrice();
           r.setEvent(event);
-          r.setSeatCategory(s);
+          r.setSeatCategory(s.getSeatCategory());
           r.setPriceCategory(t.getPriceCategory());
           r.setPrice(t.getPrice());
           result.add(r);

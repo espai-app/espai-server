@@ -4,13 +4,16 @@
  */
 package app.espai.businesslogic;
 
+import app.espai.dao.HallCapacities;
 import app.espai.dao.ReservationTickets;
 import app.espai.dao.Reservations;
 import app.espai.dao.SeatCategories;
+import app.espai.filter.HallCapacityFilter;
 import app.espai.filter.ReservationFilter;
 import app.espai.filter.ReservationTicketFilter;
-import app.espai.filter.SeatCategoryFilter;
 import app.espai.model.Event;
+import app.espai.model.Hall;
+import app.espai.model.HallCapacity;
 import app.espai.model.Reservation;
 import app.espai.model.ReservationStatus;
 import app.espai.model.ReservationTicket;
@@ -18,10 +21,11 @@ import app.espai.model.SeatCategory;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Named;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -41,10 +45,14 @@ public class CapacityCalculator {
   @EJB
   private SeatCategories seatCategories;
 
-  public List<SeatCategory> getSeats(Event event) {
+  @EJB
+  private HallCapacities hallCapacities;
 
+  public Map<Long, List<SeatCategory>> getSeats(List<Event> eventList) {
+
+    // get reservations and sold tickets
     ReservationFilter reservationFilter = new ReservationFilter();
-    reservationFilter.setEvent(event);
+    reservationFilter.setEvents(eventList);
     reservationFilter.setStatuses(List.of(
             ReservationStatus.NEW,
             ReservationStatus.HOLD,
@@ -55,48 +63,75 @@ public class CapacityCalculator {
     ticketFilter.setReservations(reservationList);
     List<ReservationTicket> ticketList = tickets.list(ticketFilter).getItems();
 
-    SeatCategoryFilter seatCategoryFilter = new SeatCategoryFilter();
-    seatCategoryFilter.setHall(event.getHall());
-    List<SeatCategory> seatCategoryList;
-    
-    if (event.getParentEvent() == null) {
-      seatCategoryList = seatCategories.list(seatCategoryFilter).getItems();
+    // get hall and hall capacity
+    List<Hall> hallList = eventList.stream().map(Event::getHall).distinct().toList();
 
-      for (SeatCategory currentSeatCategory : seatCategoryList) {
-        
-        Map<Long, Integer> soldTickets = ticketList.stream().collect(
-            Collectors.toMap(
-                    t -> t.getSeatCategory().getId(),
-                    ReservationTicket::getAmount,
-                    (a1, a2) -> a1 + a2));
+    HallCapacityFilter hallCapacityFilter = new HallCapacityFilter();
+    hallCapacityFilter.setHalls(hallList);
+    Map<Long, List<HallCapacity>> hallCapacityMap = hallCapacities.list(hallCapacityFilter)
+            .getItems().stream().collect(Collectors.groupingBy(s -> s.getHall().getId()));
 
-        int capacity = (event.getCapacity() < currentSeatCategory.getCapacity()) 
-                ? event.getCapacity() 
-                : currentSeatCategory.getCapacity();
+    Map<Long, List<SeatCategory>> result = new LinkedHashMap<>();
 
-        if (soldTickets.containsKey(currentSeatCategory.getId())) {
-          currentSeatCategory.setSeatsTaken(soldTickets.get(currentSeatCategory.getId()));
-          currentSeatCategory.setSeatsAvailable(
-                  capacity - currentSeatCategory.getSeatsTaken());
-        } else {
-          currentSeatCategory.setSeatsTaken(0);
-          currentSeatCategory.setSeatsAvailable(capacity);
+    for (Event event : eventList) {
+
+      List<HallCapacity> hallCapacityList = hallCapacityMap.get(event.getHall().getId());
+      List<SeatCategory> eventSeats = new LinkedList<>();
+
+      if (event.getParentEvent() == null) {
+
+        for (HallCapacity hallCapacity : hallCapacityList) {
+          SeatCategory currentSeatCategory = hallCapacity.getSeatCategory().duplicate();
+
+          Map<Long, Integer> soldTickets = ticketList.stream()
+                  .filter(t -> t.getReservation().getEvent().equals(event))
+                  .collect(
+                          Collectors.toMap(
+                                  t -> t.getSeatCategory().getId(),
+                                  ReservationTicket::getAmount,
+                                  (a1, a2) -> a1 + a2));
+
+          currentSeatCategory.setCapacity((event.getCapacity() < hallCapacity.getCapacity())
+                  ? event.getCapacity()
+                  : hallCapacity.getCapacity());
+
+          if (soldTickets.containsKey(currentSeatCategory.getId())) {
+            currentSeatCategory.setSeatsTaken(soldTickets.get(currentSeatCategory.getId()));
+            currentSeatCategory.setSeatsAvailable(
+                    currentSeatCategory.getCapacity() - currentSeatCategory.getSeatsTaken());
+          } else {
+            currentSeatCategory.setSeatsTaken(0);
+            currentSeatCategory.setSeatsAvailable(currentSeatCategory.getCapacity());
+          }
+
+          eventSeats.add(currentSeatCategory);
         }
-      }
-    } else {
-      int totalSeatsTaken = ticketList.stream().collect(
-            Collectors.summingInt(ReservationTicket::getAmount));
+      } else {
+        int totalSeatsTaken = ticketList.stream().collect(
+                Collectors.summingInt(ReservationTicket::getAmount));
 
-      seatCategoryList = new LinkedList<>();
-      SeatCategory commonSeatCategory = new SeatCategory();
-      commonSeatCategory.setName("Teilnehmer:innen");
-      commonSeatCategory.setCapacity(event.getCapacity());
-      commonSeatCategory.setSeatsTaken(totalSeatsTaken);
-      commonSeatCategory.setSeatsAvailable(event.getCapacity() - totalSeatsTaken);
-      seatCategoryList.add(commonSeatCategory);
+        SeatCategory commonSeatCategory = new SeatCategory();
+        commonSeatCategory.setName("Teilnehmer:innen");
+        commonSeatCategory.setCapacity(event.getCapacity());
+        commonSeatCategory.setSeatsTaken(totalSeatsTaken);
+        commonSeatCategory.setSeatsAvailable(event.getCapacity() - totalSeatsTaken);
+        eventSeats.add(commonSeatCategory);
+      }
+
+      result.put(event.getId(), eventSeats);
     }
 
-    return seatCategoryList;
+    return result;
+  }
+
+  public List<SeatCategory> getSeats(Event event) {
+
+    Map<Long, List<SeatCategory>> result = getSeats(List.of(event));
+    if (result.get(event.getId()) == null) {
+      return Collections.EMPTY_LIST;
+    }
+
+    return result.get(event.getId());
   }
 
   public List<String> checkCapacity(Event event, List<ReservationTicket> requestedTickets) {
@@ -127,36 +162,34 @@ public class CapacityCalculator {
     }
 
     if (event.getParentEvent() == null) {
-      Map<SeatCategory, Integer> seatsAvailable = seatStats.stream()
+      Map<Long, Integer> seatsAvailable = seatStats.stream()
               .collect(Collectors.toMap(
-                      Function.identity(),
+                      SeatCategory::getId,
                       SeatCategory::getSeatsAvailable,
                       (s1, s2) -> s1 + s2));
-      Map<SeatCategory, Integer> seatsRequested = requestedTickets.stream()
+      Map<Long, Integer> seatsRequested = requestedTickets.stream()
               .collect(Collectors.toMap(
-                      ReservationTicket::getSeatCategory,
+                      t -> t.getSeatCategory().getId(),
                       ReservationTicket::getAmount,
                       (a1, a2) -> a1 + a2));
 
-      for (Map.Entry<SeatCategory, Integer> sr : seatsRequested.entrySet()) {
+      for (Map.Entry<Long, Integer> sr : seatsRequested.entrySet()) {
         if (!seatsAvailable.containsKey(sr.getKey())) {
           errors.add(String.format(
-                  "Die Platzkategorie %s existiert für die Veranstaltung '%s' nicht.", 
-                  event.getProduction().getProduction().getTitle(),
-                  sr.getKey().getName()));
+                  "Die Platzkategorie existiert für die Veranstaltung '%s' nicht.",
+                  event.getProduction().getProduction().getTitle()));
           continue;
-        } 
+        }
 
         if (seatsAvailable.get(sr.getKey()) < sr.getValue()) {
           errors.add(String.format(
-                  "In der Platzkategorie %s sind leider nur %d Plätze verfügbar.", 
-                  sr.getKey().getName(),
+                  "In der Platzkategorie sind leider nur %d Plätze verfügbar.",
                   seatsAvailable.get(sr.getKey())));
           continue;
         }
       }
     }
-    
+
     return errors;
   }
 

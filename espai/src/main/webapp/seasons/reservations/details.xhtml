@@ -79,6 +79,30 @@
 
         <dt>Saal</dt>
         <dd><h:outputText value="#{reservationDetailsView.reservation.event.hall.name} (#{reservationDetailsView.reservation.event.hall.capacity} Pers.)" /></dd>
+        
+        <dt>Belegung</dt>
+        <dd>
+          <table class="table-inline">
+            <thead>
+              <tr>
+                <th>Platzkategorie</th>
+                <th class="text-right">frei</th>
+                <th class="text-right">belegt</th>
+                <th class="text-right">gesamt</th>
+              </tr>
+            </thead>
+            <tbody>
+              <c:forEach items="#{reservationDetailsView.seats}" var="seat">
+                <tr>
+                  <td><h:outputText value="#{seat.name}" /></td>
+                  <td class="text-right"><h:outputText value="#{seat.seatsAvailable}" /></td>
+                  <td class="text-right"><h:outputText value="#{seat.seatsTaken}" /></td>
+                  <td class="text-right"><h:outputText value="#{seat.capacity}" /></td>
+                </tr>
+              </c:forEach>
+            </tbody>
+          </table>
+        </dd>
       </dl>
     </p:card>
 

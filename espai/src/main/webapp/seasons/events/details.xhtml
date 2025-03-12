@@ -29,46 +29,78 @@
       </div>
 
       <p:card>
+        <div class="grid">
+          <div class="col-12 md:col-6">
+            <dl class="data-list">
+              <dt><p:outputLabel value="Datum" /></dt>
+              <dd>
+                <h:outputText value="#{eventDetailsView.event.date}">
+                  <f:convertDateTime pattern="dd.MM.yyyy" type="localDate" />
+                </h:outputText>,
+                <h:outputText value=" #{eventDetailsView.event.time} " /> Uhr
+              </dd>
 
-        <dl class="data-list">
-          <dt><p:outputLabel value="Datum" /></dt>
-          <dd>
-            <h:outputText value="#{eventDetailsView.event.date}">
-              <f:convertDateTime pattern="dd.MM.yyyy" type="localDate" />
-            </h:outputText>,
-            <h:outputText value=" #{eventDetailsView.event.time} " /> Uhr
-          </dd>
+              <dt><p:outputLabel value="Veranstaltung" /></dt>
+              <dd><h:outputText value="#{eventDetailsView.event.production.fullName}" /></dd>
 
-          <dt><p:outputLabel value="Veranstaltung" /></dt>
-          <dd><h:outputText value="#{eventDetailsView.event.production.fullName}" /></dd>
+              <dt><p:outputLabel value="Spielstätte" /></dt>
+              <dd><h:outputText value="#{eventDetailsView.event.hall.venue.name}, #{eventDetailsView.event.hall.venue.city}" /></dd>
 
-          <dt><p:outputLabel value="Spielstätte" /></dt>
-          <dd><h:outputText value="#{eventDetailsView.event.hall.venue.name}, #{eventDetailsView.event.hall.venue.city}" /></dd>
+              <dt><p:outputLabel value="Saal" /></dt>
+              <dd>
+                <h:outputText value=" #{eventDetailsView.event.hall.name} " />
+                (<h:outputText value="#{eventDetailsView.event.hall.capacity}" /> Pers.)
+              </dd>
 
-          <dt><p:outputLabel value="Saal" /></dt>
-          <dd>
-            <h:outputText value=" #{eventDetailsView.event.hall.name} " />
-            (<h:outputText value="#{eventDetailsView.event.hall.capacity}" /> Pers.)
-          </dd>
-          
-          <dt><p:outputLabel value="Veranstaltungsreihe" /></dt>
-          <dd><h:outputText value="#{eventDetailsView.event.eventSerial.name}" /></dd>
+              <dt>Belegung</dt>
+              <dd>
+                <table class="table-inline">
+                  <thead>
+                    <tr>
+                      <th>Platzkategorie</th>
+                      <th class="text-right">frei</th>
+                      <th class="text-right">belegt</th>
+                      <th class="text-right">gesamt</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <c:forEach items="#{eventDetailsView.seats}" var="seat">
+                      <tr>
+                        <td><h:outputText value="#{seat.name}" /></td>
+                        <td class="text-right"><h:outputText value="#{seat.seatsAvailable}" /></td>
+                        <td class="text-right"><h:outputText value="#{seat.seatsTaken}" /></td>
+                        <td class="text-right"><h:outputText value="#{seat.capacity}" /></td>
+                      </tr>
+                    </c:forEach>
+                  </tbody>
+                </table>
+              </dd>
+            </dl>
+          </div>
 
-          <dt><p:outputLabel value="Moderation" /></dt>
-          <dd><h:outputText value="#{eventDetailsView.event.host != null ? eventDetailsView.event.host.surname.concat(', ').concat(eventDetailsView.event.host.givenName) : ''}" /></dd>
+          <div class="col-12 md:col-6">
+            <dl class="data-list">
+              <dt><p:outputLabel value="Veranstaltungsreihe" /></dt>
+              <dd><h:outputText value="#{eventDetailsView.event.eventSerial.name}" /></dd>
 
-          <dt><p:outputLabel value="Co-Moderation" /></dt>
-          <dd><h:outputText value="#{eventDetailsView.event.coHost != null ? eventDetailsView.event.coHost.surname.concat(', ').concat(eventDetailsView.event.coHost.givenName) : ''}" /></dd>
+              <dt><p:outputLabel value="Moderation" /></dt>
+              <dd><h:outputText value="#{eventDetailsView.event.host != null ? eventDetailsView.event.host.surname.concat(', ').concat(eventDetailsView.event.host.givenName) : ''}" /></dd>
 
-          <dt><p:outputLabel value="Ticket-Limit" /></dt>
-          <dd><h:outputText value="#{eventDetailsView.event.ticketLimit}" /></dd>
+              <dt><p:outputLabel value="Co-Moderation" /></dt>
+              <dd><h:outputText value="#{eventDetailsView.event.coHost != null ? eventDetailsView.event.coHost.surname.concat(', ').concat(eventDetailsView.event.coHost.givenName) : ''}" /></dd>
 
-          <dt><p:outputLabel value="Sichtbarkeit" /></dt>
-          <dd><h:outputText value="#{eventDetailsView.event.hidden ? 'nicht öffentlich' : 'öffentlich'}" /></dd>
+              <dt><p:outputLabel value="Ticket-Limit" /></dt>
+              <dd><h:outputText value="#{eventDetailsView.event.ticketLimit}" /></dd>
 
-          <dt><p:outputLabel value="Buchbarkeit" /></dt>
-          <dd><h:outputText value="#{eventDetailsView.event.reservable ? 'buchbar' : 'nicht buchbar'}" /></dd>
-        </dl>
+              <dt><p:outputLabel value="Sichtbarkeit" /></dt>
+              <dd><h:outputText value="#{eventDetailsView.event.hidden ? 'nicht öffentlich' : 'öffentlich'}" /></dd>
+
+              <dt><p:outputLabel value="Buchbarkeit" /></dt>
+              <dd><h:outputText value="#{eventDetailsView.event.reservable ? 'buchbar' : 'nicht buchbar'}" /></dd>
+            </dl>
+          </div>
+
+        </div>
       </p:card>
 
       <p:tabView styleClass="mt-3">
@@ -85,13 +117,21 @@
               </p:link>
             </p:column>
 
-            <p:column headerText="Anz. Tickets">
+            <p:column headerText="Anz. Tickets" styleClass="text-right">
               <h:outputText value="#{r.tickets}" />
             </p:column>
 
             <p:column headerText="Status">
               <h:outputText value="#{r.status}" />
             </p:column>
+            
+            <p:columnGroup type="footer">
+                <p:row>
+                    <p:column footerText="" />
+                    <p:column footerText="#{eventDetailsView.totalTickets}" class="text-right font-bold"/>
+                    <p:column footerText="" />
+                </p:row>
+            </p:columnGroup>
 
           </p:dataTable>
         </p:tab>

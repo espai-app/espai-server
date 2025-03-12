@@ -1,6 +1,7 @@
 package app.espai.views.reservations;
 
 import app.espai.dao.Events;
+import app.espai.dao.HallCapacities;
 import app.espai.dao.Halls;
 import app.espai.dao.PriceCategories;
 import app.espai.dao.ReservationExtras;
@@ -8,15 +9,15 @@ import app.espai.dao.ReservationSummaries;
 import app.espai.dao.ReservationTickets;
 import app.espai.dao.Reservations;
 import app.espai.dao.SeasonVenues;
-import app.espai.dao.SeatCategories;
 import app.espai.filter.EventFilter;
+import app.espai.filter.HallCapacityFilter;
 import app.espai.filter.HallFilter;
 import app.espai.filter.ReservationExtraFilter;
 import app.espai.filter.ReservationFilter;
 import app.espai.filter.ReservationTicketFilter;
-import app.espai.filter.SeatCategoryFilter;
 import app.espai.model.Event;
 import app.espai.model.Hall;
+import app.espai.model.HallCapacity;
 import app.espai.model.PriceCategory;
 import app.espai.model.Reservation;
 import app.espai.model.ReservationExtra;
@@ -77,7 +78,7 @@ public class ReservationEditorView extends BaseView implements Serializable {
   private Halls halls;
 
   @EJB
-  private SeatCategories seatCategories;
+  private HallCapacities hallCapacities;
 
   @EJB
   private PriceCategories priceCategories;
@@ -256,9 +257,11 @@ public class ReservationEditorView extends BaseView implements Serializable {
       childFilter.setParentEvent(reservation.getEvent());
       childEventList = events.list(childFilter).getItems();
 
-      SeatCategoryFilter seatCategoryFilter = new SeatCategoryFilter();
-      seatCategoryFilter.setHall(reservation.getEvent().getHall());
-      seatCategoryList = seatCategories.list(seatCategoryFilter).getItems();
+      HallCapacityFilter hallCapacityFilter = new HallCapacityFilter();
+      hallCapacityFilter.setHall(reservation.getEvent().getHall());
+      seatCategoryList = hallCapacities.list(hallCapacityFilter).getItems().stream()
+              .map(HallCapacity::getSeatCategory)
+              .toList();
     } else {
       childEventList = new LinkedList<>();
       seatCategoryList = new LinkedList<>();
