@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author rborowski
  */
-public class ReservationTest {
+public class ReservationIT {
   
   @Test
   public void testSubmitReservation() throws URISyntaxException, IOException {
