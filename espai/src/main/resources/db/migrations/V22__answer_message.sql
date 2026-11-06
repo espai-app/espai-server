@@ -1,0 +1,1 @@
+INSERT INTO MAILTEMPLATE(ID, SHORTCODE, NAME, DESCRIPTION) VALUES (NEXTVAL(mailTemplate_id_seq), "RESERVATION_MESSAGE", "Antwort auf Frage in Buchung", "Wird verwendet, wenn man auf eine Nachricht in der Buchung antwortet.");

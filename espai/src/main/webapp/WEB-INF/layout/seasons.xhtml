@@ -6,66 +6,38 @@
   xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
   xmlns:p="http://primefaces.org/ui"
   template="/WEB-INF/layout/layout.xhtml"
-  xmlns:h="http://xmlns.jcp.org/jsf/html">
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="jakarta.tags.core">
 
-  <ui:define name="sidebar">
+  <ui:define name="submenu">
     <h:form>
-      <div class="sidebar">
-        <div class="field">
-          <p:outputLabel for="season" value="Spielzeit" />
-          <p:selectOneMenu id="season"
-                           value="#{seasonView.selectedSeason}"
-                           styleClass="block"
-                           valueChangeListener="#{seasonView.onSeasonChanged}"
-                           converter="#{seasonConverter}">
-
-            <f:selectItems value="#{seasonView.activeSeasons}"
-                           var="season"
-                           itemLabel="#{season.name}"
-                           itemValue="#{season}"/>
-
-            <p:ajax event="valueChange" listener="#{seasonView.onSeasonChanged}" async="false" />
-          </p:selectOneMenu>
-        </div>
-
-        <ul class="menu">
-          <li>
-            <p:link value="Veranstaltungen" outcome="/seasons/events/index.xhtml">
-              <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
-            </p:link>
-          </li>
-
-          <li>
-            <p:link value="Spielstätten" outcome="/seasons/venues/index.xhtml">
-              <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
-            </p:link>
-          </li>
-
-          <li>
-            <p:link value="Filme" outcome="/seasons/movies/index.xhtml">
-              <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
-            </p:link>
-          </li>
-
-          <li>
-            <p:link value="Buchungen" outcome="/seasons/reservations/index.xhtml">
-              <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
-            </p:link>
-          </li>
-
-          <li>
-            <p:link value="Statistik" outcome="/seasons/analytics/index.xhtml" rendered="#{request.isUserInRole('MANAGER')}">
-              <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
-            </p:link>
-          </li>
-
-          <li>
-            <p:link value="Einstellungen" outcome="/seasons/settings/index.xhtml">
-              <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
-            </p:link>
-          </li>
-        </ul>
-      </div>
+      <p:menubar autoDisplay="false">
+        <p:submenu label="#{seasonView.selectedSeason.name}">
+          <c:forEach items="#{seasonView.activeSeasons}" var="season">
+            <p:menuitem value="#{season.name}" url="#{request.contextPath}/seasons/events/index.xhtml">
+              <f:param name="seasonId" value="#{season.id}" />
+            </p:menuitem>
+          </c:forEach>
+        </p:submenu>
+        <p:menuitem value="Veranstaltungen" outcome="/seasons/events/index.xhtml">
+          <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
+        </p:menuitem>
+        <p:menuitem value="Spielstätten" outcome="/seasons/venues/index.xhtml">
+          <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
+        </p:menuitem>
+        <p:menuitem value="Programmauswahl" outcome="/seasons/movies/index.xhtml">
+          <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
+        </p:menuitem>
+        <p:menuitem value="Buchungen" outcome="/seasons/reservations/index.xhtml">
+          <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
+        </p:menuitem>
+        <p:menuitem value="Statistik" outcome="/seasons/analytics/index.xhtml">
+          <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
+        </p:menuitem>
+        <p:menuitem value="Einstellungen" outcome="/seasons/settings/index.xhtml">
+          <f:param name="seasonId" value="#{seasonView.selectedSeason.id}" />
+        </p:menuitem>
+      </p:menubar>
     </h:form>
   </ui:define>
 </ui:composition>

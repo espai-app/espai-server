@@ -25,14 +25,11 @@
           <p:column headerText="Titel" style="width: 40%">
             <h:outputText value="#{p.title}" />
           </p:column>
-          <p:column headerText="Alter" style="width: 10%">
-            <h:outputText value="#{p.fromAge}" /> - <h:outputText value="#{p.toAge}" />
+          <p:column headerText="Altersempfehlung" style="width: 10%">
+            <h:outputText value="#{p.recommendedAge}" />
           </p:column>
           <p:column headerText="Freigabe" style="width: 5%">
             <h:outputText value="#{p.rating}" />
-          </p:column>
-          <p:column headerText="Agentur/Verleih">
-            <h:outputText value="#{p.agency.name}" />
           </p:column>
         </p:dataTable>
 

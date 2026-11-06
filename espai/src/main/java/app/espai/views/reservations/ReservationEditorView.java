@@ -1,5 +1,6 @@
 package app.espai.views.reservations;
 
+import app.espai.RequestParameters;
 import app.espai.dao.Events;
 import app.espai.dao.HallCapacities;
 import app.espai.dao.Halls;
@@ -31,8 +32,6 @@ import app.espai.views.SeasonContext;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
-import jakarta.faces.context.ExternalContext;
-import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import java.io.Serializable;
@@ -103,26 +102,36 @@ public class ReservationEditorView extends BaseView implements Serializable {
 
   @PostConstruct
   public void init() {
-    ExternalContext econtext = FacesContext.getCurrentInstance().getExternalContext();
-    String reservationIdParam = econtext.getRequestParameterMap().get("reservationId");
+    Long reservationId = RequestParameters.getParameterAsLong("reservationId");
+    Long eventId = RequestParameters.getParameterAsLong("eventId");
 
     // selection lists
-    venueList = seasonVenues.getVenues(seasonContext.getCurrentSeason());
+    venueList = seasonVenues.listVenues(seasonContext.getCurrentSeason());
     priceCategoryList = priceCategories.list().getItems();
 
     // open or create reservation?
-    if (reservationIdParam == null || !reservationIdParam.matches("\\d+")) {
+    if (reservationId == null) {
       reservation = new Reservation();
       reservation.setStatus(ReservationStatus.NEW);
+      
+      if (eventId != null) {
+        Event event = events.get(eventId);
+        if (event != null) {
+          reservation.setEvent(event);
+        }
+      }
+      
+      selectedVenue = (reservation.getEvent() != null && reservation.getEvent().getHall() != null)
+              ? reservation.getEvent().getHall().getVenue()
+              : venueList.get(0);
       
       ticketList = new LinkedList<>();
       childReservationList = new LinkedList<>();
       selectedChildEventList = new LinkedList<>();
       extraList = new LinkedList<>();
-
-      selectedVenue = venueList.get(0);
+      
     } else {
-      reservation = reservations.get(Long.parseLong(reservationIdParam));
+      reservation = reservations.get(reservationId);
 
       ReservationTicketFilter ticketFilter = new ReservationTicketFilter();
       ticketFilter.setReservation(reservation);

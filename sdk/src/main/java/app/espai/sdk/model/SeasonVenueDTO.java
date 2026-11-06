@@ -4,10 +4,15 @@
  */
 package app.espai.sdk.model;
 
+import java.math.BigDecimal;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 /**
  *
  * @author rborowski
  */
+@Schema(name = "SeasonVenue",
+        description = "Represents the public data of a venue in a specific season.")
 public class SeasonVenueDTO {
 
   private Long id;
@@ -19,6 +24,10 @@ public class SeasonVenueDTO {
   private String email;
   private String publicNotes;
   private String seasonNotes;
+  private String slug;
+  private boolean allowFreeBooking;
+  private BigDecimal latitude;
+  private BigDecimal longitude;
 
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
   /**
@@ -145,6 +154,62 @@ public class SeasonVenueDTO {
    */
   public void setSeasonNotes(String seasonNotes) {
     this.seasonNotes = seasonNotes;
+  }
+
+  /**
+   * @return the slug
+   */
+  public String getSlug() {
+    return slug;
+  }
+
+  /**
+   * @param slug the slug to set
+   */
+  public void setSlug(String slug) {
+    this.slug = slug;
+  }
+
+  /**
+   * @return the allowFreeBooking
+   */
+  public boolean isAllowFreeBooking() {
+    return allowFreeBooking;
+  }
+
+  /**
+   * @param allowFreeBooking the allowFreeBooking to set
+   */
+  public void setAllowFreeBooking(boolean allowFreeBooking) {
+    this.allowFreeBooking = allowFreeBooking;
+  }
+
+  /**
+   * @return the latitude
+   */
+  public BigDecimal getLatitude() {
+    return latitude;
+  }
+
+  /**
+   * @param latitude the latitude to set
+   */
+  public void setLatitude(BigDecimal latitude) {
+    this.latitude = latitude;
+  }
+
+  /**
+   * @return the longitude
+   */
+  public BigDecimal getLongitude() {
+    return longitude;
+  }
+
+  /**
+   * @param longitude the longitude to set
+   */
+  public void setLongitude(BigDecimal longitude) {
+    this.longitude = longitude;
   }
   //</editor-fold>
 

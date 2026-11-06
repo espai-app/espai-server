@@ -16,14 +16,17 @@
 package app.espai.auth;
 
 import app.espai.dao.AccessRights;
-import app.espai.dao.Users;
+import app.espai.dao.ApiUsers;
+import app.espai.dao.GuiUsers;
 import app.espai.filter.AccessRightFilter;
 import app.espai.model.AccessRight;
+import app.espai.model.GuiUser;
 import app.espai.model.User;
 import app.espai.views.users.UserPasswordManager;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.security.enterprise.credential.Credential;
+import jakarta.security.enterprise.credential.RememberMeCredential;
 import jakarta.security.enterprise.credential.UsernamePasswordCredential;
 import jakarta.security.enterprise.identitystore.CredentialValidationResult;
 import jakarta.security.enterprise.identitystore.IdentityStore;
@@ -39,7 +42,10 @@ import rocks.xprs.runtime.exceptions.ResourceNotFoundException;
 public class DatabaseIdentityStore implements IdentityStore {
 
   @EJB
-  private Users users;
+  private GuiUsers guiUsers;
+
+  @EJB
+  private ApiUsers apiUsers;
 
   @EJB
   private AccessRights accessRights;
@@ -50,29 +56,40 @@ public class DatabaseIdentityStore implements IdentityStore {
   @Override
   public CredentialValidationResult validate(Credential credential) {
 
-    if (!(credential instanceof UsernamePasswordCredential)) {
-      return CredentialValidationResult.NOT_VALIDATED_RESULT;
-    }
-
-    UsernamePasswordCredential userPass = (UsernamePasswordCredential) credential;
+    User user = null;
 
     try {
-      User user = users.getByUsername(userPass.getCaller());
-      if (user != null && userPasswordManager.checkPassword(user, userPass.getPasswordAsString())) {
-        AccessRightFilter rightFilter = new AccessRightFilter();
-        rightFilter.setUser(user);
-        List<AccessRight> accessRightList = accessRights.list(rightFilter).getItems();
+      if (credential instanceof UsernamePasswordCredential userPass) {
 
-        EspaiPrincipal principal = new EspaiPrincipal(user, accessRightList);
+        user = guiUsers.getByUsername(userPass.getCaller());
+        if (user == null || !userPasswordManager.checkPassword(
+                (GuiUser) user, userPass.getPasswordAsString())) {
 
-        Set<String> roles = principal.getRoles();
-        if (!roles.isEmpty()) {
-          return new CredentialValidationResult(principal, roles);
+          user = null;
         }
+      } else if (credential instanceof RememberMeCredential token) {
+        user = apiUsers.getByToken(token.getToken());
       }
+
+      if (user == null) {
+        return CredentialValidationResult.INVALID_RESULT;
+      }
+
+      AccessRightFilter rightFilter = new AccessRightFilter();
+      rightFilter.setUser(user);
+      List<AccessRight> accessRightList = accessRights.list(rightFilter).getItems();
+
+      EspaiPrincipal principal = new EspaiPrincipal(user, accessRightList);
+
+      Set<String> roles = principal.getRoles();
+      if (!roles.isEmpty()) {
+        return new CredentialValidationResult(principal, roles);
+      }
+
     } catch (ResourceNotFoundException ex) {
       // ignore
     }
+
     return CredentialValidationResult.INVALID_RESULT;
   }
 }

@@ -7,14 +7,16 @@ package app.espai.dto;
 import app.espai.model.SeasonVenue;
 import app.espai.model.Venue;
 import app.espai.sdk.model.SeasonVenueDTO;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  *
  * @author rborowski
  */
+@ApplicationScoped
 public class SeasonVenueDTOConverter {
-  
-  public static SeasonVenueDTO of(SeasonVenue seasonVenue) {
+
+  public SeasonVenueDTO toDTO(SeasonVenue seasonVenue) {
     SeasonVenueDTO result = new SeasonVenueDTO();
 
     Venue venue = seasonVenue.getVenue();
@@ -27,8 +29,12 @@ public class SeasonVenueDTOConverter {
     result.setEmail(venue.getEmail());
     result.setPublicNotes(venue.getPublicNotes());
     result.setSeasonNotes(seasonVenue.getSeasonNotes());
+    result.setSlug(venue.getSlug());
+    result.setAllowFreeBooking(seasonVenue.isAllowFreeBooking());
+    result.setLatitude(venue.getLatitude());
+    result.setLongitude(venue.getLongitude());
 
     return result;
   }
-  
+
 }

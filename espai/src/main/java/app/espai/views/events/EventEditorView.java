@@ -5,30 +5,35 @@ import app.espai.dao.Events;
 import app.espai.dao.Halls;
 import app.espai.dao.Presenters;
 import app.espai.dao.ProductionVersions;
+import app.espai.dao.ReservationForms;
 import app.espai.dao.SeasonProductions;
 import app.espai.dao.SeasonVenues;
 import app.espai.filter.EventSerialFilter;
 import app.espai.filter.HallFilter;
 import app.espai.filter.ProductionVersionFilter;
+import app.espai.filter.ReservationFormFilter;
 import app.espai.model.Event;
 import app.espai.model.EventSerial;
 import app.espai.model.Hall;
 import app.espai.model.Presenter;
 import app.espai.model.Production;
 import app.espai.model.ProductionVersion;
+import app.espai.model.ReservationForm;
 import app.espai.model.Season;
 import app.espai.model.Venue;
+import app.espai.views.BaseView;
 import app.espai.views.SeasonContext;
 import app.espai.views.UserContext;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
+import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.List;
-import org.primefaces.PrimeFaces;
+import rocks.xprs.runtime.db.PageableFilter;
 import rocks.xprs.runtime.exceptions.InvalidDataException;
 
 /**
@@ -37,7 +42,7 @@ import rocks.xprs.runtime.exceptions.InvalidDataException;
  */
 @Named
 @ViewScoped
-public class EventEditorView implements Serializable {
+public class EventEditorView extends BaseView implements Serializable {
 
   @EJB
   private UserContext userContext;
@@ -65,6 +70,9 @@ public class EventEditorView implements Serializable {
 
   @EJB
   private ProductionVersions productionVersions;
+  
+  @EJB
+  private ReservationForms reservationForms;
 
   private Event event;
   private Venue venue;
@@ -75,6 +83,7 @@ public class EventEditorView implements Serializable {
   private List<? extends Presenter> presenterList;
   private List<Production> productionList;
   private List<ProductionVersion> productionVersionList;
+  private List<ReservationForm> reservationFormList;
 
   @PostConstruct
   public void init() {
@@ -96,12 +105,19 @@ public class EventEditorView implements Serializable {
 
     venueList = userContext.isRestricted()
             ? userContext.getVenues()
-            : seasonVenues.getVenues(currentSeason);
+            : seasonVenues.listVenues(currentSeason);
 
     presenterList = presenters.list().getItems();
     presenterList.sort(Presenters.DEFAULT_ORDER);
 
     productionList = seasonProductions.getProductions(currentSeason);
+    
+    ReservationFormFilter formFilter = new ReservationFormFilter();
+    formFilter.setActive(Boolean.TRUE);
+    formFilter.setOrderBy("name");
+    formFilter.setOrder(PageableFilter.Order.ASC);
+    
+    reservationFormList = reservationForms.list(formFilter).getItems();
 
     String eventIdParam = econtext.getRequestParameterMap().get("eventId");
     if (eventIdParam == null) {
@@ -131,8 +147,12 @@ public class EventEditorView implements Serializable {
   }
 
   public void save() {
-    events.save(event);
-    PrimeFaces.current().dialog().closeDynamic(event);
+    event = events.save(event);
+    redirect(String.format("details.xhtml?seasonId=%s&eventId=%d", 
+            seasonContext.getCurrentSeason().getId(), event.getId()), 
+            "Veranstaltung gespeichert.", 
+            null, 
+            FacesMessage.SEVERITY_INFO);
   }
 
   public void onVenueChanged() {
@@ -283,6 +303,20 @@ public class EventEditorView implements Serializable {
    */
   public void setProductionVersionList(List<ProductionVersion> productionVersionList) {
     this.productionVersionList = productionVersionList;
+  }
+
+  /**
+   * @return the reservationFormList
+   */
+  public List<ReservationForm> getReservationFormList() {
+    return reservationFormList;
+  }
+
+  /**
+   * @param reservationFormList the reservationFormList to set
+   */
+  public void setReservationFormList(List<ReservationForm> reservationFormList) {
+    this.reservationFormList = reservationFormList;
   }
   //</editor-fold>
 

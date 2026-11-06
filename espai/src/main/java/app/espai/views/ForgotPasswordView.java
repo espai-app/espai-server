@@ -1,6 +1,7 @@
 package app.espai.views;
 
-import app.espai.dao.Users;
+import app.espai.dao.GuiUsers;
+import app.espai.model.GuiUser;
 import app.espai.model.User;
 import app.espai.views.users.UserPasswordManager;
 import jakarta.ejb.EJB;
@@ -17,7 +18,7 @@ import jakarta.inject.Named;
 public class ForgotPasswordView extends BaseView {
 
   @EJB
-  private Users users;
+  private GuiUsers users;
 
   @EJB
   private UserPasswordManager userPasswordManager;
@@ -26,8 +27,8 @@ public class ForgotPasswordView extends BaseView {
 
   public void requestPassword() {
     User user = users.getByUsername(username);
-    if (user != null) {
-      userPasswordManager.resetPassword(user);
+    if (user != null && user instanceof GuiUser guiUser) {
+      userPasswordManager.resetPassword(guiUser);
     }
 
     redirect("login.xhtml",

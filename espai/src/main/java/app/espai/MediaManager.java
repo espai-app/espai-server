@@ -108,14 +108,14 @@ public class MediaManager {
     try {
       MessageDigest md = MessageDigest.getInstance("SHA1");
 
-      try (DigestInputStream dis = new DigestInputStream(inputStream, md);
-              FileOutputStream outputStream = new FileOutputStream(targetFile)) {
+      try (DigestInputStream dis = new DigestInputStream(inputStream, md); FileOutputStream outputStream = new FileOutputStream(targetFile)) {
 
         dis.transferTo(outputStream);
       }
 
-      String fx = "%0" + (md.getDigestLength()*2) + "x";
+      String fx = "%0" + (md.getDigestLength() * 2) + "x";
       attachment.setChecksum(String.format(fx, new BigInteger(1, md.digest())));
+      attachment.setLocation(targetFile.getAbsolutePath());
     } catch (NoSuchAlgorithmException ex) {
       throw new IOException("Could not create checksum for upload.", ex);
     }
@@ -138,14 +138,18 @@ public class MediaManager {
   }
 
   private File attachmentToFile(Attachment attachment) {
+
+    String path;
+
     if (attachment.getId() == null || attachment.getEntityType() == null
             || attachment.getEntityId() == null) {
-      return null;
-    }
 
-    String path = attachment.getEntityType() + File.separator
-            + attachment.getEntityId() + File.separator
-            + attachment.getId();
+      path = "/default/default.png";
+    } else {
+      path = attachment.getEntityType() + File.separator
+              + attachment.getEntityId() + File.separator
+              + attachment.getId();
+    }
 
     File result = new File(dataFolder, path);
     try {
@@ -168,7 +172,7 @@ public class MediaManager {
     try {
       MessageDigest md = MessageDigest.getInstance("SHA1");
       md.digest(Files.readAllBytes(file.toPath()));
-      String fx = "%0" + (md.getDigestLength()*2) + "x";
+      String fx = "%0" + (md.getDigestLength() * 2) + "x";
       return String.format(fx, new BigInteger(1, md.digest()));
     } catch (NoSuchAlgorithmException ex) {
       throw new IOException("Could not create checksum for upload.", ex);

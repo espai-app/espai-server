@@ -3,19 +3,19 @@ package app.espai.views.events;
 import app.espai.dao.Events;
 import app.espai.dao.Halls;
 import app.espai.dao.ProductionVersions;
-import app.espai.dao.SeasonProductions;
+import app.espai.dao.SeasonVenueProductions;
 import app.espai.dao.SeasonVenues;
 import app.espai.filter.EventFilter;
 import app.espai.filter.HallFilter;
 import app.espai.filter.ProductionVersionFilter;
-import app.espai.filter.SeasonProductionFilter;
 import app.espai.filter.SeasonVenueFilter;
+import app.espai.filter.SeasonVenueProductionFilter;
 import app.espai.model.Event;
 import app.espai.model.Hall;
 import app.espai.model.ProductionVersion;
 import app.espai.model.Season;
-import app.espai.model.SeasonProduction;
 import app.espai.model.SeasonVenue;
+import app.espai.model.SeasonVenueProduction;
 import app.espai.model.Venue;
 import app.espai.views.BaseView;
 import app.espai.views.SeasonContext;
@@ -23,9 +23,11 @@ import app.espai.views.UserContext;
 import app.espai.views.VenueContext;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
+import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
+import jakarta.ws.rs.BadRequestException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -33,7 +35,6 @@ import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-import rocks.xprs.runtime.exceptions.InvalidDataException;
 
 /**
  *
@@ -65,7 +66,7 @@ public class ProgrammingView extends BaseView implements Serializable {
   private ProductionVersions productionVersions;
 
   @EJB
-  private SeasonProductions productions;
+  private SeasonVenueProductions productions;
 
   private Season currentSeason;
   private Venue currentVenue;
@@ -75,6 +76,7 @@ public class ProgrammingView extends BaseView implements Serializable {
   private List<ProductionVersion> productionVersionList;
   private List<Hall> hallList;
   private boolean keepDate;
+  private boolean error;
 
   @PostConstruct
   public void init() {
@@ -82,7 +84,7 @@ public class ProgrammingView extends BaseView implements Serializable {
     currentVenue = venueContext.getCurrentVenue();
 
     if (currentSeason == null) {
-      throw new InvalidDataException("Keine Spielstätten ausgewählt.");
+      throw new BadRequestException("Keine Spielzeit ausgewählt.");
     }
 
     SeasonVenueFilter venueFilter = new SeasonVenueFilter();
@@ -100,7 +102,11 @@ public class ProgrammingView extends BaseView implements Serializable {
             .collect(Collectors.toList());
 
     if (venueList.isEmpty()) {
-      throw new InvalidDataException("Keine Spielstätten ausgewählt.");
+      error = true;
+      FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(
+              "Keine Spielstätten vorhanden.",
+              "Der aktuellen Spielzeit sind keine Spielstätten zugeordnet."));
+      return;
     }
 
     if (currentVenue == null) {
@@ -116,6 +122,7 @@ public class ProgrammingView extends BaseView implements Serializable {
     EventFilter eventFilter = new EventFilter();
     eventFilter.setSeason(seasonContext.getCurrentSeason());
     eventFilter.setHalls(hallList);
+    eventFilter.setParentEventIsNull(true);
 
     eventList.addAll(events.list(eventFilter).getItems());
     eventList.sort((Event o1, Event o2) -> {
@@ -124,14 +131,23 @@ public class ProgrammingView extends BaseView implements Serializable {
       return t1.compareTo(t2);
     });
 
-    SeasonProductionFilter productionFilter = new SeasonProductionFilter();
+    SeasonVenueProductionFilter productionFilter = new SeasonVenueProductionFilter();
     productionFilter.setSeason(currentSeason);
-    List<SeasonProduction> productionList = productions.list(productionFilter).getItems();
+    productionFilter.setVenue(currentVenue);
+    List<SeasonVenueProduction> productionList = productions.list(productionFilter).getItems();
+
+    if (productionList.isEmpty()) {
+      error = true;
+      FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(
+              "Keine Veranstaltungen vorhanden.",
+              "Bitte fügen Sie Veranstaltungen aus dem Repertoire zur Spielstätte hinzu."));
+      return;
+    }
 
     ProductionVersionFilter versionFilter = new ProductionVersionFilter();
     versionFilter.setProductions(productionList
             .stream()
-            .map(SeasonProduction::getProduction)
+            .map(SeasonVenueProduction::getProduction)
             .collect(Collectors.toList()));
     productionVersionList = productionVersions.list(versionFilter).getItems();
     productionVersionList.sort((p1, p2) -> String.CASE_INSENSITIVE_ORDER.compare(
@@ -165,10 +181,6 @@ public class ProgrammingView extends BaseView implements Serializable {
         events.delete(s);
       }
       eventList.remove(index);
-      System.out.println("Deleted " + s.getProduction().getProduction().getTitle());
-      for (Event e : eventList) {
-        System.out.println(e.getProduction().getProduction().getTitle());
-      }
     }
   }
 
@@ -176,7 +188,7 @@ public class ProgrammingView extends BaseView implements Serializable {
     for (Event e : eventList) {
       if (e.getDate() != null && e.getTime()!= null) {
         e.setSeason(currentSeason);
-        
+
         if (e.getId() == null) {
           e.setReservable(true);
         }
@@ -300,6 +312,20 @@ public class ProgrammingView extends BaseView implements Serializable {
    */
   public void setKeepDate(boolean keepDate) {
     this.keepDate = keepDate;
+  }
+
+  /**
+   * @return the error
+   */
+  public boolean isError() {
+    return error;
+  }
+
+  /**
+   * @param error the error to set
+   */
+  public void setError(boolean error) {
+    this.error = error;
   }
   //</editor-fold>
 

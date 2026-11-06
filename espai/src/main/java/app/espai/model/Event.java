@@ -40,4 +40,12 @@ public class Event extends AbstractEvent {
       return -1;
     }
   }
+  
+  public ReservationForm getEffectiveReservationForm() {
+    if (getReservationForm() != null) {
+      return getReservationForm();
+    }
+    
+    return getSeason().getDefaultReservationForm();
+  }
 }

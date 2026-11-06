@@ -29,6 +29,8 @@ import rocks.xprs.util.Streams;
 @Path("attachments")
 public class AttachmentsWebservice {
 
+  private Attachment DEFAULT_IMAGE;
+
   @EJB
   private Attachments attachments;
 
@@ -37,9 +39,9 @@ public class AttachmentsWebservice {
   public Response getAttachment(@PathParam("attachmentId") long attachmentId) throws IOException {
 
     Attachment attachment = attachments.get(attachmentId);
-    
+
     if (attachment == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
+      attachment = getDefaultImage();
     }
 
     switch (attachment.getMediaType()) {
@@ -48,8 +50,34 @@ public class AttachmentsWebservice {
       case IMAGE:
         Response res =  Response
                 .ok(attachments.getDataStream(attachment), attachment.getMimeType())
+                .header("ETag", attachment.getChecksum())
+                .header("Last-Modified", attachment.getModifyDate())
                 .build();
         return res;
+      default:
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
+  }
+
+  @GET
+  @Path("thumbnail/{attachmentId}/datastream")
+  public Response getFirstOriginal(
+          @PathParam("attachmentId") long entityId) throws IOException {
+
+    Attachment attachment = attachments.get(entityId);
+
+    if (attachment == null) {
+      attachment = getDefaultImage();
+    }
+
+    switch (attachment.getMediaType()) {
+      case URL:
+        return Response.seeOther(URI.create(attachment.getLocation())).build();
+      case IMAGE:
+        return Response.ok(new ResponseStream(
+                attachments.getScaledImageStream(attachment, 1000, 1000)),
+                attachment.getMimeType())
+                .build();
       default:
         return Response.status(Response.Status.NOT_FOUND).build();
     }
@@ -63,9 +91,9 @@ public class AttachmentsWebservice {
           @PathParam("category") String category) throws IOException {
 
     Attachment attachment = getFirstAttachment(entityType, entityId, category);
-    
+
     if (attachment == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
+      attachment = getDefaultImage();
     }
 
     switch (attachment.getMediaType()) {
@@ -89,13 +117,13 @@ public class AttachmentsWebservice {
           @PathParam("width") int width,
           @PathParam("height") int height)
           throws IOException {
-    
+
     Attachment attachment = getFirstAttachment(entityType, entityId, category);
 
     if (attachment == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
+      attachment = getDefaultImage();
     }
-    
+
     switch (attachment.getMediaType()) {
       case URL:
         return Response.seeOther(URI.create(attachment.getLocation())).build();
@@ -118,11 +146,11 @@ public class AttachmentsWebservice {
           @PathParam("width") int width,
           @PathParam("height") int height)
           throws IOException {
-    
+
     Attachment attachment = getFirstAttachment(entityType, entityId, category);
-    
+
     if (attachment == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
+      attachment = getDefaultImage();
     }
 
     switch (attachment.getMediaType()) {
@@ -149,10 +177,21 @@ public class AttachmentsWebservice {
 
     List<Attachment> attachmentList = attachments.list(attachmentFilter).getItems();
     if (attachmentList.isEmpty()) {
-      return null;
+      return getDefaultImage();
     }
 
     return attachmentList.get(0);
+  }
+
+  private Attachment getDefaultImage() {
+    if (DEFAULT_IMAGE == null) {
+      DEFAULT_IMAGE = new Attachment();
+      DEFAULT_IMAGE.setMediaType(IMAGE);
+      DEFAULT_IMAGE.setMimeType("image/png");
+      DEFAULT_IMAGE.setLocation("DEFAULT");
+    }
+
+    return DEFAULT_IMAGE;
   }
 
   private class ResponseStream implements StreamingOutput {

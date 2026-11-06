@@ -1,13 +1,18 @@
 package app.espai.views.seasons;
 
+import app.espai.businesslogic.SeasonManager;
+import app.espai.dao.ReservationForms;
 import app.espai.dao.Seasons;
+import app.espai.filter.ReservationFormFilter;
 import app.espai.filter.SeasonFilter;
+import app.espai.model.ReservationForm;
 import app.espai.model.Season;
 import app.espai.views.BaseView;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.List;
@@ -23,23 +28,39 @@ public class SeasonIndexView extends BaseView implements Serializable {
 
   @EJB
   private Seasons seasons;
+  
+  @EJB
+  private ReservationForms reservationForms;
+  
+  @Inject
+  private SeasonManager seasonManager;
 
   private Season newSeason = new Season();
+  private Season seasonTemplate;
   private List<Season> seasonList;
+  private List<ReservationForm> reservationFormList;
 
   @PostConstruct
   public void init() {
     SeasonFilter filter = new SeasonFilter();
     filter.setOrderBy("createDate");
     filter.setOrder(PageableFilter.Order.DESC);
-
+    
     seasonList = seasons.list(filter).getItems();
+    
+    ReservationFormFilter reservationFormFilter = new ReservationFormFilter();
+    reservationFormList = reservationForms.list(reservationFormFilter).getItems();
   }
 
   public void create() {
-    newSeason = seasons.save(newSeason);
+    
+    if (seasonTemplate != null) {
+      newSeason = seasonManager.createFromTemplate(newSeason, seasonTemplate);
+    } else {
+      newSeason = seasons.save(newSeason);
+    }
 
-    redirect("details.xhtml?seasonId=" + newSeason.getId(),
+    redirect("../../seasons/settings/index.xhtml?seasonId=" + newSeason.getId(),
             "Spielzeit erstellt",
             null,
             FacesMessage.SEVERITY_INFO);
@@ -47,17 +68,31 @@ public class SeasonIndexView extends BaseView implements Serializable {
 
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
   /**
-   * @return the seasons
+   * @return the newSeason
    */
-  public Seasons getSeasons() {
-    return seasons;
+  public Season getNewSeason() {
+    return newSeason;
   }
 
   /**
-   * @param seasons the seasons to set
+   * @param newSeason the newSeason to set
    */
-  public void setSeasons(Seasons seasons) {
-    this.seasons = seasons;
+  public void setNewSeason(Season newSeason) {
+    this.newSeason = newSeason;
+  }
+
+  /**
+   * @return the seasonTemplate
+   */
+  public Season getSeasonTemplate() {
+    return seasonTemplate;
+  }
+
+  /**
+   * @param seasonTemplate the seasonTemplate to set
+   */
+  public void setSeasonTemplate(Season seasonTemplate) {
+    this.seasonTemplate = seasonTemplate;
   }
 
   /**
@@ -73,19 +108,19 @@ public class SeasonIndexView extends BaseView implements Serializable {
   public void setSeasonList(List<Season> seasonList) {
     this.seasonList = seasonList;
   }
-
+  
   /**
-   * @return the newSeason
+   * @return the reservationFormList
    */
-  public Season getNewSeason() {
-    return newSeason;
+  public List<ReservationForm> getReservationFormList() {
+    return reservationFormList;
   }
 
   /**
-   * @param newSeason the newSeason to set
+   * @param reservationFormList the reservationFormList to set
    */
-  public void setNewSeason(Season newSeason) {
-    this.newSeason = newSeason;
+  public void setReservationFormList(List<ReservationForm> reservationFormList) {
+    this.reservationFormList = reservationFormList;
   }
   //</editor-fold>
 }

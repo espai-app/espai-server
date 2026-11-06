@@ -15,7 +15,11 @@
       <h1>Veranstaltungen programmieren</h1>
     </div>
 
-    <p:card>
+    <h:panelGroup rendered="#{programmingView.error}">
+      <p:staticMessage severity="error" summary="Filme und Spielstätten hinzufügen" detail="Um mit dem Programmieren beginnen zu können, fügen Sie Ihrer Spielzeit bitte Filme und Spielstätten hinzu." style="width: 100%"/>
+    </h:panelGroup>
+
+    <p:card rendered="#{not programmingView.error}">
       <h:form>
         <f:passThroughAttribute name="autocomplete" value="off" />
 
@@ -53,7 +57,11 @@
 
           <p:column headerText="Veranstaltung">
             <p:selectOneMenu id="productionVersion" value="#{e.production}" class="block" label="Veranstaltung">
-              <f:selectItems value="#{programmingView.productionVersionList}" var="p" itemValue="#{p}" itemLabel="#{p.production.title} #{p.versionName} (#{p.production.agency.name})" />
+              <f:selectItems value="#{programmingView.productionVersionList}"
+                             var="p"
+                             itemValue="#{p}"
+                             itemLabel="#{p.production.title}#{p.versionName != '' ? ' ('.concat(p.versionName).concat(')') : ''}">
+              </f:selectItems>
               <f:converter binding="#{productionVersionConverter}" />
             </p:selectOneMenu>
             <h:message for="productionVersion" />
@@ -67,17 +75,56 @@
             <h:message for="hall" />
           </p:column>
 
+          <p:column headerText="Status" style="width: 10rem">
+            <p:selectOneMenu id="eventStatus" value="#{e.status}" class="block">
+              <f:selectItem itemValue="NORMAL" itemLabel="findet statt" />
+              <f:selectItem itemValue="REQUESTED" itemLabel="angefragt" />
+              <f:selectItem itemValue="POSTPONED" itemLabel="verschoben" />
+              <f:selectItem itemValue="CANCELED" itemLabel="fällt aus" />
+              <f:selectItem itemValue="POSTPONED" itemLabel="verschoben" />
+              <f:selectItem itemValue="VENUE_CHANGED" itemLabel="anderer Ort" />
+            </p:selectOneMenu>
+            <h:message for="eventStatus" />
+          </p:column>
+
           <p:column style="width: 30px; text-align: center">
-            <p:commandButton id="deleteEvents" icon="pi pi-trash" styleClass="rounded-button ui-button-flat" action="#{programmingView.deleteEvent(rowIndex)}" update="@form" />
+            <p:commandButton id="deleteEvents"
+                             icon="pi pi-trash"
+                             styleClass="rounded-button ui-button-flat"
+                             action="#{programmingView.deleteEvent(rowIndex)}"
+                             immediate="true"
+                             update="@form" />
           </p:column>
 
         </p:dataTable>
 
         <div>
-          <p:commandButton id="saveProgram" icon="pi pi-save" value="Programm speichern" action="#{programmingView.save}" styleClass="mb-3" />
-          <p:commandButton id="addEvent" icon="pi pi-plus" value="Veranstaltung hinzufügen" action="#{programmingView.addEvents(1)}" update="@form" styleClass="ui-button-outlined ml-2 mb-3"/>
-          <p:commandButton id="addTenEvent" icon="pi pi-plus" value="10 Veranstaltungen hinzufügen" action="#{programmingView.addEvents(10)}" update="@form" styleClass="ui-button-outlined ml-2 mr-3 mb-3"/>
-          <p:selectBooleanCheckbox value="#{programmingView.keepDate}" itemLabel="Datum des letzten Eintrags kopieren" styleClass="mb-3" />
+          <p:commandButton id="saveProgram"
+                           icon="pi pi-save"
+                           value="Programm speichern"
+                           action="#{programmingView.save}"
+                           immediate="true"
+                           styleClass="mb-3" />
+
+          <p:commandButton id="addEvent"
+                           icon="pi pi-plus"
+                           value="Veranstaltung hinzufügen"
+                           action="#{programmingView.addEvents(1)}"
+                           immediate="true"
+                           update="@form"
+                           styleClass="ui-button-outlined ml-2 mb-3"/>
+
+          <p:commandButton id="addTenEvent"
+                           icon="pi pi-plus"
+                           value="10 Veranstaltungen hinzufügen"
+                           action="#{programmingView.addEvents(10)}"
+                           update="@form"
+                           immediate="true"
+                           styleClass="ui-button-outlined ml-2 mr-3 mb-3"/>
+          
+          <p:selectBooleanCheckbox value="#{programmingView.keepDate}"
+                                   itemLabel="Datum des letzten Eintrags kopieren"
+                                   styleClass="mb-3" />
         </div>
       </h:form>
     </p:card>

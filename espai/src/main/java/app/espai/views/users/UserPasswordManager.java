@@ -1,7 +1,7 @@
 package app.espai.views.users;
 
 import app.espai.dao.Users;
-import app.espai.model.User;
+import app.espai.model.GuiUser;
 import jakarta.annotation.Resource;
 import jakarta.ejb.Asynchronous;
 import jakarta.ejb.EJB;
@@ -35,18 +35,18 @@ public class UserPasswordManager {
   @EJB
   private Users users;
 
-  public void setPassword(User user, String password) {
+  public void setPassword(GuiUser user, String password) {
     String hash = Pbkdf2Hash.createHash(password);
     user.setPassword(hash);
     users.save(user);
   }
 
-  public boolean checkPassword(User user, String password) {
+  public boolean checkPassword(GuiUser user, String password) {
     return Pbkdf2Hash.verifyPassword(password, user.getPassword());
   }
 
   @Asynchronous
-  public Future<Void> resetPassword(User user) {
+  public Future<Void> resetPassword(GuiUser user) {
 
     try {
       user.setResetToken(UUID.randomUUID().toString());

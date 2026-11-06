@@ -12,7 +12,6 @@ import app.espai.model.TicketStatistic;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Named;
 import jakarta.persistence.TypedQuery;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,38 +28,41 @@ public class ReservationSummaries extends AbstractReservationSummaries {
 
     @Override
     public int compare(ReservationSummary o1, ReservationSummary o2) {
-
-      String order1 = LocalDateTime.of(o1.getEventDate(), o1.getEventStartTime())
-                      .toString();
+      long order1;
+      long order2;
+      
       if (o1.getParentReservation() != null) {
-        order1 = toSortString(o1.getParentReservation().getStatus()) + "-"
-                + order1 + "-" + String.valueOf(o1.getParentReservation().getId());
+        order1 = (toSortPrefix(o1.getParentReservation().getStatus()) * 100000000000000L) 
+                + o1.getParentReservation().getCreateDate().getTime() - 1L;
       } else {
-        order1 = toSortString(o1.getStatus()) + "-" + order1;
+        order1 = (toSortPrefix(o1.getStatus()) * 100000000000000L) 
+                + o1.getCreateDate().getTime();
       }
-      order1 += "-" + String.valueOf(o1.getId());
-
-      String order2 = LocalDateTime.of(o2.getEventDate(), o2.getEventStartTime())
-                      .toString();
+      
       if (o2.getParentReservation() != null) {
-        order2 = toSortString(o2.getParentReservation().getStatus()) + "-"
-                + order2 + "-" + String.valueOf(o2.getParentReservation().getId());
+        order2 = (toSortPrefix(o2.getParentReservation().getStatus()) * 100000000000000L) 
+                + o2.getParentReservation().getCreateDate().getTime() - 1L;
       } else {
-        order2 = toSortString(o2.getStatus()) + "-" + order2;
+        order2 = (toSortPrefix(o2.getStatus()) * 100000000000000L) 
+                + o2.getCreateDate().getTime();
       }
-      order2 += "-" + String.valueOf(o2.getId());
-
-      return String.CASE_INSENSITIVE_ORDER.compare(order1, order2);
+      
+      long diff = order2 - order1;
+      if (diff == 0L) {
+        return 0;
+      }
+      
+      return diff > 0L ? 1 : -1;
     }
   };
 
-  private static String toSortString(ReservationStatus status) {
+  private static long toSortPrefix(ReservationStatus status) {
     return switch(status) {
-      case NEW -> "1";
-      case HOLD -> "2";
-      case CONFIRMED -> "3";
-      case CANCELED -> "4";
-      default -> "1";
+      case NEW -> 4;
+      case HOLD -> 3;
+      case CONFIRMED -> 2;
+      case CANCELED -> 1;
+      default -> 4;
     };
   }
 

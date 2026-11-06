@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -82,6 +83,7 @@ public class CapacityCalculator {
 
         for (HallCapacity hallCapacity : hallCapacityList) {
           SeatCategory currentSeatCategory = hallCapacity.getSeatCategory().duplicate();
+          currentSeatCategory.setPartOfTotalCapacity(hallCapacity.isPartOfTotalCapacity());
 
           Map<Long, Integer> soldTickets = ticketList.stream()
                   .filter(t -> t.getReservation().getEvent().equals(event))
@@ -137,6 +139,13 @@ public class CapacityCalculator {
   public List<String> checkCapacity(Event event, List<ReservationTicket> requestedTickets) {
 
     List<String> errors = new LinkedList<>();
+    
+    Optional<ReservationTicket> negativeTicket = 
+            requestedTickets.stream().filter(t -> t.getAmount() < 0).findFirst();
+    if (negativeTicket.isPresent()) {
+      errors.add("Die Anzahl der Tickets darf nicht negativ sein.");
+      return errors;
+    }
 
     List<SeatCategory> seatStats = getSeats(event);
     Integer totalSeatsTaken = seatStats.stream()

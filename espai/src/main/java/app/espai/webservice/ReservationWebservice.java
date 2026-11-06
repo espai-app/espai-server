@@ -4,17 +4,22 @@ import app.espai.businesslogic.CapacityCalculator;
 import app.espai.dao.EventTicketPrices;
 import app.espai.dao.Events;
 import app.espai.dao.ReservationExtras;
-import app.espai.dao.ReservationSummaries;
+import app.espai.dao.ReservationFormFields;
 import app.espai.dao.ReservationTickets;
 import app.espai.dao.Reservations;
+import app.espai.dto.ReservationFormDTOConverter;
 import app.espai.events.ReservationChangedEvent;
+import app.espai.filter.ReservationFormFieldFilter;
 import app.espai.model.Event;
 import app.espai.model.EventTicketPrice;
 import app.espai.model.Reservation;
 import app.espai.model.ReservationExtra;
+import app.espai.model.ReservationForm;
+import app.espai.model.ReservationFormField;
 import app.espai.model.ReservationStatus;
 import app.espai.model.ReservationTicket;
 import app.espai.sdk.model.ReservationDTO;
+import app.espai.sdk.model.ReservationFormDTO;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -23,6 +28,7 @@ import jakarta.ws.rs.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import rocks.xprs.runtime.db.PageableFilter;
 import rocks.xprs.runtime.exceptions.ResourceNotFoundException;
 
 /**
@@ -47,9 +53,9 @@ public class ReservationWebservice {
 
   @EJB
   private EventTicketPrices ticketPrices;
-
+  
   @EJB
-  private ReservationSummaries reservationSummaries;
+  private ReservationFormFields reservationFormFields;
 
   @Inject
   private jakarta.enterprise.event.Event<ReservationChangedEvent> reservationChangedEvent;
@@ -92,6 +98,27 @@ public class ReservationWebservice {
     }
 
     return errors;
+  }
+  
+  @POST
+  @Path("reservationForm")
+  public ReservationFormDTO getReservationForm(ReservationDTO reservation) {
+    
+    Event event = events.get(reservation.getEvent());
+    ReservationForm reservationForm = event.getEffectiveReservationForm();
+    
+    if (reservationForm == null) {
+      throw new InternalError("No form configured.");
+    }
+    
+    ReservationFormFieldFilter fieldFilter = new ReservationFormFieldFilter();
+    fieldFilter.setReservationForm(reservationForm);
+    fieldFilter.setOrderBy("position");
+    fieldFilter.setOrder(PageableFilter.Order.ASC);
+    
+    List<ReservationFormField> fieldList = reservationFormFields.list(fieldFilter).getItems();
+    
+    return ReservationFormDTOConverter.convert(reservationForm, fieldList);
   }
 
   @POST

@@ -111,7 +111,7 @@ public class AnalyticsIndexView {
   public static class CityStatistics {
 
     private String name;
-    private HashMap<String, TicketStatistics> statistics;
+    private HashMap<String, TicketStatistics> statistics = new HashMap<>();
 
     public CityStatistics() {
 
@@ -122,10 +122,6 @@ public class AnalyticsIndexView {
     }
 
     public void add(String statusString, int tickets) {
-      if (statistics == null) {
-        statistics = new HashMap<>();
-      }
-
       if (!statistics.containsKey(statusString)) {
         statistics.put(statusString, new TicketStatistics(0, 0));
       }

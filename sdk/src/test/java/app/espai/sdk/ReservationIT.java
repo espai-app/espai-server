@@ -29,13 +29,13 @@ public class ReservationIT {
     reservation.setPostcode("01234");
     reservation.setCity("Buchen");
     reservation.setPhone("01234 56789");
+    reservation.setEmail("ralph.borowski@borowski.it");
     
-    reservation.setEvent(8626L);
+    reservation.setEvent(10140L);
     
     HashMap<Long, Integer> ticketMap = new HashMap<>();
-    ticketMap.put(10267L, 20);
-    ticketMap.put(10268L, 2);
-    ticketMap.put(10269L, 2);
+    ticketMap.put(18602L, 20);
+    ticketMap.put(18620L, 2);
     
     reservation.setTickets(ticketMap);
     

@@ -3,5 +3,6 @@
   <persistence-unit name="espai_PU" transaction-type="JTA">
     <jta-data-source>jdbc/espai</jta-data-source>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <shared-cache-mode>NONE</shared-cache-mode>
   </persistence-unit>
 </persistence>

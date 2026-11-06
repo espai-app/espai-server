@@ -38,12 +38,26 @@
     <!-- TOOLBAR -->
     <div class="grid mb-3">
       <div class="col">
-        <p:linkButton href="programming.xhtml" icon="pi pi-pencil" value="Programm bearbeiten" styleClass="ui-button-outlined">
+        <p:linkButton href="programming.xhtml" icon="pi pi-pencil" value="Programm bearbeiten">
+          <f:param name="seasonId" value="#{eventIndexView.currentSeason.id}" />
+        </p:linkButton>
+
+        <p:linkButton href="editor.xhtml" icon="pi pi-plus" value="Veranstaltung hinzufügen" styleClass="ui-button-outlined ml-2">
           <f:param name="seasonId" value="#{eventIndexView.currentSeason.id}" />
         </p:linkButton>
       </div>
       <div class="col text-right">
-        <p:commandButton type="button" class="ui-button-flat rounded-button ui-button-secondary" icon="pi pi-filter" title="filtern" onclick="PF('filterDialog').show()" />
+        <p:commandButton type="button"
+                         class="ui-button-flat rounded-button ui-button-secondary"
+                         icon="pi pi-filter"
+                         title="filtern"
+                         onclick="PF('filterDialog').show()" />
+
+        <p:linkButton href="#{request.contextPath}/webservice/export/season/#{seasonContext.currentSeason.id}/events"
+                      value="CSV"
+                      icon="pi pi-download"
+                      styleClass="ui-button-flat mr-2 ui-button-secondary" />
+
       </div>
     </div>
 
@@ -77,10 +91,10 @@
                    rowStyleClass="#{event.hidden ? 'not-public' : null}"
                    styleClass="mt-5"
                    reflow="true"
-                   allowUnsorting="true" 
+                   allowUnsorting="true"
                    sortMode="single">
         <p:headerRow field="date" expandable="true">
-          <p:column colspan="4">
+          <p:column colspan="6">
             <h:outputText value="#{event.date}">
               <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
             </h:outputText>
@@ -100,18 +114,27 @@
             <f:param name="eventId" value="#{event.id}" />
             <f:param name="seasonId" value="#{eventIndexView.currentSeason.id}" />
 
-            <h:outputText value=" " class="pi pi-plus mr-1" rendered="#{event.parentEvent != null}"  />
+            <h:outputText styleClass="block text-xs uppercase mb-2"
+                          value="#{event.eventSerial.name}"
+                          rendered="#{event.eventSerial != null}" />
+
+            <h:outputText value=" " class="pi pi-plus mr-1"
+                          rendered="#{event.parentEvent != null}"  />
             <h:outputText value="#{event.production.fullName}" />
 
           </p:link>
         </p:column>
 
         <p:column headerText="Ort" sortBy="#{event.hall.venue.name}">
-          <h:outputText value="#{event.hall.venue.name}"/>, <h:outputText value="#{event.hall.venue.city}"/>
+          <h:outputText value="#{event.hall.venue.name}"/> <h:outputText value=", #{event.hall.venue.city}" rendered="#{event.hall.venue.city != null and !event.hall.venue.city.blank}"/>
         </p:column>
 
-        <p:column headerText="Saal" style="width:7rem" sortBy="#{event.hall.venue.name}">
+        <p:column headerText="Saal" width="10rem" sortBy="#{event.hall.venue.name}">
           <h:outputText value="#{event.hall.name}"/>
+        </p:column>
+
+        <p:column headerText="Status" width="8rem">
+          <h:outputText value="#{translation.get('EventStatus.'.concat(event.status))}"/>
         </p:column>
 
         <p:column headerText="Auslastung" style="width: 100px;" sortBy="#{0 + eventIndexView.ticketsSold.get(event.id)}">

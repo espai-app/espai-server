@@ -1,0 +1,134 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/layout.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+  <ui:param name="title" value="#{agencyDetailsView.agency.name}"/>
+
+  <ui:define name="content">
+    <h:form>
+
+      <p:breadCrumb homeDisplay="text">
+        <p:menuitem value="Stammdaten" url="../index.xhtml"/>
+        <p:menuitem value="Lizenzgeber" url="index.xhtml" />
+        <p:menuitem value="#{title}" disabled="true" />
+      </p:breadCrumb>
+
+      <h1><h:outputText value="#{title}" /></h1>
+
+      <div class="mb-3">
+        <p:linkButton href="editor.xhtml" icon="pi pi-pencil" value="bearbeiten">
+          <f:param name="agencyId" value="#{agencyDetailsView.agency.id}" />
+        </p:linkButton>
+
+        <p:commandButton icon="pi pi-trash"
+                         value="löschen"
+                         styleClass="ui-button-outlined ui-button-danger ml-2"
+                         action="#{agencyDetailsView.delete}"
+                         rendered="#{agencyDetailsView.licenseList.isEmpty()}">
+          <p:confirm header="Löschen bestätigen"
+                     message="Möchten Sie diesen Lizenzgeber wirklich löschen?" />
+        </p:commandButton>
+        <p:commandButton icon="pi pi-trash"
+                         value="löschen"
+                         styleClass="ui-button-outlined ui-button-danger ml-2"
+                         onclick="PF('deleteDialog').show()"
+                         rendered="#{not agencyDetailsView.licenseList.isEmpty()}" />
+      </div>
+
+      <p:dataTable value="#{agencyDetailsView.licenseList}" var="l">
+        <p:column headerText="Werk" width="20%">
+          <p:link value="#{l.production.title}" href="../productions/editor.xhtml">
+            <f:param name="productionId" value="#{l.production.id}" />
+          </p:link>
+        </p:column>
+
+        <p:column headerText="Typ">
+          <h:outputText value="gewerblich" rendered="#{l.commercial}" />
+          <h:outputText value="nicht gewerblich" rendered="#{not l.commercial}" />
+        </p:column>
+
+        <p:column headerText="Umsatzbeteiligung" styleClass="text-right">
+          <h:outputText value="#{l.ticketShare}">
+            <f:convertNumber maxFractionDigits="2" pattern="0.## '%'"/>
+          </h:outputText>
+        </p:column>
+
+        <p:column headerText="Mindestgarantie" styleClass="text-right">
+          <h:outputText value="#{l.guarantee.amount}">
+            <f:convertNumber locale="de" minFractionDigits="2" maxFractionDigits="2" />
+          </h:outputText> <h:outputText value=" #{l.guarantee.currency}" />
+        </p:column>
+
+        <p:column headerText="Festpreis" styleClass="text-right">
+          <h:outputText value="#{l.fixedPrice.amount}">
+            <f:convertNumber locale="de" minFractionDigits="2" maxFractionDigits="2" />
+          </h:outputText>
+          <h:outputText value=" #{l.fixedPrice.currency}" />
+        </p:column>
+
+        <p:column headerText="sonstige Kosten" styleClass="text-right">
+          <h:outputText value="#{l.additionalCost.amount}">
+            <f:convertNumber locale="de" minFractionDigits="2" maxFractionDigits="2" />
+          </h:outputText>
+          <h:outputText value=" #{l.additionalCost.currency}" />
+        </p:column>
+
+        <p:column headerText="Hinweise" width="20%">
+          <h:outputText value="#{l.notes}" />
+        </p:column>
+      </p:dataTable>
+
+      <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="650">
+        <p:commandButton value="abbrechen" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+        <p:commandButton value="Ja, löschen" type="button" icon="pi pi-trash" styleClass="ui-confirmdialog-yes ui-button-danger" />
+      </p:confirmDialog>
+
+    </h:form>
+
+    <h:form>
+      <p:dialog widgetVar="deleteDialog"
+                header="#{agencyDetailsView.agency.name} löschen"
+                modal="true"
+                responsive="true"
+                resizable="true"
+                width="800"
+                height="150"
+                closeOnEscape="true"
+                showEffect="fade"
+                blockScroll="true">
+
+        <f:facet name="footer">
+          <p:commandButton icon="pi pi-copy"
+                           value="zusammenführen"
+                           action="#{agencyDetailsView.mergeWith}"
+                           update="@form" />
+
+          <p:commandButton icon="pi pi-trash"
+                           value="alles löschen"
+                           styleClass="ui-button-outlined ui-button-danger ml-2"
+                           action="#{agencyDetailsView.delete}"
+                           update="@form" />
+
+          <p:commandButton icon="pi pi-times"
+                           styleClass="ui-button-outlined ml-2"
+                           value="abbrechen"
+                           onclick="PF('deleteDialog').hide()" />
+        </f:facet>
+
+        <p>Dieser Lizenzgeber enthält verschiedene Lizenzbedingungen. Möchten Sie den Lizenzgeber mit einem bestehenden Datensatz zusammenlegen?</p>
+
+        <p:selectOneMenu value="#{agencyDetailsView.targetAgency}" required="true">
+          <f:selectItems value="#{agencyDetailsView.agencyList}"
+                         var="a"
+                         itemLabel="#{a.name}"
+                         itemValue="#{a}" />
+        </p:selectOneMenu>
+      </p:dialog>
+    </h:form>
+  </ui:define>
+</ui:composition>

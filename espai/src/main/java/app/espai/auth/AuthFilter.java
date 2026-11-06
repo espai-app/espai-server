@@ -50,13 +50,7 @@ public class AuthFilter implements Filter {
                 chain.doFilter(request, response);
                 return;
             }
-        }
-
-        // ignore CORS preflight requests
-        if (httpRequest.getMethod().equals("OPTIONS")) {
-            chain.doFilter(request, response);
-            return;
-        }
+        }       
 
         // if not logged in or public user in private area, redirect to login page
         Principal principal = httpRequest.getUserPrincipal();

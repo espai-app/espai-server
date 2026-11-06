@@ -8,7 +8,9 @@ package app.espai.dao;
 import app.espai.model.Venue;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Named;
+import jakarta.persistence.TypedQuery;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * DAO class for venue
@@ -16,6 +18,20 @@ import java.util.Comparator;
 @Named
 @Stateless
 public class Venues extends AbstractVenues {
+
+  public Venue getBySlug(String slug) {
+
+    TypedQuery<Venue> query = em.createQuery("SELECT v FROM Venue v WHERE v.slug = :slug", Venue.class);
+    query.setParameter("slug", slug);
+
+    List<Venue> result = query.getResultList();
+
+    if (result.isEmpty()) {
+      return null;
+    }
+
+    return result.get(0);
+  }
 
   public static final Comparator<Venue> DEFAULT_ORDER = new Comparator<>() {
     @Override

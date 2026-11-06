@@ -6,6 +6,8 @@ import app.espai.dao.Users;
 import app.espai.dao.Venues;
 import app.espai.filter.AccessRightFilter;
 import app.espai.model.AccessRight;
+import app.espai.model.ApiUser;
+import app.espai.model.GuiUser;
 import app.espai.model.User;
 import app.espai.model.UserRole;
 import app.espai.model.Venue;
@@ -20,6 +22,7 @@ import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  *
@@ -41,7 +44,8 @@ public class UserEditorView extends BaseView implements Serializable {
   @EJB
   private UserPasswordManager userPasswordManager;
 
-  private User user;
+  private GuiUser guiUser;
+  private ApiUser apiUser;
   private List<AccessRight> accessRightList = new LinkedList<>();
   private List<? extends Venue> venueList;
   private final UserRole[] userRoleList = UserRole.values();
@@ -50,13 +54,26 @@ public class UserEditorView extends BaseView implements Serializable {
   public void init() {
     ExternalContext econtext = FacesContext.getCurrentInstance().getExternalContext();
     String userParam = econtext.getRequestParameterMap().get(USER_ID);
+    String userTypeParam = econtext.getRequestParameterMap().get("userType");
     if (userParam == null || !userParam.matches("\\d+")) {
-      user = new User();
+
+      if ("apiUser".equals(userTypeParam)) {
+        apiUser = new ApiUser();
+        apiUser.setApiToken(UUID.randomUUID().toString());
+      } else {
+        guiUser = new GuiUser();
+      }
     } else {
-      user = users.get(Long.parseLong(userParam));
+      User genericUser = users.get(Long.parseLong(userParam));
+
+      if (genericUser instanceof ApiUser u) {
+        apiUser = u;
+      } else if (genericUser instanceof GuiUser u) {
+        guiUser = u;
+      }
 
       AccessRightFilter rightFilter = new AccessRightFilter();
-      rightFilter.setUser(user);
+      rightFilter.setUser(genericUser);
       accessRightList.addAll(accessRights.list(rightFilter).getItems());
     }
 
@@ -79,14 +96,22 @@ public class UserEditorView extends BaseView implements Serializable {
   }
 
   public void save() {
-    user = users.save(user);
 
-    for (AccessRight r : accessRightList) {
-      r.setUser(user);
-      if (r.getRole() == UserRole.MANAGER) {
-      r.setVenue(null);
+    User user = null;
+    if (apiUser != null) {
+      user = users.save(apiUser);
+    } else if (guiUser != null) {
+      user = users.save(guiUser);
     }
-      accessRights.save(r);
+
+    if (user != null) {
+      for (AccessRight r : accessRightList) {
+        r.setUser(user);
+        if (r.getRole() == UserRole.MANAGER) {
+        r.setVenue(null);
+      }
+        accessRights.save(r);
+      }
     }
 
     redirect("editor.xhtml?userId=" + user.getId(),
@@ -96,31 +121,46 @@ public class UserEditorView extends BaseView implements Serializable {
   }
 
   public void delete() {
-    users.delete(user);
+    users.delete(guiUser);
     redirect("index.xhtml",
             "Benuterkonto gelöscht",
-            String.format("Das Benutzerkonto für %s wurde gelöscht.", user.getDisplayName()),
+            String.format("Das Benutzerkonto für %s wurde gelöscht.", guiUser.getDisplayName()),
             FacesMessage.SEVERITY_INFO);
   }
 
   public void resetPassword() {
-    userPasswordManager.resetPassword(user);
+    userPasswordManager.resetPassword(guiUser);
   }
 
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
   /**
-   * @return the user
+   * @return the guiUser
    */
-  public User getUser() {
-    return user;
+  public GuiUser getGuiUser() {
+    return guiUser;
   }
 
   /**
-   * @param user the user to set
+   * @param guiUser the guiUser to set
    */
-  public void setUser(User user) {
-    this.user = user;
+  public void setGuiUser(GuiUser guiUser) {
+    this.guiUser = guiUser;
   }
+
+  /**
+   * @return the apiUser
+   */
+  public ApiUser getApiUser() {
+    return apiUser;
+  }
+
+  /**
+   * @param apiUser the apiUser to set
+   */
+  public void setApiUser(ApiUser apiUser) {
+    this.apiUser = apiUser;
+  }
+
 
   /**
    * @return the accessRightList

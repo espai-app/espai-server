@@ -15,11 +15,23 @@
     <h1>Spielstätten</h1>
 
     <h:form>
-      <p:commandButton value="hinzufügen" icon="pi pi-plus" action="#{seasonVenueIndexView.addVenues}" styleClass="mr-2">
-        <p:ajax event="dialogReturn" listener="#{seasonVenueIndexView.init}" update="@form" />
+      <p:commandButton value="hinzufügen"
+                       icon="pi pi-plus"
+                       action="#{seasonVenueIndexView.addVenues}"
+                       styleClass="mr-2">
+        <p:ajax event="dialogReturn"
+                listener="#{seasonVenueIndexView.init}"
+                update="@form" />
       </p:commandButton>
-      <p:commandButton value="markierte entfernen" icon="pi pi-trash" action="#{seasonVenueIndexView.deleteVenues}" styleClass="ui-button-outlined ui-button-secondary" update="venueList">
-        <p:confirm header="Spielstätten entfernen" message="Möchten Sie die ausgewählten Spielstätten wirklich aus der Spielzeit entfernen?" icon="pi pi-trash"/>
+
+      <p:commandButton value="markierte entfernen"
+                       icon="pi pi-trash"
+                       action="#{seasonVenueIndexView.deleteVenues}"
+                       styleClass="ui-button-outlined ui-button-secondary"
+                       update="venueList">
+        <p:confirm header="Spielstätten entfernen"
+                   message="Möchten Sie die ausgewählten Spielstätten wirklich aus der Spielzeit entfernen?"
+                   icon="pi pi-trash"/>
       </p:commandButton>
 
       <p:dataTable id="venueList"
@@ -37,7 +49,10 @@
         <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
 
         <p:column headerText="Name" sortBy="#{v.venue.name}">
-          <h:outputText value="#{v.venue.name}" />
+          <p:link href="details.xhtml" value="#{v.venue.name}">
+            <f:param name="seasonId" value="#{seasonContext.currentSeason.id}" />
+            <f:param name="seasonVenueId" value="#{v.id}" />
+          </p:link>
         </p:column>
 
         <p:column headerText="Ort" sortBy="#{v.venue.city}">
@@ -52,14 +67,8 @@
           <h:outputText value="#{v.selfProgramming ? 'ja' : 'nein'}" />
         </p:column>
 
-        <p:column style="width: 100px;" styleClass="text-right">
-          <p:commandButton title="bearbeiten"
-                           icon="pi pi-pencil"
-                           styleClass="ui-button-flat ui-rounded-button"
-                           action="#{seasonVenueIndexView.editSeasonVenue(v.id)}" >
-
-            <p:ajax event="dialogReturn" listener="#{seasonVenueIndexView.init}" update="@form"/>
-          </p:commandButton>
+        <p:column headerText="Terminwünsche"  style="width: 7rem" sortBy="#{v.allowFreeBooking}">
+          <h:outputText value="#{v.allowFreeBooking ? 'ja' : 'nein'}" />
         </p:column>
       </p:dataTable>
 

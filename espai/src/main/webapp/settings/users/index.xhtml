@@ -6,14 +6,20 @@
   xmlns:p="http://primefaces.org/ui"
   template="/WEB-INF/layout/settings.xhtml"
   xmlns:h="http://xmlns.jcp.org/jsf/html">
-  
+
   <ui:param name="title" value="Benutzerkonten" />
 
   <ui:define name="content">
     <h1>Benutzerkonten</h1>
 
     <h:form>
-      <p:linkButton value="neues Benutzerkonto" icon="pi pi-plus" href="editor.xhtml" />
+      <p:linkButton value="neues Benutzerkonto"
+                    icon="pi pi-plus"
+                    href="editor.xhtml" />
+      <p:linkButton value="neuer API-Token"
+                    icon="pi pi-plus"
+                    href="editor.xhtml?userType=apiUser"
+                    styleClass="ml-2" />
 
       <p:dataTable value="#{userIndexView.userList}" var="s" styleClass="mt-3">
         <p:column headerText="Name">
@@ -22,7 +28,9 @@
           </p:link>
         </p:column>
         <p:column headerText="E-Mail">
-          <p:link value="#{s.email}" href="editor.xhtml">
+          <p:link value="#{s.email}"
+                  href="editor.xhtml"
+                  rendered="#{userIndexView.getType(s) == 'GuiUser'}">
             <f:param name="userId" value="#{s.id}" />
           </p:link>
         </p:column>

@@ -73,7 +73,39 @@
 
         <div class="field">
           <p:outputLabel for="publicNotes" value="öffentliche Hinweise" />
-          <p:inputTextarea id="publicNotes" value="#{hallEditorView.hall.internalNotes}" />
+
+          <p:textEditor id="publicNotes"
+                        value="#{hallEditorView.hall.internalNotes}"
+                        height="200"
+                        secure="false"
+                        styleClass="w-full">
+
+            <f:facet name="toolbar">
+              <span class="ql-formats">
+                <button class="ql-bold"></button>
+                <button class="ql-italic"></button>
+                <button class="ql-underline"></button>
+                <button class="ql-strike"></button>
+              </span>
+
+              <span class="ql-formats">
+                <button class="ql-script" value="sub" />
+                <button class="ql-script" value="super" />
+              </span>
+
+              <span class="ql-formats">
+                <button class="ql-list" value="ordered" />
+                <button class="ql-list" value="bullet" />
+                <button class="ql-indent" value="-1" />
+                <button class="ql-indent" value="+1" />
+              </span>
+
+              <span class="ql-formats">
+                <button class="ql-link" />
+              </span>
+            </f:facet>
+          </p:textEditor>
+
           <small class="w-full">Werden auch auf der Webseite angezeigt, z.B. Hinweise zur Barrierefreiheit.</small>
           <h:message for="publicNotes" />
         </div>

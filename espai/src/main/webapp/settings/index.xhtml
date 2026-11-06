@@ -13,6 +13,8 @@
   <ui:define name="content">
     <h1>Einstellungen</h1>
 
+    <h2>Allgemeine Verwaltung</h2>
+
     <div class="grid">
       <p:card styleClass="lg:col-3 md:col-4 col-12 md:mr-2 mb-2" rendered="#{request.isUserInRole('MANAGER')}">
         <f:facet name="title">Spielzeiten verwalten</f:facet>
@@ -21,13 +23,23 @@
       </p:card>
 
       <p:card styleClass="lg:col-3 md:col-4 col-12 md:mr-2 mb-2" rendered="#{request.isUserInRole('MANAGER')}">
+        <f:facet name="title">Preiskategorien</f:facet>
+        <p>Verwalten Sie die Preiskategorien für die Tickets.</p>
+        <f:facet name="footer"><div class="text-right"><p:linkButton href="priceCategories/index.xhtml" value="zur Liste" styleClass="ui-button-flat"/></div></f:facet>
+      </p:card>
+
+      <p:card styleClass="lg:col-3 md:col-4 col-12 md:mr-2 mb-2" rendered="#{request.isUserInRole('MANAGER')}">
         <f:facet name="title">Benutzerkonten verwalten</f:facet>
         <p>Fügen Sie neue Nutzer hinzu und vergeben Sie Nutzerrechte.</p>
         <f:facet name="footer"><div class="text-right"><p:linkButton href="users/index.xhtml" value="zur Liste" styleClass="ui-button-flat"/></div></f:facet>
       </p:card>
-
+    </div>
+    
+    <h2>Kommunikation</h2>
+    
+    <div class="grid">
       <p:card styleClass="lg:col-3 md:col-4 col-12 md:mr-2 mb-2" rendered="#{request.isUserInRole('MANAGER')}">
-        <f:facet name="title">Mail-Konten</f:facet>
+        <f:facet name="title">E-Mail-Konten</f:facet>
         <p>Bearbeiten Sie die Mailkonten für ein- und ausgehende E-Mails.</p>
         <f:facet name="footer"><div class="text-right"><p:linkButton href="mailAccounts/index.xhtml" value="zur Liste" styleClass="ui-button-flat"/></div></f:facet>
       </p:card>
@@ -37,12 +49,24 @@
         <p>Bearbeiten Sie die Standardtexte für Status-E-Mails.</p>
         <f:facet name="footer"><div class="text-right"><p:linkButton href="mailTemplates/index.xhtml" value="zur Liste" styleClass="ui-button-flat"/></div></f:facet>
       </p:card>
+    </div>
 
+    <h2>Datenstrukturen</h2>
+
+    <div class="grid">
       <p:card styleClass="lg:col-3 md:col-4 col-12 md:mr-2 mb-2" rendered="#{request.isUserInRole('MANAGER')}">
-        <f:facet name="title">Preiskategorien</f:facet>
-        <p>Verwalten Sie die Preiskategorien für die Tickets.</p>
-        <f:facet name="footer"><div class="text-right"><p:linkButton href="priceCategories/index.xhtml" value="zur Liste" styleClass="ui-button-flat"/></div></f:facet>
+        <f:facet name="title">Veranstaltungsformate</f:facet>
+        <p>Verwalten Sie Metadaten-Felder Ihrer Veranstaltungsformate.</p>
+        <f:facet name="footer"><div class="text-right"><p:linkButton href="productionTypes/index.xhtml" value="zur Liste" styleClass="ui-button-flat"/></div></f:facet>
+      </p:card>
+      
+      <p:card styleClass="lg:col-3 md:col-4 col-12 md:mr-2 mb-2" rendered="#{request.isUserInRole('MANAGER')}">
+        <f:facet name="title">Buchungsformulare</f:facet>
+        <p>Verwalten Sie Metadaten-Felder Ihrer Buchungsformulare.</p>
+        <f:facet name="footer"><div class="text-right"><p:linkButton href="reservationForms/index.xhtml" value="zur Liste" styleClass="ui-button-flat"/></div></f:facet>
       </p:card>
     </div>
+
+    
   </ui:define>
 </ui:composition>

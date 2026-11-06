@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/seasons.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="jakarta.tags.core">
+
+  <ui:param name="title" value="#{seasonVenueDetailsView.seasonVenue.venue.name}" />
+
+  <ui:define name="content">
+
+    <h:form>
+      <h1><h:outputText value="#{title}" /></h1>
+
+      <div class="mb-3">
+        <p:commandButton value="speichern"
+                         icon="pi pi-save"
+                         action="#{seasonVenueEditorView.save}" />
+      </div>
+
+      <p:card>
+        <div class="grid ui-fluid">
+          <div class="col-12 lg:col-6">
+            <div class="field">
+              <p:outputLabel for="name" value="Name" />
+              <p:inputText id="name" value="#{seasonVenueEditorView.seasonVenue.venue.name}" />
+              <h:message for="name" />
+            </div>
+
+            <div class="field">
+              <p:outputLabel for="address" value="Adresse" />
+              <p:inputText id="address" value="#{seasonVenueEditorView.seasonVenue.venue.address}" />
+              <h:message for="address" />
+            </div>
+
+            <div class="grid">
+              <div class="col-3 field">
+                <p:outputLabel for="postcode" value="PLZ" />
+                <p:inputText id="postcode" value="#{seasonVenueEditorView.seasonVenue.venue.postcode}" />
+                <h:message for="postcode" />
+              </div>
+
+              <div class="col-9 field">
+                <p:outputLabel for="city" value="Ort" />
+                <p:inputText id="city" value="#{seasonVenueEditorView.seasonVenue.venue.city}" />
+                <h:message for="city" />
+              </div>
+            </div>
+
+            <div class="field">
+              <p:outputLabel for="phone" value="Telefon" />
+              <p:inputText id="phone" value="#{seasonVenueEditorView.seasonVenue.venue.phone}" />
+              <h:message for="phone" />
+            </div>
+
+            <div class="field">
+              <p:outputLabel for="email" value="E-Mail" />
+              <p:inputText id="email" value="#{seasonVenueEditorView.seasonVenue.venue.email}" />
+              <h:message for="email" />
+            </div>
+
+            <div class="field">
+              <p:outputLabel for="website" value="Webseite" />
+              <p:inputText id="website" value="#{seasonVenueEditorView.seasonVenue.venue.website}" />
+              <h:message for="website" />
+            </div>
+
+            <div>
+              <p:selectBooleanCheckbox value="#{seasonVenueEditorView.seasonVenue.selfProgramming}"
+                                       itemLabel="programmiert selbst" />
+            </div>
+
+            <div class="mt-2">
+              <p:selectBooleanCheckbox value="#{seasonVenueEditorView.seasonVenue.allowFreeBooking}"
+                                       itemLabel="akzeptiert Terminwünsche" />
+            </div>
+
+            <div class="field mt-4">
+              <p:outputLabel for="publicNotes" value="Hinweise für Webseite (alle Spielzeiten)" />
+
+              <p:textEditor id="publicNotes"
+                            value="#{seasonVenueEditorView.seasonVenue.venue.publicNotes}"
+                            height="200"
+                            secure="false"
+                            styleClass="w-full">
+
+                <f:facet name="toolbar">
+                  <span class="ql-formats">
+                    <button class="ql-bold"></button>
+                    <button class="ql-italic"></button>
+                    <button class="ql-underline"></button>
+                    <button class="ql-strike"></button>
+                  </span>
+
+                  <span class="ql-formats">
+                    <button class="ql-script" value="sub" />
+                    <button class="ql-script" value="super" />
+                  </span>
+
+                  <span class="ql-formats">
+                    <button class="ql-list" value="ordered" />
+                    <button class="ql-list" value="bullet" />
+                    <button class="ql-indent" value="-1" />
+                    <button class="ql-indent" value="+1" />
+                  </span>
+
+                  <span class="ql-formats">
+                    <button class="ql-link" />
+                  </span>
+                </f:facet>
+              </p:textEditor>
+
+              <h:message for="publicNotes" />
+            </div>
+
+            <div class="field">
+              <p:outputLabel for="seasonNotes" value="Hinweise für Webseite in dieser Spielzeit" />
+
+              <p:textEditor id="seasonNotes"
+                            value="#{seasonVenueEditorView.seasonVenue.seasonNotes}"
+                            height="200"
+                            secure="false"
+                            styleClass="w-full">
+
+                <f:facet name="toolbar">
+                  <span class="ql-formats">
+                    <button class="ql-bold"></button>
+                    <button class="ql-italic"></button>
+                    <button class="ql-underline"></button>
+                    <button class="ql-strike"></button>
+                  </span>
+
+                  <span class="ql-formats">
+                    <button class="ql-script" value="sub" />
+                    <button class="ql-script" value="super" />
+                  </span>
+
+                  <span class="ql-formats">
+                    <button class="ql-list" value="ordered" />
+                    <button class="ql-list" value="bullet" />
+                    <button class="ql-indent" value="-1" />
+                    <button class="ql-indent" value="+1" />
+                  </span>
+
+                  <span class="ql-formats">
+                    <button class="ql-link" />
+                  </span>
+                </f:facet>
+              </p:textEditor>
+
+              <h:message for="seasonNotes" />
+            </div>
+          </div>
+        </div>
+      </p:card>
+    </h:form>
+  </ui:define>
+</ui:composition>

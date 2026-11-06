@@ -26,9 +26,9 @@
           <f:param name="reservationId" value="#{reservationDetailsView.reservation.id}" />
           <f:param name="seasonId" value="#{reservationDetailsView.reservation.event.season.id}" />
         </p:linkButton>
-        <p:commandButton icon="pi pi-trash" 
-                         value="löschen" 
-                         rendered="#{request.isUserInRole('MANAGER')}" 
+        <p:commandButton icon="pi pi-trash"
+                         value="löschen"
+                         rendered="#{request.isUserInRole('MANAGER')}"
                          styleClass="ui-button-outlined ui-button-danger"
                          action="#{reservationDetailsView.delete}">
           <p:confirm header="Löschen bestätigen"
@@ -54,56 +54,108 @@
     <p:card>
       <f:facet name="title">Veranstaltung</f:facet>
 
-      <dl class="data-list">
-        <dt>Veranstaltung</dt>
-        <dd>
-          <p:link href="../events/details.xhtml" value="#{reservationDetailsView.production.title}">
-            <f:param name="eventId" value="#{reservationDetailsView.reservation.event.id}" />
-            <f:param name="seasonId" value="#{reservationDetailsView.reservation.event.season.id}" />
-          </p:link>
-        </dd>
+      <div class="grid">
+        <div class="col-12 md:col-6">
+          <dl class="data-list">
+            <dt>Veranstaltung</dt>
+            <dd>
+              <p:link href="../events/details.xhtml" value="#{reservationDetailsView.production.title}">
+                <f:param name="eventId" value="#{reservationDetailsView.reservation.event.id}" />
+                <f:param name="seasonId" value="#{reservationDetailsView.reservation.event.season.id}" />
+              </p:link>
+            </dd>
 
-        <dt>Version</dt>
-        <dd><h:outputText value="#{reservationDetailsView.reservation.event.production.versionName}" /></dd>
+            <h:panelGroup>
+              <dt>gehört zu</dt>
+              <dd>
+                <p:link href="details.xhtml" value="#{reservationDetailsView.reservation.parentReservation.event.production.fullName}">
+                  <f:param name="reservationId" value="#{reservationDetailsView.reservation.parentReservation.id}" />
+                  <f:param name="seasonId" value="#{reservationDetailsView.reservation.event.season.id}" />
+                </p:link>
+              </dd>
+            </h:panelGroup>
 
-        <dt>Termin</dt>
-        <dd>
-          <h:outputText value="#{reservationDetailsView.reservation.event.date}">
-            <f:convertDateTime pattern="dd.MM.yyyy" type="localDate" />
-          </h:outputText>
-          <h:outputText value=", #{reservationDetailsView.reservation.event.time} Uhr" />
-        </dd>
+            <dt>Version</dt>
+            <dd><h:outputText value="#{reservationDetailsView.reservation.event.production.versionName}" /></dd>
 
-        <dt>Spielstätte</dt>
-        <dd><h:outputText value="#{reservationDetailsView.reservation.event.hall.venue.name}, #{reservationDetailsView.reservation.event.hall.venue.city}" /></dd>
+            <dt>Termin</dt>
+            <dd>
+              <h:outputText value="#{reservationDetailsView.reservation.event.date}">
+                <f:convertDateTime pattern="dd.MM.yyyy" type="localDate" />
+              </h:outputText>
+              <h:outputText value=", #{reservationDetailsView.reservation.event.time} Uhr" />
+            </dd>
 
-        <dt>Saal</dt>
-        <dd><h:outputText value="#{reservationDetailsView.reservation.event.hall.name} (#{reservationDetailsView.reservation.event.hall.capacity} Pers.)" /></dd>
-        
-        <dt>Belegung</dt>
-        <dd>
-          <table class="table-inline">
+            <dt>Spielstätte</dt>
+            <dd>
+              <p:link value="#{reservationDetailsView.reservation.event.hall.venue.name}, #{reservationDetailsView.reservation.event.hall.venue.city}"
+                      href="../../catalogs/venues/details.xhtml"
+                      rendered="#{not userContext.restricted}">
+                <f:param name="venueId" value="#{reservationDetailsView.reservation.event.hall.venue.id}" />
+              </p:link>
+              <h:outputText value="#{reservationDetailsView.reservation.event.hall.venue.name}, #{reservationDetailsView.reservation.event.hall.venue.city}"
+                            rendered="#{userContext.restricted}"/>
+            </dd>
+
+            <dt>Saal</dt>
+            <dd><h:outputText value="#{reservationDetailsView.reservation.event.hall.name} (#{reservationDetailsView.reservation.event.hall.capacity} Pers.)" /></dd>
+
+            <dt>Status</dt>
+            <dd><h:outputText value="#{translation.get('EventStatus.'.concat(reservationDetailsView.reservation.event.status))}"/></dd>
+          </dl>
+        </div>
+        <div class="col-12 md:col-6">
+
+          <table>
             <thead>
               <tr>
-                <th>Platzkategorie</th>
-                <th class="text-right">frei</th>
-                <th class="text-right">belegt</th>
-                <th class="text-right">gesamt</th>
+                <th colspan="2"></th>
+                <c:forEach items="#{reservationDetailsView.seatCategoryNames}" var="seatCategory">
+                  <th class="text-right"><h:outputText value="#{seatCategory}" /></th>
+                </c:forEach>
               </tr>
             </thead>
             <tbody>
-              <c:forEach items="#{reservationDetailsView.seats}" var="seat">
+              <tr>
+                <td colspan="2">frei</td>
+                <c:forEach items="#{reservationDetailsView.seatCategoryNames}" var="seatCategory">
+                  <td class="text-right"><h:outputText value="#{reservationDetailsView.ticketTable.get('free').get('').get(seatCategory)}" /></td>
+                </c:forEach>
+              </tr>
+            </tbody>
+            <tbody>
+              <tr>
+                <td colspan="2">belegt</td>
+                <td colspan="#{reservationDetailsView.seatCategoryNames.size()}"></td>
+              </tr>
+              <c:forEach items="#{reservationDetailsView.priceCategoryNames}" var="priceCategory">
                 <tr>
-                  <td><h:outputText value="#{seat.name}" /></td>
-                  <td class="text-right"><h:outputText value="#{seat.seatsAvailable}" /></td>
-                  <td class="text-right"><h:outputText value="#{seat.seatsTaken}" /></td>
-                  <td class="text-right"><h:outputText value="#{seat.capacity}" /></td>
+                  <td width="15px"></td>
+                  <td><h:outputText value="#{priceCategory}" /></td>
+                  <c:forEach items="#{reservationDetailsView.seatCategoryNames}" var="seatCategory">
+                    <td class="text-right"><h:outputText value="#{reservationDetailsView.ticketTable.get('event').get(priceCategory).get(seatCategory)}" /></td>
+                  </c:forEach>
+                </tr>
+              </c:forEach>
+            </tbody>
+            <tbody>
+              <tr>
+                <td colspan="2">Summe Tag</td>
+                <td colspan="#{reservationDetailsView.seatCategoryNames.size()}"></td>
+              </tr>
+              <c:forEach items="#{reservationDetailsView.priceCategoryNames}" var="priceCategory">
+                <tr>
+                  <td></td>
+                  <td><h:outputText value="#{priceCategory}" /></td>
+                  <c:forEach items="#{reservationDetailsView.seatCategoryNames}" var="seatCategory">
+                    <td class="text-right"><h:outputText value="#{reservationDetailsView.ticketTable.get('day').get(priceCategory).get(seatCategory)}" /></td>
+                  </c:forEach>
                 </tr>
               </c:forEach>
             </tbody>
           </table>
-        </dd>
-      </dl>
+        </div>
+      </div>
     </p:card>
 
     <p:card styleClass="mt-3">
@@ -145,7 +197,14 @@
             </c:if>
 
             <dt>Nachricht</dt>
-            <dd><h:outputText value="#{reservationDetailsView.reservation.message}" /></dd>
+            <dd>
+              <h:outputText value="#{reservationDetailsView.reservation.message}" />
+              <p:commandButton icon="pi pi-send"
+                               value="antworten"
+                               styleClass="ml-3 text-xs ui-button-secondary ui-button-outlined"
+                               action="#{reservationDetailsView.sendAnswerMessage}"
+                               rendered="#{reservationDetailsView.reservation.message != null and not reservationDetailsView.reservation.message.isBlank()}"/>
+            </dd>
 
             <dt>Gebucht am</dt>
             <dd>
@@ -158,13 +217,16 @@
         <div class="md:col-6">
           <h:form>
             <p:selectOneMenu value="#{reservationDetailsView.reservationStatus}" rendered="#{request.isUserInRole('MANAGER')}" styleClass="mr-2">
-              <f:selectItems value="#{reservationDetailsView.reservationStatusList}" var="s" itemValue="#{s}" itemLabel="#{r}" />
+              <f:selectItem itemLabel="#{translation.get('ReservationStatus.NEW')}" itemValue="NEW" />
+              <f:selectItem itemLabel="#{translation.get('ReservationStatus.HOLD')}" itemValue="HOLD" />
+              <f:selectItem itemLabel="#{translation.get('ReservationStatus.CONFIRMED')}" itemValue="CONFIRMED" />
+              <f:selectItem itemLabel="#{translation.get('ReservationStatus.CANCELED')}" itemValue="CANCELED" />
             </p:selectOneMenu>
 
             <p:commandButton value="Status ändern" action="#{reservationDetailsView.updateStatus}" rendered="#{request.isUserInRole('MANAGER')}">
               <p:ajax event="dialogReturn" update="@form" />
             </p:commandButton>
-            
+
             <p:growl globalOnly="true" />
           </h:form>
 

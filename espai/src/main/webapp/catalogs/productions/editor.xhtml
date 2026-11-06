@@ -1,0 +1,398 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/layout.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="jakarta.tags.core">
+
+  <ui:param name="title"  value="#{productionEditorView.production.id != null ? productionEditorView.production.title : productionEditorView.production.productionType.name.concat(' anlegen')}" />
+
+  <ui:define name="content">
+    <h:form>
+      <f:passThroughAttribute name="autocomplete" value="off" />
+
+      <p:breadCrumb homeDisplay="text">
+        <p:menuitem value="Stammdaten" url="../index.xhtml"/>
+        <p:menuitem value="Repertoire" url="index.xhtml" />
+        <p:menuitem value="#{title}" disabled="true" />
+      </p:breadCrumb>
+
+      <p:staticMessage severity="ERROR"
+                       summary="Bitte legen Sie mindestens eine Sprachfassung an."
+                       styleClass="block mt-3 ml-0"
+                       rendered="#{productionEditorView.versionList.isEmpty() and productionEditorView.production.id != null}"/>
+
+      <div class="page-title">
+        <h1><h:outputText value="#{title}" /></h1>
+      </div>
+
+      <div class="mb-3">
+        <p:commandButton action="#{productionEditorView.save}" value="speichern" />
+      </div>
+
+
+      <p:card styleClass="lg:flex-1">
+
+        <div class="grid">
+          <div class="col-12 md:col-9 ui-fluid">
+            <div class="field">
+              <p:outputLabel for="title" value="Titel" />
+              <p:inputText id="title"
+                           value="#{productionEditorView.production.title}"
+                           class="text-xl"/>
+              <h:message for="title" />
+            </div>
+
+
+            <div class="field">
+              <p:outputLabel for="subtitle" value="Untertitel" />
+              <p:inputText id="subtitle" value="#{productionEditorView.production.subtitle}" />
+              <h:message for="subtitle" />
+            </div>
+
+            <div class="field">
+              <p:outputLabel for="description" value="Beschreibung" />
+
+              <p:textEditor id="description"
+                            value="#{productionEditorView.production.description}"
+                            height="200"
+                            secure="false"
+                            styleClass="w-full">
+
+                <f:facet name="toolbar">
+                  <span class="ql-formats">
+                    <button class="ql-bold"></button>
+                    <button class="ql-italic"></button>
+                    <button class="ql-underline"></button>
+                    <button class="ql-strike"></button>
+                  </span>
+
+                  <span class="ql-formats">
+                    <button class="ql-script" value="sub" />
+                    <button class="ql-script" value="super" />
+                  </span>
+
+                  <span class="ql-formats">
+                    <button class="ql-list" value="ordered" />
+                    <button class="ql-list" value="bullet" />
+                    <button class="ql-indent" value="-1" />
+                    <button class="ql-indent" value="+1" />
+                  </span>
+
+                  <span class="ql-formats">
+                    <button class="ql-link" />
+                  </span>
+                </f:facet>
+              </p:textEditor>
+              <h:message for="description" />
+            </div>
+
+            <div class="grid">
+              <div class="field col-12 md:col-4">
+                <p:outputLabel for="duration" value="Laufzeit" styleClass="w-full" />
+
+                <p:inputText id="duration"
+                             value="#{productionEditorView.production.durationInMinutes}"
+                             styleClass="w-4 lg:w-6" /> min.
+                <h:message for="duration" />
+              </div>
+
+              <div class="field col-12 lg:col-4">
+                <p:outputLabel for="rating" value="Altersfreigabe" styleClass="w-full"/>
+
+                <p:inputText id="rating"
+                             value="#{productionEditorView.production.rating}"
+                             styleClass="w-4 lg:w-6"/>
+                <h:message for="rating" />
+              </div>
+
+              <div class="field col-12 lg:col-4">
+                <p:outputLabel for="recommendedAge" value="Altersempfehlung" styleClass="w-full"/>
+                <p:inputText id="recommendedAge"
+                             value="#{productionEditorView.production.recommendedAge}"
+                             styleClass="w-4 lg:w-6"/>
+                <h:message for="recommendedAge" />
+              </div>
+            </div>
+          </div>
+
+          <!--<div class="col-12 md:col-3">
+            <h:graphicImage />
+
+            <div class="mt-2">
+              <p:commandButton value="Bild hochladen"
+                               icon="pi pi-upload"
+                               />
+              <p:commandButton value="Bild löschen"
+                               styleClass="ui-button-secondary ui-button-outlined ml-1"
+                               icon="pi pi-trash"/>
+            </div>
+          </div>-->
+        </div>
+
+
+
+
+      </p:card>
+
+      <p:tabView styleClass="mt-3">
+        <p:tab title="Metadaten">
+          <div class="ui-fluid">
+            <c:forEach items="#{productionEditorView.metaFieldList}" var="currentField" varStatus="fieldStat" >
+              <div class="field">
+                <c:choose>
+                  <c:when test="#{currentField.field.fieldType == 'TEXT'}">
+                    <p:outputLabel for="metafield-#{fieldStat.index}" value="#{currentField.field.label}" />
+                    <p:inputText id="metafield-#{fieldStat.index}"
+                                 value="#{currentField.value.formattedValue}" />
+                    <h:message for="metafield-#{fieldStat.index}" />
+                  </c:when>
+                  <c:when test="#{currentField.field.fieldType == 'MULTILINE'}">
+                    <p:outputLabel for="metafield-#{fieldStat.index}" value="#{currentField.field.label}" />
+                    <p:inputTextarea id="metafield-#{fieldStat.index}"
+                                     value="#{currentField.value.formattedValue}" />
+                    <h:message for="metafield-#{fieldStat.index}" />
+                  </c:when>
+                  <c:when test="#{currentField.field.fieldType == 'RICHTEXT'}">
+                    <p:outputLabel for="metafield-#{fieldStat.index}" value="#{currentField.field.label}" />
+                    <p:textEditor id="metafield-#{fieldStat.index}"
+                                  value="#{currentField.value.formattedValue}"
+                                  height="200"
+                                  secure="false"
+                                  styleClass="w-full">
+
+                      <f:facet name="toolbar">
+                        <span class="ql-formats">
+                          <button class="ql-bold"></button>
+                          <button class="ql-italic"></button>
+                          <button class="ql-underline"></button>
+                          <button class="ql-strike"></button>
+                        </span>
+                      </f:facet>
+                    </p:textEditor>
+                    <h:message for="metafield-#{fieldStat.index}" />
+                  </c:when>
+                  <c:when test="#{currentField.field.fieldType == 'INTEGER'}">
+                    <p:outputLabel for="metafield-#{fieldStat.index}" value="#{currentField.field.label}" />
+                    <p:inputNumber id="metafield-#{fieldStat.index}"
+                                   value="#{currentField.value.formattedValue}" decimalPlaces="0" />
+                    <h:message for="metafield-#{fieldStat.index}" />
+                  </c:when>
+                  <c:when test="#{currentField.field.fieldType == 'DECIMAL'}">
+                    <p:outputLabel for="metafield-#{fieldStat.index}" value="#{currentField.field.label}" />
+                    <p:inputNumber id="metafield-#{fieldStat.index}"
+                                   value="#{currentField.value.formattedValue}" decimalPlaces="4" />
+                    <h:message for="metafield-#{fieldStat.index}" />
+                  </c:when>
+                  <c:when test="#{currentField.field.fieldType == 'TAG'}">
+                    <p:outputLabel for="metafield-#{fieldStat.index}" value="#{currentField.field.label}" />
+                    <p:autoComplete id="metafield-#{fieldStat.index}"
+                                    multiple="true"
+                                    value="#{currentField.value.formattedValue}"
+                                    var="tag"
+                                    itemLabel="#{tag}"
+                                    itemValue="#{tag}"
+                                    completeMethod="#{currentField.lookup}"/>
+                    <h:message for="metafield-#{fieldStat.index}" />
+                  </c:when>
+                  <c:when test="#{currentField.field.fieldType == 'BOOLEAN'}">
+                    <p:selectBooleanCheckbox id="metafield-#{fieldStat.index}"
+                                             value="#{currentField.value.formattedValue}"
+                                             itemLabel="#{currentField.field.label}" />
+                    <h:message for="metafield-#{fieldStat.index}" />
+                  </c:when>
+                  <c:when test="#{currentField.field.fieldType == 'DATE'}">
+                    <p:outputLabel for="metafield-#{fieldStat.index}"
+                                   value="#{currentField.field.label}" />
+                    <p:inputMask id="metafield-#{fieldStat.index}"
+                                 value="#{currentField.value.formattedValue}"
+                                 mask="99.99.9999"
+                                 label="#{currentField.field.label}">
+                      <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+                    </p:inputMask>
+                    <h:message for="metafield-#{fieldStat.index}" />
+                  </c:when>
+
+                  <c:when test="#{currentField.field.fieldType == 'DATETIME'}">
+                    <p:outputLabel for="metafield-#{fieldStat.index}"
+                                   value="#{currentField.field.label}" />
+                    <p:inputMask id="metafield-#{fieldStat.index}"
+                                 value="#{currentField.value.formattedValue}"
+                                 mask="99.99.9999 99:99"
+                                 label="#{currentField.field.label}">
+                      <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm" />
+                    </p:inputMask>
+                    <h:message for="metafield-#{fieldStat.index}" />
+                  </c:when>
+                </c:choose>
+              </div>
+            </c:forEach>
+          </div>
+        </p:tab>
+        <p:tab title="Fassungen und Formate">
+
+          <p:commandButton action="#{productionEditorView.addProductionVersion()}"
+                           icon="pi pi-plus"
+                           value="Fassung hinzufügen"
+                           styleClass="ui-button-outlined"/>
+
+          <p:dataTable value="#{productionEditorView.versionList}"
+                       var="v"
+                       class="mt-4 ui-fluid"
+                       rowKey="#{v.id}"
+                       rowIndexVar="versionIndex">
+
+            <p:autoUpdate />
+
+            <p:column headerText="Beschreibung">
+              <p:inputText value="#{v.versionName}" />
+            </p:column>
+
+            <p:column headerText="Medien-Format">
+              <p:inputText value="#{v.mediaFormat}" />
+            </p:column>
+
+            <p:column headerText="gesprochene Sprache">
+              <p:inputText value="#{v.spokenLanguage}" />
+            </p:column>
+
+            <p:column headerText="Untertitel">
+              <p:inputText value="#{v.subtitles}" />
+            </p:column>
+
+            <p:column style="width: 50px;">
+              <p:commandButton action="#{productionEditorView.removeProductionVersion(versionIndex)}"
+                               icon="pi pi-trash"
+                               styleClass="ui-button-danger ui-button-flat rounded-button" />
+            </p:column>
+          </p:dataTable>
+
+        </p:tab>
+
+        <p:tab title="Medien">
+          <ui:repeat value="#{productionEditorView.attachmentCategoryList}" var="ac">
+            <h3><h:outputText value="#{ac.name}" /></h3>
+
+            <div class="mb-3">
+              <p:commandButton value="hinzufügen" icon="pi pi-plus" action="#{productionEditorView.addAttachment(ac.name)}" rendered="#{productionEditorView.production.id != null}">
+                <p:ajax event="dialogReturn" listener="#{productionEditorView.onAttachmentsChanged}" update="@form"/>
+              </p:commandButton>
+            </div>
+
+            <div class="grid">
+              <ui:repeat value="#{productionEditorView.categorizedAttachments.get(ac.name).list}" var="a">
+                <div class="lg:col-3 md:col-4 col-12">
+                  <h:graphicImage url="/webservice/attachments/#{a.id}/datastream"
+                                  alt="#{a.caption}"
+                                  styleClass="img-attachment"
+                                  rendered="#{a.mediaType == 'IMAGE'}"/>
+
+                  <h:outputText value="#{a.caption}" style="block" />
+                  <h:outputText value="© #{a.copyright}" rendered="#{a.copyright != null}" style="block" />
+                  <p:commandButton title="Anhang bearbeiten"
+                                   icon="pi pi-pencil"
+                                   action="#{productionEditorView.editAttachment(a.id)}"
+                                   styleClass="ui-button-flat ui-rounded-button">
+                    <p:ajax event="dialogReturn" listener="#{productionEditorView.onAttachmentsChanged}" update="@form"/>
+                  </p:commandButton>
+                  <p:commandButton title="Bild löschen"
+                                   icon="pi pi-trash"
+                                   styleClass="ui-button-flat ui-rounded-button ui-button-danger"
+                                   action="#{productionEditorView.removeAttachment(a.id)}"
+                                   update="@form">
+                    <p:confirm header="Löschen bestätigen" message="Möchten Sie diesen Anhang wirklich löschen?" icon="pi pi-exclamation-triangle" />
+                  </p:commandButton>
+                </div>
+              </ui:repeat>
+            </div>
+          </ui:repeat>
+        </p:tab>
+
+        <p:tab title="Lizenzbedingungen">
+
+          <p:commandButton action="#{productionEditorView.addLicense}"
+                           icon="pi pi-plus"
+                           value="Lizenz hinzufügen"
+                           styleClass="ui-button-outlined">
+            <p:ajax event="dialogReturn"
+                    listener="#{productionEditorView.onLicensesChanged}"
+                    update="@parent"/>
+          </p:commandButton>
+
+          <h:panelGroup id="licensesList">
+            <ui:repeat value="#{productionEditorView.licenseList}" var="l">
+
+              <div class="grid">
+                <h3 class="col-12 md:col-8"><h:outputText value="#{l.agency.name}" /></h3>
+                <div class="col-12 md:col-4 text-right pt-3">
+                  <p:commandButton action="#{productionEditorView.editLicense(l.id)}"
+                                   icon="pi pi-pencil"
+                                   title="Lizenz bearbeiten"
+                                   styleClass="ui-button-flat ui-button-rounded mb-3">
+                    <p:ajax event="dialogReturn"
+                            listener="#{productionEditorView.onLicensesChanged}"
+                            update="@parent:@parent"/>
+                  </p:commandButton>
+
+                  <p:commandButton action="#{productionEditorView.removeLicense(l.id)}"
+                                   icon="pi pi-trash"
+                                   title="Lizenz bearbeiten"
+                                   styleClass="ui-button-flat ui-button-danger ui-button-rounded ml-2"
+                                   update="@parent:@parent">
+
+                    <p:confirm message="Möchten Sie diese Lizenz wirklich löschen?" />
+                  </p:commandButton>
+                </div>
+              </div>
+
+              <div class="grid">
+                <div class="col-12 md:col-2">
+                  <div class="font-semibold mb-1">Typ</div>
+                  <h:outputText value="gewerblich" rendered="#{l.commercial}" />
+                  <h:outputText value="nicht gewerblich" rendered="#{not l.commercial}" />
+                </div>
+
+                <div class="col-12 md:col-2">
+                  <div class="font-semibold mb-1">Umsatzbeteiligung</div>
+                  <div><h:outputText value="#{l.ticketShare}">
+                      <f:convertNumber maxFractionDigits="2" pattern="0.## '%'"/>
+                    </h:outputText></div>
+                </div>
+
+                <div class="col-12 md:col-2">
+                  <div class="font-semibold mb-1">Mindestgarantie</div>
+                  <div>
+                    <h:outputText value="#{l.guarantee.amount}">
+                      <f:convertNumber locale="de" minFractionDigits="2" maxFractionDigits="2" />
+                    </h:outputText> <h:outputText value=" #{l.guarantee.currency}" /></div>
+                </div>
+
+                <div class="col-12 md:col-2">
+                  <div class="font-semibold mb-1">Festpreis</div>
+                  <div>
+                    <h:outputText value="#{l.fixedPrice.amount}">
+                      <f:convertNumber locale="de" minFractionDigits="2" maxFractionDigits="2" />
+                    </h:outputText>
+                    <h:outputText value=" #{l.fixedPrice.currency}" /></div>
+                </div>
+
+                <div class="col-4">
+                  <div class="font-semibold mb-1">Hinweise</div>
+                  <div><h:outputText value="#{l.notes}" /></div>
+                </div>
+              </div>
+            </ui:repeat>
+          </h:panelGroup>
+        </p:tab>
+      </p:tabView>
+
+      <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="650">
+        <p:commandButton value="abbrechen" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+        <p:commandButton value="Ja, löschen" type="button" icon="pi pi-trash" styleClass="ui-confirmdialog-yes ui-button-danger" />
+      </p:confirmDialog>
+    </h:form>
+  </ui:define>
+</ui:composition>

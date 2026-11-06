@@ -5,39 +5,119 @@
   xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
   xmlns:p="http://primefaces.org/ui"
   template="/WEB-INF/layout/layout.xhtml"
-  xmlns:h="http://xmlns.jcp.org/jsf/html">
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:cc="jakarta.faces.composite"
+  xmlns:c="jakarta.tags.core">
 
-  <ui:param name="title" value="Programm"/>
+  <ui:param name="title" value="Repertoire"/>
 
   <ui:define name="content">
     <h:form>
+      <p:breadCrumb homeDisplay="text">
+        <p:menuitem value="Stammdaten" url="../index.xhtml"/>
+        <p:menuitem value="Repertoire" disabled="true" />
+      </p:breadCrumb>
+
       <div class="page-title">
-        <h1>Programm</h1>
+        <h1>Repertoire</h1>
       </div>
 
       <div>
-        <p:linkButton href="../movies/editor.xhtml" value="neuer Film" />
+        <p:menuButton value="Neuer Eintrag">
+          <c:forEach items="#{productionIndexView.productionTypeList}"
+                     var="pt">
+            <p:menuitem value="#{pt.name}"
+                        url="editor.xhtml?productionTypeId=#{pt.id}" />
+          </c:forEach>
+        </p:menuButton>
       </div>
-
-      <p:dataTable value="#{productionIndexView.productionList}" var="p" styleClass="mt-3" allowUnsorting="true" sortMode="single">
-        <p:column headerText="Titel" sortBy="#{p.title}">
-          <p:link value="#{p.title}" href="../movies/editor.xhtml">
-            <f:param name="productionId" value="#{p.id}" />
-          </p:link>
-        </p:column>
-
-        <p:column headerText="Verleih" sortBy="#{p.agency.name}">
-          <p:link value="#{p.agency.name}" href="../movies/editor.xhtml">
-            <f:param name="productionId" value="#{p.id}" />
-          </p:link>
-        </p:column>
-
-        <p:column headerText="Jahr" style="width: 4rem" sortBy="#{p.productionYear}">
-          <p:link value="#{p.productionYear}" href="../movies/editor.xhtml">
-            <f:param name="productionId" value="#{p.id}" />
-          </p:link>
-        </p:column>
-      </p:dataTable>
     </h:form>
+
+    <div id="searchResult" class="grid">
+      <div class="col-9">
+        <h:form>
+          <p:dataTable value="#{productionIndexView.searchResult.items}"
+                       var="p"
+                       styleClass="mt-3"
+                       allowUnsorting="true"
+                       sortMode="single"
+                       paginator="true"
+                       rows="50"
+                       pageLinks="10"
+                       paginatorTemplate="{FirstPageLink} {PageLinks} {LastPageLink}" >
+
+            <p:autoUpdate />
+
+            <p:column width="50px">
+              <p:link href="editor.xhtml">
+                <f:param name="productionId" value="#{p.id}" />
+                <img src="#{request.contextPath}/webservice/attachments/first/fit/production/#{p.id}/poster/50/70" />
+              </p:link>
+            </p:column>
+
+            <p:column headerText="Titel" sortBy="#{p.title}">
+              <p:link href="editor.xhtml">
+                <f:param name="productionId" value="#{p.id}" />
+                <span class="block text-sm">
+                  <h:outputText value="#{p.productionType.name}" />
+                </span>
+                <span class="block text-lg">
+                  <h:outputText value="#{p.title}" />
+                </span>
+                <span class="block text-sm">
+                  <h:outputText value="#{p.subtitle}" />
+                </span>
+              </p:link>
+            </p:column>
+
+            <p:column headerText="Laufzeit (min.)" width="7%">
+              <h:outputText value="#{p.durationInMinutes}" />
+            </p:column>
+            <p:column headerText="Alters&#173;freigabe" width="7%">
+              <h:outputText value="#{p.rating}"
+                            styleClass="text-lg"/>
+            </p:column>
+            <p:column headerText="Alter&#173;sempfeh&#173;lung" width="7%">
+              <h:outputText value="#{p.recommendedAge}"
+                            styleClass="text-lg"/>
+            </p:column>
+          </p:dataTable>
+        </h:form>
+      </div>
+      <div class="col-3">
+        <h:form>
+          <div class="ui-fluid">
+            <div class="field mt-3">
+              <p:outputLabel for="keyword" value="Suchwort" />
+              <p:inputText id="keyword"
+                           value="#{productionIndexView.searchResult.searchQuery.keyword}" />
+            </div>
+
+            <c:forEach items="#{productionIndexView.searchResult.searchQuery.facets}" var="facet">
+              <div class="field search-facet">
+                <b class="block mt-3 mb-1"><h:outputText value="#{facet.label}" /></b>
+
+                <div class="search-facet-options">
+                  <p:selectManyCheckbox value="#{facet.selected}" layout="pageDirection">
+                    <f:selectItems value="#{facet.available}"
+                                   var="i"
+                                   itemLabel="#{i.name} (#{i.count})"
+                                   itemValue="#{i.name}" />
+                  </p:selectManyCheckbox>
+                </div>
+              </div>
+            </c:forEach>
+          </div>
+
+          <div>
+            <p:commandButton value="filtern"
+                             icon="pi pi-filter"
+                             action="#{productionIndexView.filter}"
+                             styleClass="text-center"
+                             update="@form" />
+          </div>
+        </h:form>
+      </div>
+    </div>
   </ui:define>
 </ui:composition>

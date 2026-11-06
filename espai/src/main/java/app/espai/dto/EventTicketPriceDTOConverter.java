@@ -6,15 +6,22 @@ package app.espai.dto;
 
 import app.espai.model.EventTicketPrice;
 import app.espai.sdk.model.EventTicketPriceDTO;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.math.BigDecimal;
 
 /**
  *
  * @author rborowski
  */
+@ApplicationScoped
 public class EventTicketPriceDTOConverter {
-  
-  public static EventTicketPriceDTO of(EventTicketPrice price) {
+
+  public EventTicketPriceDTO toDTO(EventTicketPrice price) {
+
+    if (price == null) {
+      return null;
+    }
+
     EventTicketPriceDTO result = new EventTicketPriceDTO();
     result.setId(price.getId());
     result.setSeatCategory(price.getSeatCategory().getName());
@@ -24,5 +31,5 @@ public class EventTicketPriceDTOConverter {
     result.setCurrency(price.getPrice().getCurrency());
     return result;
   }
-  
+
 }

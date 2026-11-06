@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:jsf="http://xmlns.jcp.org/jsf"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/dialog.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:c="jakarta.tags.core">
+
+  <ui:param name="title"  value="#{licenseConditionEditView.license.id != null ? 'Lizenz bearbeiten' : 'Neue Lizenz'}" />
+
+  <ui:define name="content">
+    <h:form enctype="multipart/form-data">
+      <f:passThroughAttribute name="autocomplete" value="off" />
+
+      <input type="hidden" name="licenseId" value="#{param.licenseId}" />
+      <input type="hidden" name="productionId" value="#{param.productionId}" />
+
+      <div class="ui-fluid">
+
+        <div class="field">
+          <p:outputLabel for="agency" value="Lizenzgeber" />
+          <p:selectOneMenu id="agency"
+                           value="#{licenseConditionEditView.license.agency}">
+            <f:selectItems value="#{licenseConditionEditView.agencyList}"
+                           var="a"
+                           itemLabel="#{a.name}"
+                           itemValue="#{a}" />
+          </p:selectOneMenu>
+          <h:message for="agency" />
+        </div>
+
+        <div class="grid">
+          <div class="field col-12 mt-3">
+            <p:selectBooleanCheckbox value="#{licenseConditionEditView.license.commercial}"
+                                     itemLabel="gewerbliche Aufführungsrechte" />
+          </div>
+          <div class="field col-6">
+            <p:outputLabel for="ticketShare" value="Umsatzbeteiligung" />
+            <p:inputNumber id="ticketShare"
+                           value="#{licenseConditionEditView.license.ticketShare}"
+                           decimalPlaces="2"
+                           decimalSeparator=","
+                           symbol=" %"
+                           symbolPosition="s" />
+            <h:message for="ticketShare" />
+          </div>
+
+          <div class="field col-6">
+            <p:outputLabel for="guarantee" value="Mindestgarantie" />
+            <p:inputNumber id="guarantee"
+                           value="#{licenseConditionEditView.license.guarantee.amount}"
+                           decimalPlaces="2"
+                           decimalSeparator=","
+                           symbol=" #{licenseConditionEditView.license.guarantee.currency}"
+                           symbolPosition="s" />
+            <h:message for="guarantee" />
+          </div>
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="fixedPrice" value="Festpreis" />
+          <p:inputNumber id="fixedPrice"
+                         value="#{licenseConditionEditView.license.fixedPrice.amount}"
+                         decimalPlaces="2"
+                         decimalSeparator=","
+                         symbol=" #{licenseConditionEditView.license.fixedPrice.currency}"
+                         symbolPosition="s" />
+          <h:message for="fixedPrice" />
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="additionalCost" value="zusätzliche Kosten (Transport etc.)" />
+          <p:inputNumber id="additionalCost"
+                         value="#{licenseConditionEditView.license.additionalCost.amount}"
+                         decimalPlaces="2"
+                         decimalSeparator=","
+                         symbol=" #{licenseConditionEditView.license.additionalCost.currency}"
+                         symbolPosition="s" />
+          <h:message for="additionalCost" />
+        </div>
+
+        <div class="field">
+          <p:outputLabel for="notes" value="Hinweise" />
+          <p:inputTextarea id="notes" value="#{licenseConditionEditView.license.notes}" />
+          <h:message for="notes" />
+        </div>
+      </div>
+
+      <div class="dialog-footer">
+        <p:commandButton action="#{licenseConditionEditView.save}" 
+                         value="speichern" 
+                         icon="pi pi-save" />
+      </div>
+    </h:form>
+  </ui:define>
+</ui:composition>

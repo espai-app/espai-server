@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/layout.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+  <ui:param name="title" 
+            value="#{productionMetaFieldEditView.field.id == null ? 'Feld erstellen' : productionMetaFieldEditView.field.label.concat(' bearbeiten')}" />
+
+  <ui:define name="content">
+
+    <h1><h:outputText value="#{title}" /></h1>
+    <p:card>
+      <h:form>
+        <div class="ui-fluid">
+          <div class="field">
+            <p:outputLabel for="label" value="Name" />
+            <p:inputText id="label" value="#{productionMetaFieldEditView.field.label}" />
+            <h:message for="label" />
+          </div>
+          
+          <div class="grid">
+            <div class="field col-8">
+              <p:outputLabel for="name" value="Technischer Name" />
+              <p:inputText id="name" value="#{productionMetaFieldEditView.field.name}" />
+              <h:message for="name" />
+            </div>
+
+            <div class="field col-4">
+              <p:outputLabel for="position" value="Position" />
+              <p:inputNumber id="position" value="#{productionMetaFieldEditView.field.position}" />
+              <h:message for="position" />
+            </div>
+          </div>
+
+          <div class="field">
+            <p:outputLabel for="fieldType" value="Datentyp" />
+            <p:selectOneMenu id="fieldType" value="#{productionMetaFieldEditView.field.fieldType}">
+              <f:selectItem itemValue="TEXT" itemLabel="Einzeiliger Text" />
+              <f:selectItem itemValue="MULTILINE" itemLabel="Mehrzeiliger Text" />
+              <f:selectItem itemValue="RICHTEXT" itemLabel="Formatierter Text" />
+              <f:selectItem itemValue="INTEGER" itemLabel="Ganze Zahl" />
+              <f:selectItem itemValue="DECIMAL" itemLabel="Dezimalzahl" />
+              <f:selectItem itemValue="BOOLEAN" itemLabel="Ja/Nein" />
+              <f:selectItem itemValue="DATE" itemLabel="Datum" />
+              <f:selectItem itemValue="DATETIME" itemLabel="Datum und Uhrzeit" />
+              <f:selectItem itemValue="TAG" itemLabel="Schlagwort" />              
+              <p:ajax update="dynamicFields" />
+            </p:selectOneMenu>
+            <h:message for="fieldType" />
+          </div>
+          
+          <h:panelGroup id="dynamicFields">
+            <h:panelGroup rendered="#{productionMetaFieldEditView.field.fieldType == 'TAG'}">
+              <div class="field">
+                <p:outputLabel for="presets" value="Vorgabewerte" />
+                <p:inputTextarea id="presets" 
+                                 value="#{productionMetaFieldEditView.field.presets}" 
+                                 rows="20" />
+                <h:message for="presets" />
+              </div>
+            </h:panelGroup>
+          </h:panelGroup>
+          
+          <p:selectBooleanCheckbox value="#{productionMetaFieldEditView.field.indexed}"
+                                   itemLabel="in den Suchindex indexieren"
+                                   styleClass="block" />
+          
+          <p:selectBooleanCheckbox value="#{productionMetaFieldEditView.field.facet}"
+                                   itemLabel="als Facette verwenden"
+                                   styleClass="block" />
+        </div>
+
+        <div class="mt-3">
+          <p:commandButton icon="pi pi-save" value="speichern" action="#{productionMetaFieldEditView.save}" /> 
+          oder
+          <p:link value="zurück zum Veranstaltungsformat" href="editor.xhtml">
+            <f:param name="productionTypeId" value="#{productionMetaFieldEditView.field.productionType.id}" />
+          </p:link>
+        </div>
+      </h:form>
+    </p:card>
+    
+  </ui:define>
+</ui:composition>

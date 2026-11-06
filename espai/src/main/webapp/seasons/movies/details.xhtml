@@ -12,14 +12,14 @@
   <ui:define name="content">
     <h:form>
 
-      <h1><h:outputText value="#{movieDetailsView.movie.title}" /></h1>
+      <h1><h:outputText value="#{movieDetailsView.production.title}" /></h1>
 
       <p:linkButton value="bearbeiten"
                     icon="pi pi-pencil"
-                    href="../../catalogs/movies/editor.xhtml"
+                    href="../../catalogs/productions/editor.xhtml"
                     styleClass="mb-4"
                     rendered="#{not userContext.restricted}">
-        <f:param name="productionId" value="#{movieDetailsView.movie.id}" />
+        <f:param name="productionId" value="#{movieDetailsView.production.id}" />
       </p:linkButton>
 
       <p:card>
@@ -27,25 +27,18 @@
           <div class="col-12 md:col-8">
             <dl class="data-list">
               <dt>Inhalt</dt>
-              <dd><h:outputText value="#{movieDetailsView.movie.description}" escape="false" /></dd>
-
-              <dt>Land</dt>
-              <dd><h:outputText value="#{movieDetailsView.movie.productionCountries}" /></dd>
-
-              <dt>Jahr</dt>
-              <dd><h:outputText value="#{movieDetailsView.movie.productionYear}" /></dd>
+              <dd><h:outputText value="#{movieDetailsView.production.description}" escape="false" /></dd>
 
               <dt>Laufzeit</dt>
-              <dd><h:outputText value="#{movieDetailsView.movie.durationInMinutes}" /> min.</dd>
+              <dd><h:outputText value="#{movieDetailsView.production.durationInMinutes}" /> min.</dd>
 
               <dt>Altersfreigabe</dt>
-              <dd><h:outputText value="#{movieDetailsView.movie.rating}" /></dd>
+              <dd><h:outputText value="#{movieDetailsView.production.rating}" /></dd>
 
               <dt>Altersempfehlung</dt>
-              <dd><h:outputText value="#{movieDetailsView.movie.fromAge}" /></dd>
+              <dd><h:outputText value="#{movieDetailsView.production.recommendedAge}" /></dd>
 
-              <dt>Verleih</dt>
-              <dd><h:outputText value="#{movieDetailsView.movie.agency.name}" /></dd>
+              
             </dl>
           </div>
           <div class="col-12 md:col-4">

@@ -2,6 +2,7 @@ package app.espai.views.events;
 
 import app.espai.businesslogic.CapacityCalculator;
 import app.espai.businesslogic.PriceManager;
+import app.espai.businesslogic.ReservationManager;
 import app.espai.dao.EventTicketPrices;
 import app.espai.dao.Events;
 import app.espai.dao.ReservationSummaries;
@@ -57,10 +58,14 @@ public class EventDetailsView extends BaseView {
   
   @Inject
   private CapacityCalculator capacityCalculator;
+  
+  @EJB
+  private ReservationManager reservationManager;
 
   private Event event;
   private List<Event> childEventList;
   private List<ReservationSummary> reservationList;
+  private List<ReservationSummary> selectedReservations;
   private List<EventTicketPrice> ticketPriceList;
   private List<SeatCategory> seats;
   private int totalTickets;
@@ -103,7 +108,7 @@ public class EventDetailsView extends BaseView {
     HashMap<String, List<String>> params = new HashMap<>();
     params.put("seasonId", Arrays.asList(String.valueOf(event.getSeason().getId())));
     params.put("eventId", Arrays.asList(String.valueOf(event.getId())));
-    PrimeFaces.current().dialog().openDynamic("editor", Dialog.getDefaultOptions(800, 780), params);
+    PrimeFaces.current().dialog().openDynamic("editor", Dialog.getDefaultOptions(800, 850), params);
   }
 
   public void deleteEvent() {
@@ -168,6 +173,21 @@ public class EventDetailsView extends BaseView {
   public void onEventChanged(SelectEvent<Event> selectEvent) {
     init();
   }
+  
+  public void confirmReservations() {
+    reservationManager.confirmReservationSummaries(selectedReservations);
+    init();
+  }
+
+  public void holdReservations() {
+    reservationManager.holdReservationSummaries(selectedReservations);
+    init();
+  }
+
+  public void cancelReservations() {
+    reservationManager.cancelReservationSummaries(selectedReservations);
+    init();
+  }
 
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
   /**
@@ -210,6 +230,20 @@ public class EventDetailsView extends BaseView {
    */
   public void setReservationList(List<ReservationSummary> reservationList) {
     this.reservationList = reservationList;
+  }
+
+  /**
+   * @return the selectedReservations
+   */
+  public List<ReservationSummary> getSelectedReservations() {
+    return selectedReservations;
+  }
+
+  /**
+   * @param selectedReservations the selectedReservations to set
+   */
+  public void setSelectedReservations(List<ReservationSummary> selectedReservations) {
+    this.selectedReservations = selectedReservations;
   }
 
   /**

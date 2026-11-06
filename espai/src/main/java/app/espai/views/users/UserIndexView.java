@@ -26,6 +26,10 @@ public class UserIndexView {
     userList = users.list().getItems();
   }
 
+  public String getType(User user) {
+    return user.getClass().getSimpleName();
+  }
+
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
   /**
    * @return the userList

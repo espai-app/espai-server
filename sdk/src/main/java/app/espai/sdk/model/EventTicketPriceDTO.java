@@ -1,9 +1,13 @@
 package app.espai.sdk.model;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 /**
  *
  * @author rborowski
  */
+@Schema(name = "EventTicketPrice",
+        description = "Represents a ticket price for an event.")
 public class EventTicketPriceDTO {
 
   private Long id;

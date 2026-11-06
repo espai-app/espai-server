@@ -1,33 +1,60 @@
 package app.espai.sdk.model;
 
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
  *
  * @author rborowski
  */
+@Schema(name = "Reservation",
+        description = "Represents a reservation.")
 public class ReservationDTO implements Serializable {
 
+  @Size(max = 150, message = "company must be between 0 to 150 characters")
   private String company;
+
+  @Size(max = 50, message = "givenName must be between 0 to 50 characters")
   private String givenName;
+
+  @Size(max = 50, message = "surname must be between 0 to 50 characters")
   private String surname;
+
+  @Size(max = 300, message = "address must be between 0 to 300 characters")
   private String address;
+
+  @Size(max = 10, message = "postcode must be between 0 to 10 characters")
   private String postcode;
+
+  @Size(max = 200, message = "city must be between 0 to 200 characters")
   private String city;
+
+  @Size(max = 50, message = "phone must be between 0 to 50 characters")
   private String phone;
+
+  @Size(max = 100, message = "email must be between 0 to 100 characters")
   private String email;
 
+  @Size(max = 2000, message = "message must be between 0 to 2000 characters")
   private String message;
 
+  @NotNull(message = "event must not be null")
   private Long event;
   private List<Long> childEvents = new LinkedList<>();
+
+  @NotNull(message = "tickets must not be null")
   private Map<Long, Integer> tickets = new HashMap<>();
 
   private Map<String, String> extras = new HashMap<>();
+
+  @AssertTrue(message = "Terms of Service mus be accepted.")
   private boolean acceptTos;
 
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">

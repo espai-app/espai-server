@@ -8,6 +8,7 @@ import app.espai.filter.EventFilter;
 import app.espai.filter.ReservationFilter;
 import app.espai.model.Event;
 import app.espai.model.Production;
+import app.espai.model.ProductionType;
 import app.espai.model.Reservation;
 import app.espai.model.Season;
 import jakarta.ejb.EJB;
@@ -49,13 +50,17 @@ public class Events extends AbstractEvents {
     }
   };
 
-  public List<Production> listDistinctProductions(Season season, LocalDate since) {
+  public List<Production> listDistinctProductions(Season season, 
+          ProductionType productionType, LocalDate since) {
+    
     TypedQuery<Production> query = em.createQuery(
             "SELECT DISTINCT e.production.production FROM Event e "
             + "WHERE e.season = :season AND e.parentEvent IS NULL "
+                    + "AND e.production.production.productionType = :productionType "
                     + "AND e.hidden = :hidden AND e.date > :since",
             Production.class);
     query.setParameter("season", season);
+    query.setParameter("productionType", productionType);
     query.setParameter("hidden", false);
     query.setParameter("since", since);
     List<Production> productionList = query.getResultList();

@@ -7,56 +7,83 @@
   template="/WEB-INF/layout/settings.xhtml"
   xmlns:h="http://xmlns.jcp.org/jsf/html"
   xmlns:c="jakarta.tags.core">
-  
+
   <ui:param name="title" value="Benutzerkonto bearbeiten" />
 
   <ui:define name="content">
     <h1>
       <c:choose>
-        <c:when test="#{userEditorView.user.id != null}">#{userEditorView.user.displayName} bearbeiten</c:when>
+        <c:when test="#{userEditorView.apiUser.id != null}">API-Token #{userEditorView.apiUser.displayName} bearbeiten</c:when>
+        <c:when test="#{userEditorView.guiUser.id != null}">#{userEditorView.guiUser.displayName} bearbeiten</c:when>
+        <c:when test="#{userEditorView.apiUser != null}">Neuen API-Token erstellen</c:when>
         <c:otherwise>Neues Benutzerkonto erstellen</c:otherwise>
       </c:choose>
     </h1>
 
-    <p:card>
-      <h:form>
-        <div>
-          <p:commandButton value="speichern" icon="pi pi-save" action="#{userEditorView.save}" />
-          <c:if test="#{userEditorView.user.id != null}">
-            <p:commandButton value="Passwort zurücksetzen" icon="pi pi-undo" action="#{userEditorView.resetPassword}" styleClass="ml-3 ui-button-outlined ui-button-secondary"/>
-            <p:commandButton value="löschen" icon="pi pi-trash" action="#{userEditorView.delete}" styleClass="ml-3 ui-button-outlined ui-button-danger">
-              <p:confirm header="Löschen bestätigen" message="Möchten Sie dieses Benutzerkonto wirklich löschen?" />
-            </p:commandButton>
-          </c:if>
-        </div>
+    <h:form>
+      <div class="mb-3">
+        <p:commandButton value="speichern" icon="pi pi-save" action="#{userEditorView.save}" />
 
-        <dl>
-          <dt><p:outputLabel for="displayName" value="Name" /></dt>
-          <dd>
-            <p:inputText id="displayName" value="#{userEditorView.user.displayName}" />
-            <p:message for="displayName" />
-          </dd>
+          <p:commandButton value="Passwort zurücksetzen"
+                           icon="pi pi-undo"
+                           action="#{userEditorView.resetPassword}"
+                           styleClass="ml-3 ui-button-outlined ui-button-secondary"
+                           rendered="#{userEditorView.guiUser.id != null}"/>
+          <p:commandButton value="löschen"
+                           icon="pi pi-trash"
+                           action="#{userEditorView.delete}"
+                           styleClass="ml-3 ui-button-outlined ui-button-danger"
+                           rendered="#{userEditorView.apiUser.id != null or userEditorView.guiUser.id != null}">
+            <p:confirm header="Löschen bestätigen" message="Möchten Sie dieses Benutzerkonto wirklich löschen?" />
+          </p:commandButton>
+      </div>
 
-          <dt><p:outputLabel for="email" value="E-Mail" /></dt>
-          <dd>
-            <p:inputText id="email" value="#{userEditorView.user.email}" />
-            <p:message for="email" />
-          </dd>
+      <p:card>
+        <h:panelGroup rendered="#{userEditorView.apiUser != null}">
+          <div class="ui-fluid md:col-6">
+            <div class="field">
+              <p:outputLabel for="apiDisplayName" value="Name" />
+              <p:inputText id="apiDisplayName" value="#{userEditorView.apiUser.displayName}" />
+              <h:message for="apiDisplayName" />
+            </div>
 
-          <dt><p:outputLabel for="username" value="Benutzername" /></dt>
-          <dd>
-            <p:inputText id="username" value="#{userEditorView.user.username}" />
-            <p:message for="username" />
-          </dd>
-        </dl>
+            <div class="field">
+              <p:outputLabel for="apiToken" value="API-Token" />
+              <p:inputText id="apiToken" value="#{userEditorView.apiUser.apiToken}" readonly="true" />
+              <h:message for="apiToken" />
+            </div>
+          </div>
+        </h:panelGroup>
+
+        <h:panelGroup rendered="#{userEditorView.guiUser != null}">
+          <div class="ui-fluid md:col-6">
+            <div class="field">
+              <p:outputLabel for="guiDisplayName" value="Name" />
+              <p:inputText id="guiDisplayName" value="#{userEditorView.guiUser.displayName}" />
+              <h:message for="guiDisplayName" />
+            </div>
+
+            <div class="field">
+              <p:outputLabel for="email" value="E-Mail" />
+              <p:inputText id="email" value="#{userEditorView.guiUser.email}" />
+              <h:message for="email" />
+            </div>
+
+            <div class="field">
+              <p:outputLabel for="username" value="Benutzername" />
+              <p:inputText id="username" value="#{userEditorView.guiUser.username}" />
+              <h:message for="username" />
+            </div>
+          </div>
+        </h:panelGroup>
 
         <h2>Zugriffsrechte</h2>
 
         <p:commandButton value="Zugriffsrecht hinzufügen" icon="pi pi-plus" action="#{userEditorView.addAccessRight}" />
 
-        <p:dataTable value="#{userEditorView.accessRightList}" 
-                     var="a" 
-                     class="mt-4 ui-fluid" 
+        <p:dataTable value="#{userEditorView.accessRightList}"
+                     var="a"
+                     class="mt-4 ui-fluid"
                      rowKey="#{a.id}"
                      rowIndexVar="rightIndex">
 
@@ -72,7 +99,7 @@
               <f:selectItems value="#{userEditorView.venueList}" var="v" itemValue="#{v}" itemLabel="#{v.name}, #{v.city}" />
             </p:selectOneMenu>
           </p:column>
-          <p:column>
+          <p:column width="50px" styleClass="text-right">
             <p:commandButton id="deleteRole" icon="pi pi-trash" styleClass="rounded-button ui-button-flat" action="#{userEditorView.removeAccessRight(rightIndex)}" update="@form" />
           </p:column>
         </p:dataTable>
@@ -81,8 +108,8 @@
           <p:commandButton value="Ja, Benutzerkonto löschen" type="button" styleClass="ui-confirmdialog-yes" />
           <p:commandButton value="Nein" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
         </p:confirmDialog>
-      </h:form>
-    </p:card>
+      </p:card>
+    </h:form>
 
   </ui:define>
 </ui:composition>

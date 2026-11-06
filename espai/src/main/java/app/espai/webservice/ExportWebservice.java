@@ -4,6 +4,7 @@
  */
 package app.espai.webservice;
 
+import app.espai.businesslogic.CapacityCalculator;
 import app.espai.dao.Events;
 import app.espai.dao.ReservationExtras;
 import app.espai.dao.ReservationTickets;
@@ -23,6 +24,7 @@ import app.espai.model.SeatCategory;
 import app.espai.views.UserContext;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -69,6 +71,9 @@ public class ExportWebservice {
 
   @EJB
   private ReservationExtras extras;
+
+  @Inject
+  private CapacityCalculator capacity;
 
   @GET
   @Path("season/{seasonId}/reservations")
@@ -151,15 +156,38 @@ public class ExportWebservice {
     }
 
     return Response
-            .ok(
-                    new CsvResponse(
-                            reservationExports,
-                            combinedCategoryList,
-                            extraCategories,
-                            userContext.isRestricted()),
-                    "application/csv")
+            .ok(new ReservationCsvResponse(
+                    reservationExports,
+                    combinedCategoryList,
+                    extraCategories,
+                    userContext.isRestricted()),
+                    "text/csv")
             .header("Content-Disposition",
                     "attachment; filename=\"Reservierungen " + season.getName() + ".csv\"")
+            .build();
+  }
+
+  @GET
+  @Path("season/{seasonId}/events")
+  public Response exportEvents(@PathParam("seasonId") Long seasonId) {
+    if (userContext.getCurrentPrincipal() == null) {
+      return Response
+              .status(Response.Status.UNAUTHORIZED)
+              .build();
+    }
+
+    // collect events, reservations, tickets...
+    Season season = seasons.get(seasonId);
+    EventFilter eventFilter = userContext.getEventFilter();
+    eventFilter.setSeason(season);
+    List<Event> eventList = events.list(eventFilter).getItems();
+    Map<Long, List<SeatCategory>> seats = capacity.getSeats(eventList);
+
+    return Response
+            .ok(new EventCsvResponse(eventList, seats),
+                    "text/csv")
+            .header("Content-Disposition",
+                    "attachment; filename=\"Veranstaltungen " + season.getName() + ".csv\"")
             .build();
   }
 
@@ -222,14 +250,14 @@ public class ExportWebservice {
 
   }
 
-  private static class CsvResponse implements StreamingOutput {
+  private static class ReservationCsvResponse implements StreamingOutput {
 
     private final List<ReservationExport> reservations;
     private final List<String> ticketCategories;
     private final List<String> extraCategories;
     private final boolean restricted;
 
-    private CsvResponse(List<ReservationExport> reservations,
+    private ReservationCsvResponse(List<ReservationExport> reservations,
             List<String> ticketCategories,
             List<String> extraCategories,
             boolean restricted) {
@@ -247,8 +275,8 @@ public class ExportWebservice {
               writer, CsvPreference.EXCEL_NORTH_EUROPE_PREFERENCE)) {
 
         List<Object> line = new LinkedList(List.of("Datum", "Uhrzeit", "Veranstaltung",
-                "Spielstätte", "Ort", "Saal", "ist Unterveranstaltung", "Institution",
-                "Vorname", "Nachname"));
+                "Fassung", "Veranstaltungsreihe", "Spielstätte", "Ort", "Saal",
+                "ist Unterveranstaltung", "Institution", "Vorname", "Nachname"));
 
         if (!restricted) {
           line.addAll(List.of("Adresse", "PLZ", "Ort", "Telefon", "E-Mail"));
@@ -281,7 +309,10 @@ public class ExportWebservice {
 
           line.add(currentReservation.getEvent().getDate().format(dateFormatter));
           line.add(currentReservation.getEvent().getTime().format(timeFormatter));
-          line.add(currentReservation.getEvent().getProduction().getFullName());
+          line.add(currentReservation.getEvent().getProduction().getProduction().getTitle());
+          line.add(currentReservation.getEvent().getProduction().getVersionName());
+          line.add(currentReservation.getEvent().getEventSerial() != null
+                  ? currentReservation.getEvent().getEventSerial().getName() : "");
           line.add(currentReservation.getEvent().getHall().getVenue().getName());
           line.add(currentReservation.getEvent().getHall().getVenue().getCity());
           line.add(currentReservation.getEvent().getHall().getName());
@@ -314,5 +345,54 @@ public class ExportWebservice {
         }
       }
     }
+  }
+
+  private static class EventCsvResponse implements StreamingOutput {
+
+    private List<Event> events;
+    private Map<Long, List<SeatCategory>> seats;
+
+    public EventCsvResponse(List<Event> events, Map<Long, List<SeatCategory>> seats) {
+      this.events = events;
+      this.seats = seats;
+    }
+
+    @Override
+    public void write(OutputStream output) throws IOException, WebApplicationException {
+      try (PrintWriter writer = new PrintWriter(output); CsvListWriter csvWriter = new CsvListWriter(
+              writer, CsvPreference.EXCEL_NORTH_EUROPE_PREFERENCE)) {
+
+        csvWriter.write("Datum", "Zeit", "Veranstaltung", "Fassung", "Veranstaltungsreihe",
+                "ist Unterveranstaltung", "ist sichtbar", "ist buchbar",
+                "Spielstätte", "Ort", "Saal", "Plätze im Saal", "Plätze belegt");
+
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm");
+
+        for (Event e : events) {
+          int seatsTaken = seats.get(e.getId())
+                  .stream()
+                  .filter(s -> s.isPartOfTotalCapacity())
+                  .collect(Collectors.summingInt(SeatCategory::getSeatsTaken));
+
+          csvWriter.write(
+                  e.getDate().format(dateFormat),
+                  e.getTime().format(timeFormat),
+                  e.getProduction().getProduction().getTitle(),
+                  e.getProduction().getVersionName(),
+                  e.getEventSerial() != null ? e.getEventSerial().getName() : "",
+                  e.getParentEvent() != null ? "ja" : "nein",
+                  e.isHidden() ? "nein" : "ja",
+                  e.isReservable() ? "ja" : "nein",
+                  e.getHall().getVenue().getName(),
+                  e.getHall().getVenue().getCity(),
+                  e.getHall().getName(),
+                  e.getCapacity(),
+                  seatsTaken
+          );
+        }
+      }
+    }
+
   }
 }

@@ -25,6 +25,12 @@
           <p:fileUpload id="dataStream" value="#{attachmentEditorView.uploadedFile}" mode="simple" styleClass="w-full" />
           <h:message for="dataStream" />
         </div>
+        
+        <div class="field">
+          <p:outputLabel for="category" value="Kategorie" />
+          <p:inputText id="category" value="#{attachmentEditorView.attachment.category}" />
+          <h:message for="category" />
+        </div>
 
         <div class="field">
           <p:outputLabel for="caption" value="Beschreibung" />

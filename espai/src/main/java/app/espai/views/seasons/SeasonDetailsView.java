@@ -71,25 +71,12 @@ public class SeasonDetailsView extends BaseView implements Serializable {
     }
   }
 
-  public void toggleArchive() {
-    season.setArchived(!season.isArchived());
-    seasons.save(season);
-    redirect(
-            season.isArchived() ? "Spielzeit archiviert." : "Spielzeit wiederhergestellt.",
-            null);
-  }
-
   public void saveSeason() {
     seasons.save(season);
     redirect("details.xhtml?" + Constants.SEASON_ID + "=" + season.getId(),
             "Spielzeit wurde gespeichert.",
             null,
             FacesMessage.SEVERITY_INFO);
-  }
-
-  public void deleteSeason() {
-    seasons.delete(season);
-    redirect("index.xhtml", "Spielzeit wurde gelöscht.", null, FacesMessage.SEVERITY_INFO);
   }
 
   public void addProductions() {

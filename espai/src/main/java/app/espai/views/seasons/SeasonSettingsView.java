@@ -1,25 +1,27 @@
 package app.espai.views.seasons;
 
-import app.espai.dao.EventSerials;
 import app.espai.dao.EventTicketPrices;
 import app.espai.dao.Events;
 import app.espai.dao.HallCapacities;
 import app.espai.dao.MailAccounts;
+import app.espai.dao.ReservationForms;
 import app.espai.dao.SeasonPriceTemplates;
 import app.espai.dao.Seasons;
 import app.espai.filter.EventFilter;
 import app.espai.filter.EventTicketPriceFilter;
 import app.espai.filter.HallCapacityFilter;
+import app.espai.filter.ReservationFormFilter;
 import app.espai.filter.SeasonPriceTemplateFilter;
 import app.espai.model.Event;
-import app.espai.model.EventSerial;
 import app.espai.model.EventTicketPrice;
 import app.espai.model.Hall;
 import app.espai.model.HallCapacity;
 import app.espai.model.MailAccount;
+import app.espai.model.ReservationForm;
 import app.espai.model.Season;
 import app.espai.model.SeasonPriceTemplate;
 import app.espai.model.SeatCategory;
+import app.espai.views.BaseView;
 import app.espai.views.Dialog;
 import app.espai.views.SeasonContext;
 import jakarta.annotation.PostConstruct;
@@ -34,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.primefaces.PrimeFaces;
+import rocks.xprs.runtime.db.PageableFilter;
 
 /**
  *
@@ -41,7 +44,7 @@ import org.primefaces.PrimeFaces;
  */
 @Named
 @RequestScoped
-public class SeasonSettingsView {
+public class SeasonSettingsView extends BaseView {
 
   @EJB
   private SeasonContext seasonContext;
@@ -65,25 +68,31 @@ public class SeasonSettingsView {
   private EventTicketPrices ticketPrices;
   
   @EJB
-  private EventSerials eventSerials;
+  private ReservationForms reservationForms;
 
   private Season currentSeason;
   private List<? extends MailAccount> mailAccountList;
   private List<SeasonPriceTemplate> priceTemplateList;
-  private List<EventSerial> eventSerialList;
+  private List<ReservationForm> reservationFormList;
 
   @PostConstruct
   public void init() {
     currentSeason = seasonContext.getCurrentSeason();
-    mailAccountList =mailAccounts.list().getItems();
+    mailAccountList = mailAccounts.list().getItems();
     
     SeasonPriceTemplateFilter priceTemplateFilter = new SeasonPriceTemplateFilter();
     priceTemplateFilter.setSeason(currentSeason);
     priceTemplateList = priceTemplates.list(priceTemplateFilter).getItems();
+    
+    ReservationFormFilter reservationFormFilter = new ReservationFormFilter();
+    reservationFormFilter.setActive(Boolean.TRUE);
+    reservationFormFilter.setOrderBy("name");
+    reservationFormFilter.setOrder(PageableFilter.Order.ASC);
+    reservationFormList = reservationForms.list(reservationFormFilter).getItems();
   }
 
   public void save() {
-    seasons.save(getCurrentSeason());
+    seasons.save(currentSeason);
 
     FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Änderungen gespeichert."));
   }
@@ -138,6 +147,10 @@ public class SeasonSettingsView {
 
     for (Event currentEvent : allEvents) {
       
+      if (currentEvent.getParentEvent() != null) {
+        continue;
+      }
+      
       List<EventTicketPrice> currentTicketPrices = allPrices.containsKey(currentEvent.getId()) 
               ? allPrices.get(currentEvent.getId()) 
               : Collections.EMPTY_LIST;
@@ -177,6 +190,19 @@ public class SeasonSettingsView {
     }
     
     FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Preise aktualisiert."));
+  }
+  
+  public void toggleArchive() {
+    currentSeason.setArchived(!currentSeason.isArchived());
+    seasons.save(currentSeason);
+    redirect(
+            currentSeason.isArchived() ? "Spielzeit archiviert." : "Spielzeit wiederhergestellt.",
+            null);
+  }
+  
+  public void deleteSeason() {
+    seasons.delete(currentSeason);
+    redirect("../../index.xhtml", "Spielzeit wurde gelöscht.", null, FacesMessage.SEVERITY_INFO);
   }
   
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
@@ -222,6 +248,20 @@ public class SeasonSettingsView {
    */
   public void setPriceTemplateList(List<SeasonPriceTemplate> priceTemplateList) {
     this.priceTemplateList = priceTemplateList;
+  }
+
+  /**
+   * @return the reservationFormList
+   */
+  public List<ReservationForm> getReservationFormList() {
+    return reservationFormList;
+  }
+
+  /**
+   * @param reservationFormList the reservationFormList to set
+   */
+  public void setReservationFormList(List<ReservationForm> reservationFormList) {
+    this.reservationFormList = reservationFormList;
   }
   //</editor-fold>
   

@@ -1,11 +1,8 @@
 package app.espai.views.reservations;
 
-import app.espai.EspaiMail;
-import app.espai.Mailer;
-import app.espai.ReservationMailManager;
+import app.espai.businesslogic.ReservationManager;
 import app.espai.dao.Productions;
 import app.espai.dao.ReservationSummaries;
-import app.espai.dao.Reservations;
 import app.espai.dao.Venues;
 import app.espai.filter.ReservationSummaryFilter;
 import app.espai.model.Production;
@@ -17,20 +14,16 @@ import app.espai.views.SeasonContext;
 import app.espai.views.UserContext;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import rocks.xprs.runtime.db.PageableFilter;
 
 /**
@@ -38,8 +31,8 @@ import rocks.xprs.runtime.db.PageableFilter;
  * @author rborowski
  */
 @Named
-@RequestScoped
-public class ReservationIndexView {
+@ViewScoped
+public class ReservationIndexView implements Serializable {
 
   @EJB
   private SeasonContext seasonContext;
@@ -51,32 +44,32 @@ public class ReservationIndexView {
   private ReservationSummaries reservationSummaries;
 
   @EJB
-  private Reservations reservations;
-
-  @EJB
   private Venues venues;
 
   @EJB
   private Productions productions;
 
   @EJB
-  private ReservationMailManager reservationMailManager;
+  private ReservationManager reservationManager;
 
   private List<ReservationSummary> reservationList;
   private List<Venue> venueList;
   private List<Production> productionList;
   private ReservationSummaryFilter reservationFilter;
   private List<ReservationSummary> selectedReservations;
-  private List<Venue> selectedVenues;
-  private List<Long> selectedVenueIds;
-  private List<Production> selectedProductions;
-  private List<ReservationStatus> selectedStatuses;
-  private List<Long> selectedProductionIds;
   private Map<Long, List<Reservation>> childReservationMap = new HashMap<>();
   private boolean filtered;
 
   @PostConstruct
   public void init() {
+    
+    reservationFilter = new ReservationSummaryFilter();
+    reservationFilter.setSeason(seasonContext.getCurrentSeason());
+
+    if (userContext.isRestricted()) {
+      reservationFilter.setVenues(userContext.getVenues());
+    }
+    List<ReservationSummary> allReservations = reservationSummaries.list(reservationFilter).getItems();
 
     reservationFilter = getFilter();
     reservationFilter.setSeason(seasonContext.getCurrentSeason());
@@ -91,54 +84,74 @@ public class ReservationIndexView {
     reservationList = reservationSummaries.list(reservationFilter).getItems();
     reservationList.sort(ReservationSummaries.DEFAULT_ORDER);
 
-    venueList = reservationList.stream().map(ReservationSummary::getVenue).distinct().toList();
-    productionList = reservationList.stream().map(ReservationSummary::getProduction).distinct().toList();
+    venueList = allReservations.stream().map(ReservationSummary::getVenue).distinct().toList();
+    productionList = allReservations.stream()
+            .map(ReservationSummary::getProduction)
+            .distinct()
+            .sorted(((p1, p2) -> String.CASE_INSENSITIVE_ORDER.compare(p1.getTitle(), p2.getTitle())))
+            .toList();
+  }
+
+  public void filter() {
+    List<String> queryParams = new LinkedList<>();
+    
+    queryParams.add(String.format("seasonId=%d", seasonContext.getCurrentSeason().getId()));
+
+    if (reservationFilter.getVenues() != null && !reservationFilter.getVenues().isEmpty()) {
+      queryParams.addAll(reservationFilter.getVenues().stream()
+                      .map(v -> String.format("venue=%d", v.getId())).toList());
+    }
+
+    if (reservationFilter.getProductions() != null && !reservationFilter.getProductions().isEmpty()) {
+      queryParams.addAll(reservationFilter.getProductions().stream()
+              .map(p -> String.format("production=%d", p.getId())).toList());
+    }
+    
+    if (reservationFilter.getStatuses() != null && !reservationFilter.getStatuses().isEmpty()) {
+      queryParams.addAll(reservationFilter.getStatuses().stream()
+              .map(s -> String.format("status=%s", s.toString())).toList());
+    }
+    
+    try {
+      FacesContext context = FacesContext.getCurrentInstance();
+      ExternalContext econtext = context.getExternalContext();
+      econtext.redirect(String.format("index.xhtml?%s", String.join("&", queryParams)));
+      context.responseComplete();
+    } catch (IOException ex) {
+      
+    }
   }
 
   private ReservationSummaryFilter getFilter() {
     ExternalContext econtext = FacesContext.getCurrentInstance().getExternalContext();
 
     ReservationSummaryFilter filter = new ReservationSummaryFilter();
-
-    for (Map.Entry<String, String[]> entry : econtext.getRequestParameterValuesMap().entrySet()) {
-      if (entry.getKey().endsWith(":venue")) {
-
-        selectedVenues = new LinkedList<Venue>();
-        for (String idParam : entry.getValue()) {
-          long id = Long.parseLong(idParam);
-          selectedVenues.add(venues.get(id));
-          selectedVenueIds.add(id);
-        }
-
-        if (!selectedVenues.isEmpty()) {
-          filter.setVenues(selectedVenues);
-          filtered |= true;
-        }
+    
+    Map<String, String[]> params = econtext.getRequestParameterValuesMap();
+    
+    if (params.containsKey("venue")) {
+      List<Venue> selectedVenues = new LinkedList<>();
+      filter.setVenues(selectedVenues);
+      for (String idParam : params.get("venue")) {
+        long id = Long.parseLong(idParam);
+        selectedVenues.add(venues.get(id));
       }
-
-      if (entry.getKey().endsWith(":production")) {
-        selectedProductions = new LinkedList<>();
-        for (String idParam : entry.getValue()) {
-          long id = Long.parseLong(idParam);
-          selectedProductions.add(productions.get(id));
-          selectedProductionIds.add(id);
-        }
-
-        if (!selectedProductions.isEmpty()) {
-          filter.setProductions(selectedProductions);
-          filtered |= true;
-        }
+    }
+    
+    if (params.containsKey("production")) {
+      List<Production> selectedProductions = new LinkedList<>();
+      filter.setProductions(selectedProductions);
+      for (String idParam : params.get("production")) {
+        long id = Long.parseLong(idParam);
+        selectedProductions.add(productions.get(id));
       }
-
-      if (entry.getKey().endsWith(":status")) {
-        selectedStatuses = new LinkedList<>();
-        for (String statusName : entry.getValue()) {
-          selectedStatuses.add(ReservationStatus.valueOf(statusName));
-        }
-
-        if (!selectedStatuses.isEmpty()) {
-          filtered |= true;
-        }
+    }
+    
+    if (params.containsKey("status")) {
+      List<ReservationStatus> selectesStatuses = new LinkedList<>();
+      filter.setStatuses(selectesStatuses);
+      for (String idParam : params.get("status")) {
+        selectesStatuses.add(ReservationStatus.valueOf(idParam));
       }
     }
 
@@ -146,92 +159,18 @@ public class ReservationIndexView {
   }
 
   public void confirmReservations() {
-    int counter = 0;
-
-    for (ReservationSummary s : selectedReservations) {
-      Reservation r = reservations.get(s.getId());
-      r.setStatus(ReservationStatus.CONFIRMED);
-      reservations.save(r);
-
-      try {
-        EspaiMail mail = reservationMailManager.createConfirmed(r);
-
-        Mailer mailer = new Mailer(mail.getMailAccount());
-        Message message = mailer.send(mail);
-        mailer.saveSent(message);
-        counter++;
-      } catch (MessagingException | IOException ex) {
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                        "E-Mail für Buchungen %d nicht gesendet.".formatted(s.getId()), null));
-        Logger.getLogger(ReservationIndexView.class.getName()).log(
-                Level.WARNING,
-                "Failed to send confirmation message for reservation no. %d".formatted(r.getId()),
-                ex);
-      }
-    }
-
+    reservationManager.confirmReservationSummaries(selectedReservations);
     init();
-    FacesContext.getCurrentInstance().addMessage(null,
-            new FacesMessage("%d Buchungen bestätigt.".formatted(counter)));
   }
 
   public void holdReservations() {
-    int counter = 0;
-    for (ReservationSummary s : selectedReservations) {
-      Reservation r = reservations.get(s.getId());
-      r.setStatus(ReservationStatus.HOLD);
-      reservations.save(r);
-
-      try {
-        EspaiMail mail = reservationMailManager.createHold(r);
-
-        Mailer mailer = new Mailer(mail.getMailAccount());
-        Message message = mailer.send(mail);
-        mailer.saveSent(message);
-        counter++;
-      } catch (MessagingException | IOException ex) {
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                        "E-Mail für Buchungen %d nicht gesendet.".formatted(s.getId()), null));
-        Logger.getLogger(ReservationIndexView.class.getName()).log(
-                Level.WARNING,
-                "Failed to send confirmation message for reservation no. %d".formatted(r.getId()),
-                ex);
-      }
-    }
+    reservationManager.holdReservationSummaries(selectedReservations);
     init();
-    FacesContext.getCurrentInstance().addMessage(null,
-            new FacesMessage("%d Buchungen geparkt.".formatted(counter)));
   }
 
   public void cancelReservations() {
-    int counter = 0;
-    for (ReservationSummary s : selectedReservations) {
-      Reservation r = reservations.get(s.getId());
-      r.setStatus(ReservationStatus.CANCELED);
-      reservations.save(r);
-
-      try {
-        EspaiMail mail = reservationMailManager.createCanceled(r);
-        
-        Mailer mailer = new Mailer(mail.getMailAccount());
-        Message message = mailer.send(mail);
-        mailer.saveSent(message);
-        counter++;
-      } catch (MessagingException | IOException ex) {
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                        "E-Mail für Buchungen %d nicht gesendet.".formatted(s.getId()), null));
-        Logger.getLogger(ReservationIndexView.class.getName()).log(
-                Level.WARNING,
-                "Failed to send confirmation message for reservation no. %d".formatted(r.getId()),
-                ex);
-      }
-    }
+    reservationManager.cancelReservationSummaries(selectedReservations);
     init();
-    FacesContext.getCurrentInstance().addMessage(null,
-            new FacesMessage("Buchungen storniert.".formatted(counter)));
   }
 
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
@@ -317,76 +256,6 @@ public class ReservationIndexView {
    */
   public void setSelectedReservations(List<ReservationSummary> selectedReservations) {
     this.selectedReservations = selectedReservations;
-  }
-
-  /**
-   * @return the selectedVenues
-   */
-  public List<Venue> getSelectedVenues() {
-    return selectedVenues;
-  }
-
-  /**
-   * @param selectedVenues the selectedVenues to set
-   */
-  public void setSelectedVenues(List<Venue> selectedVenues) {
-    this.selectedVenues = selectedVenues;
-  }
-
-  /**
-   * @return the selectedVenueIds
-   */
-  public List<Long> getSelectedVenueIds() {
-    return selectedVenueIds;
-  }
-
-  /**
-   * @param selectedVenueIds the selectedVenueIds to set
-   */
-  public void setSelectedVenueIds(List<Long> selectedVenueIds) {
-    this.selectedVenueIds = selectedVenueIds;
-  }
-
-  /**
-   * @return the selectedProductions
-   */
-  public List<Production> getSelectedProductions() {
-    return selectedProductions;
-  }
-
-  /**
-   * @param selectedProductions the selectedProductions to set
-   */
-  public void setSelectedProductions(List<Production> selectedProductions) {
-    this.selectedProductions = selectedProductions;
-  }
-
-  /**
-   * @return the selectedStatuses
-   */
-  public List<ReservationStatus> getSelectedStatuses() {
-    return selectedStatuses;
-  }
-
-  /**
-   * @param selectedStatuses the selectedStatuses to set
-   */
-  public void setSelectedStatuses(List<ReservationStatus> selectedStatuses) {
-    this.selectedStatuses = selectedStatuses;
-  }
-
-  /**
-   * @return the selectedProductionIds
-   */
-  public List<Long> getSelectedProductionIds() {
-    return selectedProductionIds;
-  }
-
-  /**
-   * @param selectedProductionIds the selectedProductionIds to set
-   */
-  public void setSelectedProductionIds(List<Long> selectedProductionIds) {
-    this.selectedProductionIds = selectedProductionIds;
   }
 
   /**

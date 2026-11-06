@@ -16,7 +16,7 @@
     <welcome-file-list>
         <welcome-file>index.xhtml</welcome-file>
     </welcome-file-list>
-    
+
     <!-- REDIRECT TO LOGIN PAGE -->
     <filter>
         <filter-name>LoginFilter</filter-name>
@@ -26,7 +26,17 @@
         <filter-name>LoginFilter</filter-name>
         <servlet-name>Faces Servlet</servlet-name>
     </filter-mapping>
-    
+
+    <!-- SECURE WEBSERVICES -->
+    <filter>
+      <filter-name>WebserviceAuthFilter</filter-name>
+      <filter-class>app.espai.auth.WebserviceAuthFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>WebserviceAuthFilter</filter-name>
+        <url-pattern>/webservice/*</url-pattern>
+    </filter-mapping>
+
     <!-- AVAILABLE ROLES -->
     <security-role>
         <description>manager for a single venue</description>
@@ -36,7 +46,7 @@
         <description>manager to all venues</description>
         <role-name>MANAGER</role-name>
     </security-role>
-    
+
     <!-- GENERAL APPLICATION CONFIGURATION -->
     <session-config>
         <session-timeout>120</session-timeout>
@@ -44,7 +54,7 @@
     <welcome-file-list>
         <welcome-file>index.xhtml</welcome-file>
     </welcome-file-list>
-    
+
     <!-- MIME MAPPINGS -->
     <mime-mapping>
         <extension>eot</extension>

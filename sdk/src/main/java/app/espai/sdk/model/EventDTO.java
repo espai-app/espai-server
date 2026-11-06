@@ -1,27 +1,38 @@
 package app.espai.sdk.model;
 
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
  *
  * @author rborowski
  */
+@Schema(name = "Event",
+        description = "Represents an event.")
 public class EventDTO {
 
   private Long id;
+
+  @NotNull(message = "date is a required field")
   private LocalDate date;
+
+  @NotNull(message = "time is a required field")
   private LocalTime time;
   private String title;
   private String version;
+
+  @NotNull(message = "production is a required field")
   private ProductionDTO production;
+
+  @NotNull(message = "venue is a required field")
   private VenueDTO venue;
-  private PresenterDTO host;
-  private PresenterDTO coHost;
   private Map<String, Integer> availableTickets = new HashMap<>();
+  private String eventNote;
   private Integer ticketLimit;
   private boolean mandatory;
   private boolean reservable;
@@ -129,34 +140,6 @@ public class EventDTO {
   }
 
   /**
-   * @return the host
-   */
-  public PresenterDTO getHost() {
-    return host;
-  }
-
-  /**
-   * @param host the host to set
-   */
-  public void setHost(PresenterDTO host) {
-    this.host = host;
-  }
-
-  /**
-   * @return the coHost
-   */
-  public PresenterDTO getCoHost() {
-    return coHost;
-  }
-
-  /**
-   * @param coHost the coHost to set
-   */
-  public void setCoHost(PresenterDTO coHost) {
-    this.coHost = coHost;
-  }
-
-  /**
    * @return the availableTickets
    */
   public Map<String, Integer> getAvailableTickets() {
@@ -168,6 +151,20 @@ public class EventDTO {
    */
   public void setAvailableTickets(Map<String, Integer> availableTickets) {
     this.availableTickets = availableTickets;
+  }
+
+  /**
+   * @return the eventNote
+   */
+  public String getEventNote() {
+    return eventNote;
+  }
+
+  /**
+   * @param eventNote the eventNote to set
+   */
+  public void setEventNote(String eventNote) {
+    this.eventNote = eventNote;
   }
 
   /**

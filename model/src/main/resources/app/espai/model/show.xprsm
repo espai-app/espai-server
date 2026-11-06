@@ -9,23 +9,26 @@ DEFINE MODEL Agency
 WITH FIELDS
   name String(200) REQUIRED;
 
+DEFINE MODEL ProductionType
+WITH FIELDS
+  name String(50) REQUIRED,
+  icon String(50) REQUIRED,
+  color String(10) REQUIRED,
+  active Boolean;
+
 DEFINE MODEL Production
 WITH FIELDS
+  productionType ProductionType,
   title String(200) REQUIRED,
+  subtitle String(200),
   description String,
   durationInMinutes Integer,
-  fromAge Integer,
-  toAge Integer,
   rating Integer,
-  agency Agency,
+  recommendedAge Integer,
   available Boolean,
-  fixedPrice Monetary,
-  ticketShare Double,
-  additionalCost Monetary,
   externalId String(250),
   internalNote String
 ON DELETE
-  IN Attachment DELETE,
   IN ProductionTag DELETE,
   IN ProductionVersion DELETE;
 
@@ -35,7 +38,8 @@ WITH OPTIONS
   AUDIO,
   VIDEO,
   IMAGE,
-  URL;
+  URL,
+  DOWNLOAD;
 
 DEFINE MODEL Attachment
 WITH FIELDS
@@ -56,13 +60,45 @@ WITH FIELDS
   entityType String(100),
   attachmentType AttachmentType;
 
+DEFINE ENUM FieldType
+WITH OPTIONS
+  TEXT,
+  MULTILINE,
+  RICHTEXT,
+  INTEGER,
+  DECIMAL,
+  TAG,
+  BOOLEAN,
+  DATE,
+  DATETIME;
+
+DEFINE MODEL ProductionMetaField
+WITH FIELDS
+  productionType ProductionType,
+  name String(50) REQUIRED,
+  label String(50) REQUIRED,
+  position Integer,
+  fieldType FieldType REQUIRED,
+  presets String,
+  indexed Boolean,
+  facet Boolean;
+
+DEFINE MODEL ProductionMetaValue
+WITH FIELDS
+  production Production,
+  productionMetaField ProductionMetaField,
+  position Integer,
+  value String;
+
 DEFINE MODEL ProductionVersion
 WITH FIELDS
   production Production,
   versionName String(30),
   mediaFormat String(30),
   spokenLanguage String(3),
-  subtitles String(3);
+  subtitles String(3),
+  audioDescription String(3),
+  signLanguage String(3);
 
 DEFINE MODEL ProductionTagTemplate
 WITH FIELDS
@@ -84,7 +120,7 @@ WITH FIELDS
   commercial Boolean,
   guarantee Monetary,
   fixedPrice Monetary,
-  ticketShare Monetary,
+  ticketShare Decimal,
   additionalCost Monetary,
   notes String;
 
@@ -96,16 +132,14 @@ WITH FIELDS
   reference String(300),
   note String;
 
-DEFINE MODEL Movie
-INHERIT FROM Production
+DEFINE MODEL ProductionCollection
 WITH FIELDS
-  productionCountries String(200),
-  productionYear String(10),
-  releaseDate LocalDate,
-  director String(200),
-  starring String,
-  book String (200),
-  trailer String(200);
+  name String(250) REQUIRED;
+
+DEFINE MODEL ProductionCollectionItem
+WITH FIELDS
+  collection ProductionCollection REQUIRED,
+  production Production REQUIRED;
 
 DEFINE MODEL Presenter
 WITH FIELDS
@@ -117,21 +151,6 @@ WITH FIELDS
   phone String(50),
   email String(100);
 
-DEFINE MODEL Talk
-INHERIT FROM Production;
-
-DEFINE MODEL Workshop
-INHERIT FROM Production;
-
-DEFINE MODEL Concert
-INHERIT FROM Production;
-
-DEFINE MODEL Play
-INHERIT FROM Production;
-
-DEFINE MODEL Exhibition
-INHERIT FROM Production;
-
 DEFINE MODEL Venue
 WITH FIELDS
   name String(300),
@@ -140,8 +159,12 @@ WITH FIELDS
   city String(100),
   phone String(50),
   email String(150),
+  website String(150),
   publicNotes String,
-  internalNotes String
+  internalNotes String,
+  slug String(200) UNIQUE,
+  latitude Decimal,
+  longitude Decimal
 ON DELETE
   IN SeasonVenue DELETE,
   IN Event DELETE;
@@ -178,7 +201,7 @@ WITH FIELDS
 DEFINE MODEL SeatCategory
 WITH FIELDS
   name String(100),
-  description String;  
+  description String;
 
 DEFINE MODEL HallCapacity
 WITH FIELDS
@@ -201,7 +224,8 @@ WITH FIELDS
   start LocalDate,
   end LocalDate,
   archived Boolean,
-  mailAccount MailAccount
+  mailAccount MailAccount,
+  defaultReservationForm ReservationForm REQUIRED
 ON DELETE
   IN SeasonProduction DELETE,
   IN SeasonVenue DELETE,
@@ -210,14 +234,17 @@ ON DELETE
 DEFINE MODEL SeasonProduction
 WITH FIELDS
   season Season,
-  production Production;
+  production Production,
+  internalNote String,
+  externalNote String;
 
 DEFINE MODEL SeasonVenue
 WITH FIELDS
   season Season REQUIRED,
   venue Venue REQUIRED,
   seasonNotes String,
-  selfProgramming Boolean;
+  selfProgramming Boolean,
+  allowFreeBooking Boolean;
 
 DEFINE MODEL SeasonPriceTemplate
 WITH FIELDS
@@ -225,8 +252,9 @@ WITH FIELDS
   priceCategory PriceCategory,
   price Monetary;
 
-DEFINE MODEL VenueProduction
+DEFINE MODEL SeasonVenueProduction
 WITH FIELDS
+  season Season,
   venue Venue REQUIRED,
   production Production REQUIRED;
 
@@ -238,21 +266,35 @@ WITH FIELDS
 ON DELETE
   IN Event SET NULL;
 
+DEFINE ENUM EventStatus
+WITH OPTIONS
+  UNSET,
+  REQUESTED,
+  NORMAL,
+  CANCELED,
+  POSTPONED,
+  VENUE_CHANGED;
+
 DEFINE MODEL Event
 WITH FIELDS
   season Season,
   eventSerial EventSerial,
+  status EventStatus,
   date LocalDate REQUIRED,
   time LocalTime REQUIRED,
+  originalDate LocalDate,
   hall Hall REQUIRED,
   host Presenter,
   coHost Presenter,
   production ProductionVersion REQUIRED,
+  internalNote String,
+  externalNote String,
   ticketLimit Integer,
   parentEvent Event,
   reservable Boolean,
   mandatory Boolean,
-  hidden Boolean
+  hidden Boolean,
+  reservationForm ReservationForm
 ON DELETE
   IN Event DELETE;
 
@@ -319,6 +361,17 @@ WITH FIELDS
   message String,
   status ReservationStatus;
 
+DEFINE MODEL TicketSummary
+WITH FIELDS
+  event Event,
+  date LocalDate,
+  season Season,
+  venue Venue,
+  priceCategory PriceCategory,
+  seatCategory SeatCategory,
+  tickets Integer,
+  capacity Integer,
+  total Monetary;
 
 DEFINE MODEL ReservationTicket
 WITH FIELDS
@@ -328,18 +381,56 @@ WITH FIELDS
   seatCategory SeatCategory,
   price Monetary;
 
+DEFINE MODEL ReservationForm
+WITH FIELDS
+  name String(250),
+  description String,
+  termsConditionsUrl String(250),
+  privacyUrl String(250),
+  active Boolean;
+
+DEFINE ENUM ReservationFormFieldType
+WITH OPTIONS
+  TEXT,
+  MULTILINE,
+  INTEGER,
+  DECIMAL,
+  BOOLEAN,
+  DATE,
+  DATETIME,
+  DROPDOWN;
+
+DEFINE MODEL ReservationFormField
+WITH FIELDS
+  reservationForm ReservationForm REQUIRED,
+  name String(50) REQUIRED,
+  label String(250) REQUIRED,
+  position Integer,
+  fieldType ReservationFormFieldType REQUIRED,
+  presets String,
+  required Boolean;
+
 DEFINE MODEL User
 WITH FIELDS
-  username String(100) REQUIRED,
-  email String(100) REQUIRED,
-  password String(250),
   displayName String(100),
-  resetToken String(50),
-  resetTokenValid Date,
   blocked Boolean,
   lastLogin Date
 ON DELETE
   IN AccessRight DELETE;
+
+DEFINE MODEL GuiUser
+INHERIT FROM User
+WITH FIELDS
+  email String(100) REQUIRED,
+  username String(100) REQUIRED,
+  password String(250),
+  resetToken String(50),
+  resetTokenValid Date;
+
+DEFINE MODEL ApiUser
+INHERIT FROM User
+WITH FIELDS
+  apiToken String(250) REQUIRED;
 
 DEFINE ENUM UserRole
 WITH OPTIONS
@@ -384,3 +475,18 @@ WITH FIELDS
   bcc String(250),
   subject String(250),
   htmlMessage String;
+
+DEFINE MODEL MailSnippet
+WITH FIELDS
+  active Boolean,
+  name String(150) REQUIRED,
+  text String REQUIRED;
+
+DEFINE MODEL Task
+WITH FIELDS
+  title String(250) REQUIRED,
+  description String,
+  assignee User REQUIRED,
+  due Date,
+  url String(250),
+  done Boolean;

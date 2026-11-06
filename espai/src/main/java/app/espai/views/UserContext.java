@@ -17,6 +17,7 @@ import jakarta.security.enterprise.SecurityContext;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -78,7 +79,11 @@ public class UserContext implements Serializable {
    * @return the currentPrincipal
    */
   public EspaiPrincipal getCurrentPrincipal() {
-    return (EspaiPrincipal) securityContext.getCallerPrincipal();
+    Set<EspaiPrincipal> principals = securityContext.getPrincipalsByType(EspaiPrincipal.class);
+    if (principals.isEmpty()) {
+      return null;
+    }
+    return (EspaiPrincipal) principals.toArray()[0];
   }
 
 }

@@ -27,8 +27,9 @@ public class ImageConverterImageMagick {
   public static void resizeAndCrop(File source, File target, int targetWidth, int targetHeight) throws IOException {
 
     try {
+
       // create command
-      ConvertCmd cmd = new ConvertCmd();
+      ConvertCmd cmd = new ConvertCmd(true);
 
       // create the operation
       IMOperation op = new IMOperation();
@@ -102,7 +103,7 @@ public class ImageConverterImageMagick {
 
     try {
       // create command
-      ConvertCmd cmd = new ConvertCmd();
+      ConvertCmd cmd = new ConvertCmd(true);
 
       // create the operation
       IMOperation op = new IMOperation();
@@ -133,7 +134,7 @@ public class ImageConverterImageMagick {
   public static void autoOrient(File source, File target) throws IOException {
     try {
       // create command
-      ConvertCmd cmd = new ConvertCmd();
+      ConvertCmd cmd = new ConvertCmd(true);
 
       // create the operation
       IMOperation op = new IMOperation();
@@ -165,7 +166,7 @@ public class ImageConverterImageMagick {
   public static void rotate(File source, File target, int degree) throws IOException {
     try {
       // create command
-      ConvertCmd cmd = new ConvertCmd();
+      ConvertCmd cmd = new ConvertCmd(true);
 
       // create the operation
       IMOperation op = new IMOperation();

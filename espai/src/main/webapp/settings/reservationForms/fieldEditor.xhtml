@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/layout.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+  <ui:param name="title" 
+            value="#{reservationFormFieldEditorView.field.id == null ? 'Feld erstellen' : reservationFormFieldEditorView.field.label.concat(' bearbeiten')}" />
+
+  <ui:define name="content">
+    <h:form>
+      <h1><h:outputText value="#{title}" /></h1>
+      <p:card>
+        <div class="ui-fluid">
+          <div class="field">
+            <p:outputLabel for="label" value="Beschriftung" />
+            <p:inputText id="label" value="#{reservationFormFieldEditorView.field.label}" />
+            <h:message for="label" />
+          </div>
+
+          <div class="grid">
+            <div class="field col-8">
+              <p:outputLabel for="name" value="Technischer Name" />
+              <p:inputText id="name" value="#{reservationFormFieldEditorView.field.name}" />
+              <h:message for="name" showSummary="true" />
+            </div>
+
+            <div class="field col-2">
+              <p:outputLabel for="position" value="Position" />
+              <p:inputNumber id="position" value="#{reservationFormFieldEditorView.field.position}" />
+              <h:message for="position" />
+            </div>
+
+            <div class="field col-2">
+              <p:outputLabel for="required" value="Pflichtfeld" />
+              <p:selectBooleanCheckbox id="required" value="#{reservationFormFieldEditorView.field.required}" />
+              <h:message for="required" showSummary="true" />
+            </div>
+          </div>
+
+          <div class="field">
+            <p:outputLabel for="fieldType" value="Datentyp" />
+            <p:selectOneMenu id="fieldType" value="#{reservationFormFieldEditorView.field.fieldType}">
+              <f:selectItem itemValue="TEXT" itemLabel="Einzeiliger Text" />
+              <f:selectItem itemValue="MULTILINE" itemLabel="Mehrzeiliger Text" />
+              <f:selectItem itemValue="INTEGER" itemLabel="Ganze Zahl" />
+              <f:selectItem itemValue="DECIMAL" itemLabel="Dezimalzahl" />
+              <f:selectItem itemValue="BOOLEAN" itemLabel="Ja/Nein" />
+              <f:selectItem itemValue="DATE" itemLabel="Datum" />
+              <f:selectItem itemValue="DATETIME" itemLabel="Datum und Uhrzeit" />
+              <f:selectItem itemValue="DROPDOWN" itemLabel="Drop-Down-Liste" />              
+              <p:ajax update="dynamicFields" />
+            </p:selectOneMenu>
+            <h:message for="fieldType" showSummary="true" />
+          </div>
+
+          <h:panelGroup id="dynamicFields">
+            <h:panelGroup rendered="#{reservationFormFieldEditorView.field.fieldType == 'DROPDOWN'}">
+              <div class="field">
+                <p:outputLabel for="presets" value="Vorgabewerte" />
+                <p:inputTextarea id="presets" 
+                                 value="#{reservationFormFieldEditorView.field.presets}" 
+                                 rows="20" />
+                <h:message for="presets" showSummary="true" />
+              </div>
+            </h:panelGroup>
+          </h:panelGroup>
+
+        </div>
+
+        <div class="mt-3">
+          <p:commandButton icon="pi pi-save" value="speichern" action="#{reservationFormFieldEditorView.save}" /> 
+          oder
+          <p:link value="zurück zum Buchungsformular" href="editor.xhtml">
+            <f:param name="reservationFormId" value="#{reservationFormFieldEditorView.field.reservationForm.id}" />
+          </p:link>
+        </div>
+
+      </p:card>
+    </h:form>
+
+  </ui:define>
+</ui:composition>

@@ -9,16 +9,50 @@
   xmlns:h="http://xmlns.jcp.org/jsf/html">
 
   <ui:define name="sidebar">
-    <!--<div class="sidebar">
-      <ul>
+    <div class="sidebar">
+      <ul class="menu">
         <li>
-          <p:link value="Benutzer" outcome="/settings/users/index.xhtml" />
+          <p:link value="Benutzerkonten" 
+                  href="#{request.contextPath}/settings/users/index.xhtml" 
+                  rendered="#{request.isUserInRole('MANAGER')}" />
         </li>
         
         <li>
-          <p:link value="Spielzeiten" outcome="/settings/seasons/index.xhtml" />
+          <p:link value="Spielzeiten" 
+                  href="#{request.contextPath}/settings/seasons/index.xhtml" 
+                  rendered="#{request.isUserInRole('MANAGER')}" />
+        </li>
+        
+        <li>
+          <p:link value="Preiskategorien" 
+                  href="#{request.contextPath}/settings/priceCategories/index.xhtml" 
+                  rendered="#{request.isUserInRole('MANAGER')}" />
+        </li>
+        
+        <li>
+          <p:link value="E-Mail-Konten" 
+                  href="#{request.contextPath}/settings/mailAccounts/index.xhtml" 
+                  rendered="#{request.isUserInRole('MANAGER')}" />
+        </li>
+        
+        <li>
+          <p:link value="E-Mail-Vorlagen" 
+                  href="#{request.contextPath}/settings/mailTemplates/index.xhtml" 
+                  rendered="#{request.isUserInRole('MANAGER')}" />
+        </li>
+        
+        <li>
+          <p:link value="Veranstaltungsformate" 
+                  href="#{request.contextPath}/settings/productionTypes/index.xhtml" 
+                  rendered="#{request.isUserInRole('MANAGER')}" />
+        </li>
+        
+        <li>
+          <p:link value="Buchungsformulare" 
+                  href="#{request.contextPath}/settings/reservationForms/index.xhtml" 
+                  rendered="#{request.isUserInRole('MANAGER')}" />
         </li>
       </ul>
-    </div>-->
+    </div>
   </ui:define>
 </ui:composition>

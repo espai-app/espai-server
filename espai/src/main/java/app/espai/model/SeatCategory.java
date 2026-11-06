@@ -25,11 +25,15 @@ public class SeatCategory extends AbstractSeatCategory {
   @Transient
   private int capacity = 0;
   
+  @Transient
+  private boolean partOfTotalCapacity;
+  
   public SeatCategory duplicate() {
     SeatCategory result = new SeatCategory();
     result.setId(getId());
     result.setName(getName());
     result.setDescription(getDescription());
+    result.setPartOfTotalCapacity(isPartOfTotalCapacity());
     
     return result;
   }
@@ -75,6 +79,20 @@ public class SeatCategory extends AbstractSeatCategory {
    */
   public void setCapacity(int capacity) {
     this.capacity = capacity;
+  }
+
+  /**
+   * @return the partOfTotalCapacity
+   */
+  public boolean isPartOfTotalCapacity() {
+    return partOfTotalCapacity;
+  }
+
+  /**
+   * @param partOfTotalCapacity the partOfTotalCapacity to set
+   */
+  public void setPartOfTotalCapacity(boolean partOfTotalCapacity) {
+    this.partOfTotalCapacity = partOfTotalCapacity;
   }
   //</editor-fold>
   

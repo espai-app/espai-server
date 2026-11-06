@@ -29,8 +29,9 @@
           </h:form>
         </f:facet>
       </p:menubar>
-
     </div>
+
+    <ui:insert name="submenu" />
 
     <div class="main">
       <ui:insert name="sidebar" />
@@ -39,11 +40,11 @@
         <ui:insert name="content"/>
       </div>
     </div>
-    
+
     <h:form>
       <p:growl id="growl" for="popup" showDetail="true" />
     </h:form>
-    
-    <div class="footer">© 2023, BOROWSKI IT GmbH. Alle Rechte vorbehalten.</div>
+
+    <div class="footer">© 2023-2026, BOROWSKI IT GmbH. Alle Rechte vorbehalten.</div>
   </h:body>
 </html>

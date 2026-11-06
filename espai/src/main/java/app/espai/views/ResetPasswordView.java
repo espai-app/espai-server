@@ -1,7 +1,7 @@
 package app.espai.views;
 
-import app.espai.dao.Users;
-import app.espai.model.User;
+import app.espai.dao.GuiUsers;
+import app.espai.model.GuiUser;
 import app.espai.views.users.UserPasswordManager;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
@@ -23,12 +23,12 @@ import java.util.Date;
 public class ResetPasswordView implements Serializable {
 
   @EJB
-  private Users users;
+  private GuiUsers users;
 
   @EJB
   private UserPasswordManager userPasswordManager;
 
-  private User user;
+  private GuiUser user;
   private String newPassword;
   private String newPasswordRetype;
 
@@ -91,14 +91,14 @@ public class ResetPasswordView implements Serializable {
   /**
    * @return the user
    */
-  public User getUser() {
+  public GuiUser getUser() {
     return user;
   }
 
   /**
    * @param user the user to set
    */
-  public void setUser(User user) {
+  public void setUser(GuiUser user) {
     this.user = user;
   }
 

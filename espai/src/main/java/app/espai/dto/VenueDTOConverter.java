@@ -6,14 +6,21 @@ package app.espai.dto;
 
 import app.espai.model.Venue;
 import app.espai.sdk.model.VenueDTO;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  *
  * @author rborowski
  */
+@ApplicationScoped
 public class VenueDTOConverter {
-  
-  public static VenueDTO of(Venue venue) {
+
+  public VenueDTO toDTO(Venue venue) {
+
+    if (venue == null) {
+      return null;
+    }
+
     VenueDTO result = new VenueDTO();
 
     result.setId(venue.getId());
@@ -24,8 +31,11 @@ public class VenueDTOConverter {
     result.setPhone(venue.getPhone());
     result.setEmail(venue.getEmail());
     result.setPublicNotes(venue.getPublicNotes());
+    result.setSlug(venue.getSlug());
+    result.setLatitude(venue.getLatitude());
+    result.setLongitude(venue.getLongitude());
 
     return result;
   }
-  
+
 }

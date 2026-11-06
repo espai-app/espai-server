@@ -15,6 +15,7 @@ import jakarta.faces.event.ValueChangeEvent;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import rocks.xprs.runtime.db.PageableFilter;
 
@@ -43,17 +44,17 @@ public class SeasonView extends BaseView {
     filter.setOrderBy("start");
 
     activeSeasons = seasons.list(filter).getItems();
+
+    if (!activeSeasons.contains(seasonContext.getCurrentSeason())) {
+      activeSeasons = new LinkedList<>(activeSeasons);
+      activeSeasons.add(seasonContext.getCurrentSeason());
+    }
     selectedSeason = seasonContext.getCurrentSeason();
 
     if (selectedSeason == null && !activeSeasons.isEmpty()) {
       try {
         ExternalContext econtext = FacesContext.getCurrentInstance().getExternalContext();
-
-        HttpServletRequest request = (HttpServletRequest) econtext.getRequest();
-
-        StringBuffer url = request.getRequestURL();
-
-        econtext.redirect(url.append("?").append(Constants.SEASON_ID).append("=").append(activeSeasons.get(0).getId()).toString());
+        econtext.redirect(getSeasonIndex(activeSeasons.get(0)));
       } catch (IOException ex) {
         // should not happen
         throw new RuntimeException(ex);
@@ -64,15 +65,26 @@ public class SeasonView extends BaseView {
   public void onSeasonChanged(ValueChangeEvent event) {
     try {
       ExternalContext econtext = FacesContext.getCurrentInstance().getExternalContext();
-      HttpServletRequest request = (HttpServletRequest) econtext.getRequest();
-      StringBuffer url = request.getRequestURL();
+      econtext.redirect(getSeasonIndex(((Season) event.getNewValue())));
 
-      econtext.redirect(url.append("?").append(Constants.SEASON_ID).append("=")
-              .append(((Season) event.getNewValue()).getId()).toString());
     } catch (IOException ex) {
       // should not happen
       throw new RuntimeException(ex);
     }
+  }
+
+  private String getSeasonIndex(Season season) {
+    ExternalContext econtext = FacesContext.getCurrentInstance().getExternalContext();
+    HttpServletRequest request = (HttpServletRequest) econtext.getRequest();
+
+    StringBuffer url = request.getRequestURL();
+    int pathIndex = url.indexOf("/", 8);
+    url.setLength(pathIndex);
+    url.append(request.getContextPath())
+            .append("/seasons/events/index.xhtml?")
+            .append(Constants.SEASON_ID).append("=").append(season.getId());
+
+    return url.toString();
   }
 
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">

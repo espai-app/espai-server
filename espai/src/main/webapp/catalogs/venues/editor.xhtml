@@ -22,6 +22,12 @@
         </div>
 
         <div class="field">
+          <p:outputLabel for="slug" value="Slug" />
+          <p:inputText id="slug" value="#{venueEditorView.venue.slug}" />
+          <h:message for="slug" />
+        </div>
+
+        <div class="field">
           <p:outputLabel for="address" value="Adresse" />
           <p:inputText id="address" value="#{venueEditorView.venue.address}" />
           <h:message for="address" />
@@ -54,8 +60,46 @@
         </div>
 
         <div class="field">
+          <p:outputLabel for="website" value="Webseite" />
+          <p:inputText type="website" id="website" value="#{venueEditorView.venue.website}" />
+          <h:message for="website" />
+        </div>
+
+        <div class="field">
           <p:outputLabel for="publicNotes" value="Freitext (Webseite)" />
-          <p:inputTextarea id="publicNotes" value="#{venueEditorView.venue.publicNotes}" />
+
+          <p:textEditor id="publicNotes"
+                        value="#{venueEditorView.venue.publicNotes}"
+                        height="200"
+                        secure="false"
+                        styleClass="w-full">
+
+            <f:facet name="toolbar">
+              <span class="ql-formats">
+                <button class="ql-bold"></button>
+                <button class="ql-italic"></button>
+                <button class="ql-underline"></button>
+                <button class="ql-strike"></button>
+              </span>
+
+              <span class="ql-formats">
+                <button class="ql-script" value="sub" />
+                <button class="ql-script" value="super" />
+              </span>
+
+              <span class="ql-formats">
+                <button class="ql-list" value="ordered" />
+                <button class="ql-list" value="bullet" />
+                <button class="ql-indent" value="-1" />
+                <button class="ql-indent" value="+1" />
+              </span>
+
+              <span class="ql-formats">
+                <button class="ql-link" />
+              </span>
+            </f:facet>
+          </p:textEditor>
+
           <h:message for="publicNotes" />
         </div>
       </div>

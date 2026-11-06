@@ -18,7 +18,9 @@
 
       <p:dataTable value="#{seasonIndexView.seasonList}" var="s" styleClass="mt-3">
         <p:column headerText="Name">
-          <h:outputText value="#{s.name}" />
+          <p:link href="../../seasons/settings/index.xhtml" value="#{s.name}">
+            <f:param name="seasonId" value="#{s.id}" />
+          </p:link>
         </p:column>
 
         <p:column headerText="von">
@@ -33,53 +35,63 @@
           </h:outputText>
         </p:column>
 
-        <p:column>
-          <p:commandButton value="wiederherstellen" 
-                           icon="pi pi-lock-open" 
-                           action="#{seasonDetailsView.toggleArchive}" 
-                           rendered="#{seasonDetailsView.season.archived}" 
-                           styleClass="mr-2 ui-button-outlined ui-button-secondary" />
-          <p:commandButton value="Spielzeit löschen" 
-                           icon="pi pi-trash" 
-                           action="#{seasonDetailsView.deleteSeason}" 
-                           styleClass="ui-button-outlined ui-button-secondary">
-            <p:confirm header="Spielzeit löschen" 
-                       message="Möchten Sie die Spielzeit wirklich löschen? Beim Löschen gehen auch alle programmierten Veranstaltungen und reservierungen verloren." 
-                       icon="pi pi-trash"/>
-          </p:commandButton>
+        <p:column headerText="archiviert">
+          <h:outputText value="#{s.archived ? 'ja' : 'nein'}" />
         </p:column>
       </p:dataTable>
-      
-      <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="450">
-        <p:commandButton value="Nein" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
-        <p:commandButton value="Ja" type="button" styleClass="ui-confirmdialog-yes" />
-      </p:confirmDialog>
 
       <p:dialog header="Neue Spielzeit" widgetVar="createDialog" showEffect="fade" modal="true">
-        <dl>
-          <dt><p:outputLabel for="name" value="Name" /></dt>
-          <dd>
+        
+        <div class="ui-fluid">
+          <div class="field">
+            <p:outputLabel for="name" value="Name" />
             <p:inputText id="name" value="#{seasonIndexView.newSeason.name}" />
             <p:message for="name" />
-          </dd>
-
-          <dt><p:outputLabel for="start" value="Start" /></dt>
-          <dd>
-            <p:inputMask id="start" value="#{seasonIndexView.newSeason.start}" mask="99.99.9999">
-              <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
-            </p:inputMask>
-            <p:message for="start" />
-          </dd>
-
-          <dt><p:outputLabel for="end" value="Ende" /></dt>
-          <dd>
-            <p:inputMask id="end" value="#{seasonIndexView.newSeason.end}" mask="99.99.9999">
-              <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
-            </p:inputMask>
-            <p:message for="end" />
-          </dd>
-        </dl>
-
+          </div>
+          
+          <div class="grid">
+            <div class="field col-6">
+              <p:outputLabel for="start" value="Start" />
+                <p:inputMask id="start" value="#{seasonIndexView.newSeason.start}" mask="99.99.9999">
+                <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+              </p:inputMask>
+              <p:message for="start" />
+            </div>
+            <div class="field col-6">
+              <p:outputLabel for="end" value="Ende" />
+              <p:inputMask id="end" value="#{seasonIndexView.newSeason.end}" mask="99.99.9999">
+                <f:convertDateTime type="localDate" pattern="dd.MM.yyyy" />
+              </p:inputMask>
+              <p:message for="end" />
+            </div>
+          </div>
+          
+          <div class="field">
+            <p:outputLabel for="reservationForm" value="Standard-Buchungsformular" />
+            <p:selectOneMenu id="reservationForm" 
+                             value="#{seasonIndexView.newSeason.defaultReservationForm}" 
+                             converter="${reservationFormConverter}">
+              <f:selectItems value="#{seasonIndexView.reservationFormList}" 
+                             var="form"
+                             itemValue="#{form}"
+                             itemLabel="#{form.name}" />
+            </p:selectOneMenu>
+          </div>
+          
+          <div class="field">
+            <p:outputLabel for="template" value="Einstellungen kopieren von..." />
+            <p:selectOneMenu id="template" 
+                             value="#{seasonIndexView.seasonTemplate}" 
+                             converter="${seasonConverter}">
+              <f:selectItem itemLabel="(ohne Vorlage)" itemValue="#{null}" />
+              <f:selectItems value="#{seasonIndexView.seasonList}" 
+                             var="season"
+                             itemValue="#{season}"
+                             itemLabel="#{season.name}" />
+            </p:selectOneMenu>
+          </div>
+        </div>
+        
         <f:facet name="footer">
           <p:commandButton type="button" value="abbrechen" styleClass="ui-button-flat mr-2" onclick="PF('createDialog').hide()" />
           <p:commandButton type="submit" value="erstellen" action="#{seasonIndexView.create}"/>

@@ -46,21 +46,19 @@
 
         <p:column selectionMode="multiple" style="width:16px;text-align:center" rendered="#{not userContext.restricted}" />
 
-        <p:column headerText="Titel" style="width: 40%" sortBy="#{p.production.title}">
+        <p:column headerText="Titel" sortBy="#{p.production.title}">
           <p:link value="#{p.production.title}" href="details.xhtml">
-            <f:param name="movieId" value="#{p.production.id}" />
+            <f:param name="productionId" value="#{p.production.id}" />
             <f:param name="seasonId" value="#{seasonContext.currentSeason.id}" />
           </p:link>
         </p:column>
-        <p:column headerText="Alter" style="width: 10%" sortBy="#{p.production.fromAge}">
-          <h:outputText value="#{p.production.fromAge}" /> - <h:outputText value="#{p.production.toAge}" />
-        </p:column>
-        <p:column headerText="Freigabe" style="width: 10%" sortBy="#{p.production.rating}">
+        <p:column headerText="Alters&#173;freigabe" style="width: 10%" sortBy="#{p.production.rating}">
           <h:outputText value="#{p.production.rating}" />
         </p:column>
-        <p:column headerText="Agentur/Verleih" sortBy="#{p.production.agency.name}">
-          <h:outputText value="#{p.production.agency.name}" />
+        <p:column headerText="Alters&#173;empfeh&#173;lung" style="width: 10%" sortBy="#{p.production.recommendedAge}">
+          <h:outputText value="#{p.production.recommendedAge}" />
         </p:column>
+
       </p:dataTable>
 
       <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="450">

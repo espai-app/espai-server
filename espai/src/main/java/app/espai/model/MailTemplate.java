@@ -19,6 +19,7 @@ public class MailTemplate extends AbstractMailTemplate {
     MailTemplate result = new MailTemplate();
     result.setBcc(getBcc());
     result.setDescription(getDescription());
+    result.setSubject(getSubject());
     result.setHtmlMessage(getHtmlMessage());
     result.setName(getName());
     result.setReplyTo(getReplyTo());

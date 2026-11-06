@@ -1,54 +1,120 @@
 package app.espai.views.productions;
 
-import app.espai.dao.Productions;
-import app.espai.filter.ProductionFilter;
+import app.espai.dao.ProductionMetaFields;
+import app.espai.dao.ProductionTypes;
+import app.espai.filter.ProductionMetaFieldFilter;
+import app.espai.filter.ProductionTypeFilter;
 import app.espai.model.Production;
+import app.espai.model.ProductionMetaField;
+import app.espai.model.ProductionType;
+import app.espai.search.ProductionIndexManager;
+import app.espai.search.SearchFacet;
+import app.espai.search.SearchQuery;
+import app.espai.search.SearchResult;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.EJB;
-import jakarta.ejb.Stateful;
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
-import rocks.xprs.runtime.db.PageableFilter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author rborowski
  */
 @Named
-@Stateful
-@RequestScoped
-@RolesAllowed({"MANAGER"})
-public class ProductionIndexView {
+@ViewScoped
+public class ProductionIndexView implements Serializable {
 
   @EJB
-  private Productions productions;
+  private ProductionIndexManager searchManager;
 
-  private List<Production> productionList;
+  @EJB
+  private ProductionTypes productionTypes;
+
+  @EJB
+  private ProductionMetaFields metaFields;
+
+  private SearchQuery searchQuery;
+  private SearchResult<Production> searchResult;
+  private List<ProductionType> productionTypeList;
 
   @PostConstruct
   public void init() {
 
-    ProductionFilter productionFilter = new ProductionFilter();
-    productionFilter.setOrderBy("title");
-    productionFilter.setOrder(PageableFilter.Order.ASC);
-    productionList = productions.list(productionFilter).getItems();
+    ProductionTypeFilter typeFilter = new ProductionTypeFilter();
+    typeFilter.setActive(Boolean.TRUE);
+    productionTypeList = productionTypes.list(typeFilter).getItems();
+
+    ProductionMetaFieldFilter metaFieldFilter = new ProductionMetaFieldFilter();
+    metaFieldFilter.setFacet(true);
+    List<ProductionMetaField> facetList = metaFields.list(metaFieldFilter).getItems();
+
+    try {
+      searchQuery = new SearchQuery();
+      for (ProductionMetaField f : facetList) {
+        SearchFacet sf = new SearchFacet();
+        sf.setName(searchManager.toFacetName(f));
+        sf.setLabel(f.getLabel());
+        searchQuery.getFacets().add(sf);
+      }
+      searchQuery.setLimit(Integer.MAX_VALUE);
+
+      searchResult = searchManager.search(searchQuery);
+      searchQuery = searchResult.getSearchQuery();
+
+    } catch (IOException ex) {
+      Logger.getLogger(ProductionIndexView.class.getName()).log(
+              Level.SEVERE, "Error getting search result.", ex);
+    }
+  }
+
+  public void filter() {
+    try {
+      searchResult = searchManager.search(searchQuery);
+      searchQuery = searchResult.getSearchQuery();
+    } catch (IOException ex) {
+      Logger.getLogger(ProductionIndexView.class.getName()).log(
+              Level.SEVERE, "Error getting search result.", ex);
+    }
+  }
+
+  public void gotoPage(int page) {
+    searchResult.setCurrentPage(page);
+    searchQuery = searchResult.getSearchQuery();
+    filter();
   }
 
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
   /**
-   * @return the productionList
+   * @return the searchResult
    */
-  public List<Production> getProductionList() {
-    return productionList;
+  public SearchResult<Production> getSearchResult() {
+    return searchResult;
   }
 
   /**
-   * @param productionList the productionList to set
+   * @param searchResult the searchResult to set
    */
-  public void setProductionList(List<Production> productionList) {
-    this.productionList = productionList;
+  public void setSearchResult(SearchResult<Production> searchResult) {
+    this.searchResult = searchResult;
+  }
+
+  /**
+   * @return the productionTypeList
+   */
+  public List<ProductionType> getProductionTypeList() {
+    return productionTypeList;
+  }
+
+  /**
+   * @param productionTypeList the productionTypeList to set
+   */
+  public void setProductionTypeList(List<ProductionType> productionTypeList) {
+    this.productionTypeList = productionTypeList;
   }
   //</editor-fold>
 }

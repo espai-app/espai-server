@@ -14,12 +14,18 @@
 
   <ui:define name="content">
     <h:form>
-      <h1>#{title}</h1>
+      <h1>
+        <h:outputText value="#{eventDetailsView.event.date}">
+          <f:convertDateTime pattern="dd.MM.yyyy" type="localDate" />
+        </h:outputText>, <h:outputText value=" #{eventDetailsView.event.time} " /> Uhr
+        <h:outputText value=" - #{eventDetailsView.event.production.production.title} #{eventDetailsView.event.production.versionName != '' ? '('.concat(eventDetailsView.event.production.versionName).concat(')') : ''}" />
+      </h1>
 
       <div class="mt-3 mb-3">
-        <p:commandButton value="bearbeiten" icon="pi pi-pencil" action="#{eventDetailsView.editEvent}">
-          <p:ajax event="dialogReturn" update="@form"/>
-        </p:commandButton>
+        <p:linkButton value="bearbeiten" icon="pi pi-pencil" href="editor.xhtml">
+          <f:param name="eventId" value="#{eventDetailsView.event.id}" />
+          <f:param name="seasonId" value="#{eventDetailsView.event.season.id}" />
+        </p:linkButton>
 
         <p:commandButton value="löschen" icon="pi pi-trash" action="#{eventDetailsView.deleteEvent}" styleClass="ui-button-outlined ui-button-danger ml-1">
           <p:confirm header="Löschen bestätigen"
@@ -44,7 +50,15 @@
               <dd><h:outputText value="#{eventDetailsView.event.production.fullName}" /></dd>
 
               <dt><p:outputLabel value="Spielstätte" /></dt>
-              <dd><h:outputText value="#{eventDetailsView.event.hall.venue.name}, #{eventDetailsView.event.hall.venue.city}" /></dd>
+              <dd>
+                <p:link value="#{eventDetailsView.event.hall.venue.name}, #{eventDetailsView.event.hall.venue.city}"
+                        href="../../catalogs/venues/details.xhtml"
+                        rendered="#{not userContext.restricted}">
+                  <f:param name="venueId" value="#{eventDetailsView.event.hall.venue.id}" />
+                </p:link>
+                <h:outputText value="#{eventDetailsView.event.hall.venue.name}, #{eventDetailsView.event.hall.venue.city}"
+                              rendered="#{userContext.restricted}"/>
+              </dd>
 
               <dt><p:outputLabel value="Saal" /></dt>
               <dd>
@@ -83,14 +97,14 @@
               <dt><p:outputLabel value="Veranstaltungsreihe" /></dt>
               <dd><h:outputText value="#{eventDetailsView.event.eventSerial.name}" /></dd>
 
-              <dt><p:outputLabel value="Moderation" /></dt>
-              <dd><h:outputText value="#{eventDetailsView.event.host != null ? eventDetailsView.event.host.surname.concat(', ').concat(eventDetailsView.event.host.givenName) : ''}" /></dd>
-
-              <dt><p:outputLabel value="Co-Moderation" /></dt>
-              <dd><h:outputText value="#{eventDetailsView.event.coHost != null ? eventDetailsView.event.coHost.surname.concat(', ').concat(eventDetailsView.event.coHost.givenName) : ''}" /></dd>
+              <dt><p:outputLabel value="Hinweise für Webseite" /></dt>
+              <dd><h:outputText value="#{eventDetailsView.event.externalNote}" escape="false"/></dd>
 
               <dt><p:outputLabel value="Ticket-Limit" /></dt>
               <dd><h:outputText value="#{eventDetailsView.event.ticketLimit}" /></dd>
+
+              <dt><p:outputLabel value="Status" /></dt>
+              <dd><h:outputText value="#{translation.get('EventStatus.'.concat(eventDetailsView.event.status))}" /></dd>
 
               <dt><p:outputLabel value="Sichtbarkeit" /></dt>
               <dd><h:outputText value="#{eventDetailsView.event.hidden ? 'nicht öffentlich' : 'öffentlich'}" /></dd>
@@ -105,7 +119,51 @@
 
       <p:tabView styleClass="mt-3">
         <p:tab title="Buchungen">
-          <p:dataTable value="#{eventDetailsView.reservationList}" var="r">
+          <div>
+            <p:linkButton href="../reservations/editor.xhtml"
+                          icon="pi pi-plus"
+                          value="neue Buchung"
+                          styleClass="mr-4"
+                          rendered="#{request.isUserInRole('MANAGER')}">
+              <f:param name="seasonId" value="#{seasonContext.currentSeason.id}" />
+              <f:param name="eventId" value="#{eventDetailsView.event.id}" />
+            </p:linkButton>
+
+            <p:commandButton value="bestätigen"
+                             icon="pi pi-check"
+                             action="#{eventDetailsView.confirmReservations}"
+                             styleClass="ui-button-outlined mr-2"
+                             rendered="#{request.isUserInRole('MANAGER')}"
+                             update="@form">
+
+            </p:commandButton>
+
+            <p:commandButton value="parken"
+                             icon="pi pi-pause"
+                             action="#{eventDetailsView.holdReservations}"
+                             styleClass="ui-button-outlined mr-2"
+                             rendered="#{request.isUserInRole('MANAGER')}"
+                             update="@form">
+
+            </p:commandButton>
+
+            <p:commandButton value="stornieren"
+                             icon="pi pi-times"
+                             action="#{eventDetailsView.cancelReservations}"
+                             styleClass="ui-button-outlined"
+                             rendered="#{request.isUserInRole('MANAGER')}"
+                             update="@form">
+            </p:commandButton>
+          </div>
+
+          <p:dataTable value="#{eventDetailsView.reservationList}"
+                       selection="#{eventDetailsView.selectedReservations}"
+                       rowKey="#{r.id}"
+                       rowSelectMode="none"
+                       var="r"
+                       styleClass="mt-3">
+
+            <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
 
             <p:column headerText="Besteller:in">
               <p:link href="../reservations/details.xhtml">
@@ -124,13 +182,14 @@
             <p:column headerText="Status">
               <h:outputText value="#{r.status}" />
             </p:column>
-            
+
             <p:columnGroup type="footer">
-                <p:row>
-                    <p:column footerText="" />
-                    <p:column footerText="#{eventDetailsView.totalTickets}" class="text-right font-bold"/>
-                    <p:column footerText="" />
-                </p:row>
+              <p:row>
+                <p:column footerText="" />
+                <p:column footerText="" />
+                <p:column footerText="#{eventDetailsView.totalTickets}" class="text-right font-bold"/>
+                <p:column footerText="" />
+              </p:row>
             </p:columnGroup>
 
           </p:dataTable>

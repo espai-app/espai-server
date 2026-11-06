@@ -12,6 +12,12 @@
 
   <ui:define name="content">
     <h:form>
+      <p:breadCrumb homeDisplay="text">
+        <p:menuitem value="Stammdaten" url="../index.xhtml"/>
+        <p:menuitem value="Spielstätten" url="index.xhtml" />
+        <p:menuitem value="#{title}" disabled="true" />
+      </p:breadCrumb>
+
       <div class="page-title">
         <h1><h:outputText value="#{venueDetailsView.venue.name} (#{venueDetailsView.venue.city})" /></h1>
       </div>
@@ -33,17 +39,25 @@
           </f:facet>
           <div class="ui-fluid ">
             <div class="field">
-              <h:outputText id="address" value="#{venueDetailsView.venue.address}" /><br />
-              <h:outputText id="city" value="#{venueDetailsView.venue.postcode} #{venueDetailsView.venue.city}" /><br /><br />
+              <dl class="data-list">
+                <dt></dt>
+                <dd>
+                  <h:outputText id="address" value="#{venueDetailsView.venue.address}" /><br />
+                  <h:outputText id="city" value="#{venueDetailsView.venue.postcode} #{venueDetailsView.venue.city}" />
+                </dd>
 
-              <p:outputLabel for="phone" value="Telefon" /><h:outputText value=" " />
-              <h:outputText id="phone" value="#{venueDetailsView.venue.phone}" /><br />
+                <dt><p:outputLabel for="phone" value="Telefon" /></dt>
+                <dd><h:outputText id="phone" value="#{venueDetailsView.venue.phone}" /></dd>
 
-              <p:outputLabel for="email" value="E-Mail" /><h:outputText value=" " />
-              <h:outputText id="email" value="#{venueDetailsView.venue.email}" /><br /><br />
+                <dt><p:outputLabel for="email" value="E-Mail" /></dt>
+                <dd><h:outputText id="email" value="#{venueDetailsView.venue.email}" /></dd>
 
-              <b><p:outputLabel for="publicNotes" value="Freitext (Webseite)" /></b><br />
-              <h:outputText id="publicNotes" value="#{venueDetailsView.venue.publicNotes}" escape="false" />
+                <dt><p:outputLabel for="website" value="Webseite" /></dt>
+                <dd><h:outputText id="website" value="#{venueDetailsView.venue.website}" /></dd>
+
+                <dt><p:outputLabel for="publicNotes" value="Freitext (Webseite)" /></dt>
+                <dd><h:outputText id="publicNotes" value="#{venueDetailsView.venue.publicNotes}" escape="false" /></dd>
+              </dl>
             </div>
           </div>
         </p:card>

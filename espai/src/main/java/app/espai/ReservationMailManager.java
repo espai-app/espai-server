@@ -52,22 +52,41 @@ public class ReservationMailManager {
   }
 
   public EspaiMail createHold(Reservation reservation) {
+    String templateCode = reservation.getParentReservation() == null 
+            ? "RESERVATION_HOLD" 
+            : "SUBRESERVATION_HOLD";
+    
     MailTemplate template = mailTemplates.getByCode(
-            "RESERVATION_HOLD", reservation.getEvent().getSeason());
+            templateCode, reservation.getEvent().getSeason());
     return toMail(reservation, reservation.getGivenName(), reservation.getSurname(),
             reservation.getEmail(), template);
   }
 
   public EspaiMail createConfirmed(Reservation reservation) {
+    String templateCode = reservation.getParentReservation() == null 
+            ? "RESERVATION_CONFIRMED" 
+            : "SUBRESERVATION_CONFIRMED";
+    
     MailTemplate template = mailTemplates.getByCode(
-            "RESERVATION_CONFIRMED", reservation.getEvent().getSeason());
+            templateCode, reservation.getEvent().getSeason());
     return toMail(reservation, reservation.getGivenName(), reservation.getSurname(),
             reservation.getEmail(), template);
   }
 
   public EspaiMail createCanceled(Reservation reservation) {
+    String templateCode = reservation.getParentReservation() == null 
+            ? "RESERVATION_CANCELED" 
+            : "SUBRESERVATION_CANCELED";
     MailTemplate template = mailTemplates.getByCode(
-            "RESERVATION_CANCELED", reservation.getEvent().getSeason());
+            templateCode, reservation.getEvent().getSeason());
+    return toMail(reservation, reservation.getGivenName(), reservation.getSurname(),
+            reservation.getEmail(), template);
+  }
+  
+  public EspaiMail createMessage(Reservation reservation) {
+    String templateCode = "RESERVATION_MESSAGE";
+    MailTemplate template = mailTemplates.getByCode(
+            templateCode, reservation.getEvent().getSeason());
     return toMail(reservation, reservation.getGivenName(), reservation.getSurname(),
             reservation.getEmail(), template);
   }
@@ -106,6 +125,7 @@ public class ReservationMailManager {
     replacements.put("surname", surname);
     replacements.put("date", currentEvent.getDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
     replacements.put("time", currentEvent.getTime().format(DateTimeFormatter.ofPattern("HH:mm")));
+    replacements.put("message", reservation.getMessage());
 
     String title = currentProduction.getTitle();
     String versionName = reservation.getEvent().getProduction().getVersionName();
@@ -196,7 +216,7 @@ public class ReservationMailManager {
   private String apply(String templateString, Map<String, String> replacements) {
     String result = templateString;
     for (Map.Entry<String,String> r : replacements.entrySet()) {
-      result = result.replace("{" + r.getKey() + "}", r.getValue());
+      result = result.replace("{" + r.getKey() + "}", r.getValue() != null ? r.getValue() : "");
     }
     return result;
   }
@@ -207,8 +227,6 @@ public class ReservationMailManager {
     }
 
     return attribute;
-//
-//    return attribute.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
   }
 
   private String escAttr(String attribute) {

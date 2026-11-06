@@ -1,9 +1,14 @@
 package app.espai.sdk.model;
 
+import java.math.BigDecimal;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 /**
  *
  * @author rborowski
  */
+@Schema(name = "Venue",
+        description = "Represents a venue.")
 public class VenueDTO {
 
   private Long id;
@@ -14,6 +19,9 @@ public class VenueDTO {
   private String phone;
   private String email;
   private String publicNotes;
+  private String slug;
+  private BigDecimal latitude;
+  private BigDecimal longitude;
 
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
   /**
@@ -127,6 +135,47 @@ public class VenueDTO {
   public void setPublicNotes(String publicNotes) {
     this.publicNotes = publicNotes;
   }
-  //</editor-fold>
 
+  /**
+   * @return the slug
+   */
+  public String getSlug() {
+    return slug;
+  }
+
+  /**
+   * @param slug the slug to set
+   */
+  public void setSlug(String slug) {
+    this.slug = slug;
+  }
+
+  /**
+   * @return the latitude
+   */
+  public BigDecimal getLatitude() {
+    return latitude;
+  }
+
+  /**
+   * @param latitude the latitude to set
+   */
+  public void setLatitude(BigDecimal latitude) {
+    this.latitude = latitude;
+  }
+
+  /**
+   * @return the longitude
+   */
+  public BigDecimal getLongitude() {
+    return longitude;
+  }
+
+  /**
+   * @param longitude the longitude to set
+   */
+  public void setLongitude(BigDecimal longitude) {
+    this.longitude = longitude;
+  }
+  //</editor-fold>
 }

@@ -1,0 +1,134 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/layout/layout.xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+  <ui:param name="title" 
+            value="#{productionTypeEditView.type.id == null ? 'Veranstaltungsformat erstellen' : productionTypeEditView.type.name.concat(' bearbeiten')}" />
+
+  <ui:define name="content">
+
+    <h1><h:outputText value="#{title}" /></h1>
+    <p:card>
+      <h:form>
+        <div class="ui-fluid">
+          <div class="grid">
+            <div class="field col-10">
+              <p:outputLabel for="name" value="Name" />
+              <p:inputText id="name" value="#{productionTypeEditView.type.name}" />
+              <h:message for="name" />
+            </div>
+            <div class="field col-2">
+              <p:outputLabel for="active" value="Aktiv" />
+              <p:toggleSwitch id="active" value="#{productionTypeEditView.type.active}" />
+              <h:message for="active" />
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="col-2">
+              <p:outputLabel value="Icon" />
+              <h:panelGroup id="icon" styleClass="ui-inputgroup-addon">
+                <span class="material-symbols-rounded production-type-icon" style="background-color: \##{productionTypeEditView.type.color}">#{productionTypeEditView.type.icon}</span>
+              </h:panelGroup>
+            </div>
+
+            <div class="field col-8">
+              <p:outputLabel for="iconSelector" value="Motiv" />
+              <p:selectOneMenu id="iconSelector" value="#{productionTypeEditView.type.icon}" var="item">
+                <f:selectItems value="#{['theater_comedy','theaters', 'movie', 'comedy_mask','festival', 'local_dining', 'attractions', 'coffee', 'fitness_center', 'spa', 'music_note', 'speaker', 'podium', 'school', 'handyman', 'airport_shuttle', 'sports_gymnastics', 'sports_volleyball', 'sports_and_outdoors', 'sports_basketball', 'sports_football']}" var="item" itemLabel="#{item}"
+                               itemValue="#{item}" />
+                <p:column><span class="material-symbols-rounded">#{item}</span> #{item}</p:column>
+
+                <p:ajax listener="#{productionTypeEditView.update()}" update="@parent:icon" />
+              </p:selectOneMenu>
+            </div>
+
+            <div class="field col-2">
+              <p:outputLabel for="colorSelector" value="Farbe" />
+              <p:colorPicker id="colorSelector" 
+                             value="#{productionTypeEditView.type.color}" >
+                <p:ajax listener="#{productionTypeEditView.update()}" update="@parent:icon" />
+              </p:colorPicker>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p:commandButton icon="pi pi-save" value="speichern" action="#{productionTypeEditView.save}" />
+        </div>
+      </h:form>
+    </p:card>
+
+    <h:form rendered="#{productionTypeEditView.type.id != null}">
+      <p:card title="Felder" styleClass="mt-3">
+        <div class="mt-3">
+          <p:linkButton value="Feld hinzufügen"
+                        icon="pi pi-plus"
+                        href="fieldEditor.xhtml">
+            <f:param name="productionTypeId" value="#{productionTypeEditView.type.id}" />
+          </p:linkButton>
+        </div>
+
+        <p:dataTable id="fieldTable" 
+                     value="#{productionTypeEditView.fieldList}"
+                     var="f" 
+                     styleClass="mt-3">
+
+          <p:column headerText="Name">
+            <h:outputText value="#{f.label}" />
+          </p:column>
+
+          <p:column headerText="techn. Name">
+            <h:outputText value="#{f.name}" />
+          </p:column>
+
+          <p:column headerText="Typ">
+            <h:outputText value="#{f.fieldType}" />
+          </p:column>
+
+          <p:column width="100px">
+            <p:linkButton title="bearbeiten"
+                          icon="pi pi-pencil"
+                          styleClass="ui-button-flat rounded-button"
+                          href="fieldEditor.xhtml">
+              <f:param name="productionTypeId" value="#{productionTypeEditView.type.id}" />
+              <f:param name="productionMetaFieldId" value="#{f.id}" />
+            </p:linkButton>
+
+            <p:commandButton title="löschen"
+                             icon="pi pi-trash"
+                             styleClass="ui-button-flat rounded-button ui-button-danger"
+                             action="#{productionTypeEditView.deleteField(f.id)}"
+                             update="fieldTable">
+              <p:confirm header="Löschen bestätigen" 
+                         message="Möchten Sie dieses Feld wirklich löschen?" 
+                         icon="pi pi-exclamation-triangle" />
+
+            </p:commandButton>
+
+          </p:column>
+        </p:dataTable>
+      </p:card>
+
+      <p:confirmDialog global="true" 
+                       showEffect="fade" 
+                       hideEffect="fade" 
+                       responsive="true" 
+                       width="650">
+        <p:commandButton value="abbrechen" 
+                         type="button" 
+                         styleClass="ui-confirmdialog-no ui-button-flat"/>
+        <p:commandButton value="Ja, löschen" 
+                         type="button" 
+                         icon="pi pi-trash" styleClass="ui-confirmdialog-yes ui-button-danger" />
+      </p:confirmDialog>
+
+      <p:growl globalOnly="true" />
+    </h:form>
+  </ui:define>
+</ui:composition>

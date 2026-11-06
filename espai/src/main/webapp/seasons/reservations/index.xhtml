@@ -48,21 +48,21 @@
                            styleClass="ui-button-outlined"
                            rendered="#{request.isUserInRole('MANAGER')}"
                            update="@form">
-
           </p:commandButton>
         </div>
         <div class="md:col-3 text-right">
+
+          <p:commandButton title="filtern"
+                           onclick="PF('filterDialog').show()"
+                           icon="pi pi-filter"
+                           styleClass="ui-button-secondary ui-button-flat rounded-button"
+                           rendered="#{request.isUserInRole('MANAGER')}">
+          </p:commandButton>
+
           <p:linkButton href="#{request.contextPath}/webservice/export/season/#{reservationIndexView.seasonContext.currentSeason.id}/reservations"
                         value="CSV"
                         icon="pi pi-download"
-                        styleClass="ui-button-flat mr-2" />
-          <!--<p:commandButton title="filtern"
-                           onclick="PF('filterDialog').show()"
-                           icon="pi pi-filter"
-                           styleClass="ui-button-secondary ui-button-flat rounded-button mr-2"
-                           rendered="#{request.isUserInRole('MANAGER')}">
-
-          </p:commandButton>-->
+                        styleClass="ui-button-flat mr-2 ui-button-secondary" />
         </div>
       </div>
 
@@ -78,10 +78,10 @@
                      sortMode="single">
 
           <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
-          
-          <p:column headerText="Eingang" style="width: 10rem;" 
-                    sortBy="#{r.eventDate}#{r.eventStartTime}">
-            <h:panelGroup rendered="#{r.parentReservation == null}">
+
+          <p:column headerText="Eingang" style="width: 10rem;"
+                    sortBy="#{r.createDate}">
+            <h:panelGroup>
               <h:outputText value="#{r.createDate}">
                 <f:convertDateTime pattern="dd.MM.yyyy" type="date" />
               </h:outputText>
@@ -89,7 +89,7 @@
           </p:column>
 
           <p:column headerText="Datum" style="width: 200px;" sortBy="#{r.eventDate}#{r.eventStartTime}">
-            <h:panelGroup rendered="#{r.parentReservation == null}">
+            <h:panelGroup>
               <h:outputText value="#{r.eventDate}">
                 <f:convertDateTime pattern="dd.MM.yyyy" type="localDate" />
               </h:outputText>
@@ -102,8 +102,10 @@
               <f:param name="reservationId" value="#{r.id}" />
               <f:param name="seasonId" value="#{r.event.season.id}" />
 
-              <h:outputText value=" " class="pi pi-plus mr-1" rendered="#{r.parentReservation != null}"  />
-              <h:outputText value="#{r.productionTitle}" class="text-lg mb-2" />
+              <h:outputText value="#{r.productionTitle}" class="text-lg mb-2 block" />
+              <h:outputText value="zu #{r.parentReservation.event.production.fullName}"
+                            class="block"
+                            rendered="#{r.parentReservation != null}"  />
               <span class="block mt-3">
                 <i class="pi pi-map-marker"></i>
                 <h:outputText value=" #{r.venueName}, #{r.venueCity}" />
@@ -126,8 +128,12 @@
             <h:outputText value="#{r.tickets}" />
           </p:column>
 
+          <p:column headerText="VA-Status" width="8rem">
+            <h:outputText value="#{translation.get('EventStatus.'.concat(r.event.status))}"/>
+          </p:column>
+
           <p:column headerText="Status" style="width: 100px" sortBy="#{r.status}">
-            <h:outputText value="#{r.status}" />
+            <h:outputText value="#{translation.get('ReservationStatus.'.concat(r.status))}" />
           </p:column>
 
         </p:dataTable>
@@ -138,15 +144,14 @@
       <p:growl id="grwl" globalOnly="true" />
     </h:form>
 
-    <form method="GET">
+    <h:form>
       <p:dialog widgetVar="filterDialog" header="Filter" modal="true" responsive="true"
                 resizable="true" width="800" height="600" closeOnEscape="true" showEffect="fade"
                 blockScroll="true">
 
         <f:facet name="footer">
-          <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-            <span class="ui-button-text ui-c">filtern</span>
-          </button>
+          <p:commandButton value="filtern"
+                           action="#{reservationIndexView.filter}" />
         </f:facet>
 
         <h:inputHidden id="seasonId" value="#{reservationIndexView.seasonContext.currentSeason.id}" />
@@ -154,18 +159,22 @@
         <p:tabView>
           <p:tab title="Spielstätte">
             <p:selectManyCheckbox id="venue"
-                                  value="#{reservationIndexView.selectedVenueIds}"
+                                  value="#{reservationIndexView.reservationFilter.venues}"
+                                  converter="#{venueConverter}"
                                   layout="pageDirection"
                                   columns="1"
                                   styleClass="grid-checkbox">
 
-              <f:selectItems value="#{reservationIndexView.venueList}" var="v" itemLabel="#{v.name}, #{v.city}"
-                             itemValue="#{v.id}"/>
+              <f:selectItems value="#{reservationIndexView.venueList}"
+                             var="v"
+                             itemLabel="#{v.name}, #{v.city}"
+                             itemValue="#{v}"/>
             </p:selectManyCheckbox>
           </p:tab>
           <p:tab title="Veranstaltung">
             <p:selectManyCheckbox id="production"
-                                  value="#{reservationIndexView.selectedProductionIds}"
+                                  value="#{reservationIndexView.reservationFilter.productions}"
+                                  converter="#{productionConverter}"
                                   layout="pageDirection"
                                   columns="1"
                                   styleClass="grid-checkbox">
@@ -173,13 +182,16 @@
               <f:selectItems value="#{reservationIndexView.productionList}"
                              var="p"
                              itemLabel="#{p.title}"
-                             itemValue="#{p.id}"/>
+                             itemValue="#{p}"/>
             </p:selectManyCheckbox>
           </p:tab>
 
           <p:tab title="Status">
-            <b>Status</b>
-            <p:selectManyCheckbox id="status">
+            <p:selectManyCheckbox id="status"
+                                  value="#{reservationIndexView.reservationFilter.statuses}"
+                                  converter="#{reservationStatusConverter}"
+                                  layout="pageDirection"
+                                  columns="1">
               <f:selectItem itemLabel="neu" itemValue="NEW" />
               <f:selectItem itemLabel="wartet" itemValue="HOLD" />
               <f:selectItem itemLabel="bestätigt" itemValue="CONFIRMED" />
@@ -188,7 +200,7 @@
           </p:tab>
         </p:tabView>
       </p:dialog>
-    </form>
+    </h:form>
 
   </ui:define>
 </ui:composition>
