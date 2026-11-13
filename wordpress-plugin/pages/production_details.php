@@ -15,37 +15,41 @@ $espai = app\espai\wordpress\Espai::getInstance();
 <div class="espai-content">
 <h2><?= $production->title ?></h2>
 
+<!--
+<?php var_dump($production); ?>
+-->
+
 <div class="grid">
   <div class="lg:col-4 md:col-3 col-12">
     <?php if (!empty($production->attachments['Poster'])) { ?>
-      <img class="img-responsive" src="<?= trailingslashit($espai->baseUrl) ?>webservice/attachments/<?= $production->attachments['Poster'][0]->id ?>/datastream" alt="<?= esc_attr($production->attachments['Poster'][0]->caption) ?>" />
+      <img class="img-responsive" src="<?= trailingslashit($espai->baseUrl) ?>webservice/attachments/thumbnail/<?= $production->attachments['Poster'][0]->id ?>/datastream" alt="<?= esc_attr($production->attachments['Poster'][0]->caption) ?>" />
+  <div class="espai-copyright"><?= $production->attachments['Poster'][0]->copyright ?></div>
     <?php } ?>
   </div>
   <div class="lg:col-8 md:col-9 col-12">
     <?= $production->description ?>
 
     <dl class="espai-production-meta">
-      <dt>Laufzeit</dt>
-      <dd><?= $production->durationInMinutes ?> min.</dd>
 
-      <dt>Altersfreigabe</dt>
-      <dd><?= $production->rating ?></dd>
-      
-      <dt>Altersempfehlung</dt>
-      <dd><?= $production->fromAge ?></dd>
+	  <?php foreach($production->metadata as $key => $value) { ?>
+      <?php if ($key !== "Viki-ID" && $value !== null && $value !== "" && !str_starts_with($value, "[")) { ?>
+	      <dt><?= $key ?></dt>
+	      <dd>
+          <?php
+            if ($value == "true" || $value == "false") {
+      	      echo $value == "true" ? 'ja' : 'nein';
+      		  } else {
+      	      echo $value;
+      		  }
+      		?>
+	      </dd>
+      <?php } ?>
+	  <?php } ?>
+	</dl>
+	<?php if (!empty($production->gretaAndStarks)) { ?>
+     <img class="greta" src="<?= trailingslashit(plugin_dir_url(ESPAI_PLUGIN)) ?>assets/greta-small.png" alt="Greta &amp; Stark Logo" />
+	<?php } ?>
 
-      <dt>Produktion</dt>
-      <dd><?= $production->productionCountries ?>, <?= $production->productionYear ?></dd>
-
-      <dt>Regie</dt>
-      <dd><?= $production->director ?></dd>
-
-      <dt>Cast</dt>
-      <dd><?= $production->starring ?></dd>
-
-      <dt>Buch</dt>
-      <dd><?= $production->book ?></dd>
-    </dl>
   </div>
 </div>
 
@@ -55,10 +59,9 @@ $espai = app\espai\wordpress\Espai::getInstance();
   foreach ($tagCategories as $tc) {
 
     if (!empty($production->tags[$tc])) {
-      echo '<div class="md:col-3 col-12">';
-      echo '<h3>' . $tc . '</h3>';
-      echo join(", ", $production->tags[$tc]);
-      echo '</div>';
+      echo '<div class="md:col-3 col-12">
+	  <h3>' . $tc . '</h3>'. join(", ", $production->tags[$tc]).
+	  '</div>';
     }
   }
   ?>
@@ -69,12 +72,13 @@ $espai = app\espai\wordpress\Espai::getInstance();
   $attachCategories = ['externe Links', 'Downloads'];
   foreach ($attachCategories as $ac) {
     if (!empty($production->attachments[$ac])) {
-      echo '<h3>' . $ac . '</h3>';
+      echo '<div class="espai-attlist"><h3>' . $ac . '</h3>';
       echo '<ul>';
       foreach ($production->attachments[$ac] as $a) {
         echo '<li><a href="' .esc_attr($a->location) .'" target="_blank">' . esc_html($a->caption) . '</a></li>';
       }
-      echo '</ul>';
+      echo '</ul>
+	  </div>';
     }
   }
   ?>
@@ -95,9 +99,6 @@ $espai = app\espai\wordpress\Espai::getInstance();
 <?php } ?>
 
 <h2>Hier im Kino</h2>
-
-<!--<p>Für eine bessere Planbarkeit seitens der Veranstaltungsorte bitten wir Hort- und Kitagruppen um eine Reservierung. Diese können Sie ganz einfach über unser Buchungsformular vornehmen. Private Besucher:innen
-  können sich ihre Tickets direkt vor Ort kaufen. Sollten Sie dennoch eine Reservierung wünschen, wenden Sie sich bitte direkt an den Veranstaltungsort.</p>-->
 
 <?php \app\espai\wordpress\EventListShortcode::render($events, true, false, $highlight_id); ?>
 </div>

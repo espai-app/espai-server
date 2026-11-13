@@ -8,15 +8,15 @@ class Event {
   public $date;
   public $time;
   public $title;
-  public $version;
   public $production;
+  public $version;
   public $venue;
-  public $host;
-  public $coHost;
+  public $hall;
   public $availableTickets;
   public $ticketLimit;
   public $mandatory;
   public $reservable;
+  public $status;
   public $eventSerial;
   public $attachments;
   public $childEvents;
@@ -32,12 +32,34 @@ class Event {
     return Event::of($event);
   }
 
+  public static function create($event) {
+    $espai = Espai::getInstance();
+
+    $httpClient = HttpClient::getInstance($espai->baseUrl, $espai->apiKey);
+    $eventResponse = $httpClient->POST(
+            '/webservice/season/' . $espai->seasonId . '/events/',
+            $event);
+
+    return Event::of($eventResponse);
+  }
+
   public static function list() {
     $espai = Espai::getInstance();
 
     $httpClient = HttpClient::getInstance($espai->baseUrl, $espai->apiKey);
     $events = $httpClient->GET(
             '/webservice/season/' . $espai->seasonId . '/events');
+
+    return self::convertList($events);
+  }
+
+  public static function listFiltered($filter) {
+    $espai = Espai::getInstance();
+
+    $httpClient = HttpClient::getInstance($espai->baseUrl, $espai->apiKey);
+    $events = $httpClient->GET(
+            '/webservice/season/' . $filter['seasonId'] . '/events',
+            $filter);
 
     return self::convertList($events);
   }
@@ -104,12 +126,14 @@ class Event {
           case "production":
             $result->$key = Production::of($value);
             break;
+          case "version":
+            $result->$key = ProductionVersion::of($value);
+            break;
           case "venue":
             $result->$key = Venue::of($value);
             break;
-          case "host":
-          case "coHost":
-            $result->$key = Presenter::of($value);
+          case "hall":
+            $result->$key = Hall::of($value);
             break;
           case "eventSerial":
             $result->$key = EventSerial::of($value);

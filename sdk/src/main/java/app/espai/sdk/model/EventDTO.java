@@ -18,24 +18,28 @@ public class EventDTO {
 
   private Long id;
 
+  private SeasonDTO season;
+
   @NotNull(message = "date is a required field")
   private LocalDate date;
 
   @NotNull(message = "time is a required field")
   private LocalTime time;
   private String title;
-  private String version;
 
   @NotNull(message = "production is a required field")
   private ProductionDTO production;
+  private ProductionVersionDTO version;
 
   @NotNull(message = "venue is a required field")
   private VenueDTO venue;
+  private HallDTO hall;
   private Map<String, Integer> availableTickets = new HashMap<>();
   private String eventNote;
   private Integer ticketLimit;
   private boolean mandatory;
   private boolean reservable;
+  private String status;
   private EventSerialDTO eventSerial;
   private List<EventDTO> childEvents;
   private List<EventTicketPriceDTO> prices;
@@ -53,6 +57,20 @@ public class EventDTO {
    */
   public void setId(Long id) {
     this.id = id;
+  }
+
+  /**
+   * @return the season
+   */
+  public SeasonDTO getSeason() {
+    return season;
+  }
+
+  /**
+   * @param season the season to set
+   */
+  public void setSeason(SeasonDTO season) {
+    this.season = season;
   }
 
   /**
@@ -98,20 +116,6 @@ public class EventDTO {
   }
 
   /**
-   * @return the version
-   */
-  public String getVersion() {
-    return version;
-  }
-
-  /**
-   * @param version the version to set
-   */
-  public void setVersion(String version) {
-    this.version = version;
-  }
-
-  /**
    * @return the production
    */
   public ProductionDTO getProduction() {
@@ -126,6 +130,20 @@ public class EventDTO {
   }
 
   /**
+   * @return the version
+   */
+  public ProductionVersionDTO getVersion() {
+    return version;
+  }
+
+  /**
+   * @param version the version to set
+   */
+  public void setVersion(ProductionVersionDTO version) {
+    this.version = version;
+  }
+
+  /**
    * @return the venue
    */
   public VenueDTO getVenue() {
@@ -137,6 +155,20 @@ public class EventDTO {
    */
   public void setVenue(VenueDTO venue) {
     this.venue = venue;
+  }
+
+  /**
+   * @return the hall
+   */
+  public HallDTO getHall() {
+    return hall;
+  }
+
+  /**
+   * @param hall the hall to set
+   */
+  public void setHall(HallDTO hall) {
+    this.hall = hall;
   }
 
   /**
@@ -207,6 +239,20 @@ public class EventDTO {
    */
   public void setReservable(boolean reservable) {
     this.reservable = reservable;
+  }
+
+  /**
+   * @return the status
+   */
+  public String getStatus() {
+    return status;
+  }
+
+  /**
+   * @param status the status to set
+   */
+  public void setStatus(String status) {
+    this.status = status;
   }
 
   /**

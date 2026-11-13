@@ -15,6 +15,10 @@ if (isset($_POST['tickets'])) {
 
   $reservation->event = $event;
   $reservation->tickets = $_POST['tickets'];
+	
+  if(!empty($_POST['childEvents'])) {
+	  $reservation->childEvents = $_POST['childEvents'];
+  }
 
   // validate ticket amounts
   $errors = \app\espai\wordpress\Reservation::checkTicketAvailability($reservation);
@@ -39,7 +43,7 @@ if (isset($_POST['tickets'])) {
 <div class="grid">
   <div class="lg:col-4 md:col-3 col-12">
     <?php if (!empty($production->attachments['Poster'])) { ?>
-      <img class="img-responsive" src="<?= trailingslashit($espai->baseUrl) ?>webservice/attachments/<?= $production->attachments['Poster'][0]->id ?>/datastream" alt="<?= esc_attr($production->attachments['Poster'][0]->caption) ?>" />
+      <img class="img-responsive" src="<?= trailingslashit($espai->baseUrl) ?>webservice/attachments/thumbnail/<?= $production->attachments['Poster'][0]->id ?>/datastream" alt="<?= esc_attr($production->attachments['Poster'][0]->caption) ?>" />
     <?php } ?>
   </div>
   <div class="lg:col-8 md:col-9 col-12">
@@ -58,8 +62,12 @@ if (isset($_POST['tickets'])) {
   <h3>Tickets reservieren</h3>
 
   <p>Verfügbare Plätze:
-  <?php foreach ($event->availableTickets as $key => $value) { ?>
-    <br /><?= $key ?>: <?= $value ?>
+  <?php if (count((array) $event->availableTickets) > 1) { ?>
+    <?php foreach ($event->availableTickets as $key => $value) { ?>
+      <br /><?= $key ?>: <?= $value ?>
+    <?php } ?>
+  <?php } else { ?>
+    <br /><?= reset($event->availableTickets) ?>
   <?php } ?>
   </p>
 
@@ -73,15 +81,15 @@ if (isset($_POST['tickets'])) {
     <thead>
       <tr>
         <th>Anz.</th>
-        <th>Platzkategorie</th>
-        <th>Preiskategorie</th>
+        <th>Platz</th>
+        <th>Tarif</th>
         <th>Preis</th>
       </tr>
     </thead>
     <tbody>
       <?php foreach ($event->prices as $price) { ?>
         <tr>
-          <td><input type="number" name="tickets[<?= $price->id ?>]" value="<?= isset($reservation->tickets[$price->id]) ? $reservation->tickets[$price->id] : '0' ?>" /></td>
+          <td><input type="number" name="tickets[<?= $price->id ?>]" value="<?= isset($reservation->tickets[$price->id]) ? $reservation->tickets[$price->id] : '0' ?>" style="width: 3rem;" min="0" /></td>
           <td><?= $price->seatCategory ?></td>
           <td><?= $price->priceCategory ?></td>
           <td><?= number_format($price->price / 100, 2, ',', '.') ?> €</td>
@@ -110,7 +118,7 @@ if (isset($_POST['tickets'])) {
         <p>Dauer: <?= $child->production->durationInMinutes ?> min.</p>
         <p>Verfügbare Plätze:
         <?php foreach ($child->availableTickets as $key => $value) { ?>
-          <br /><?= $key ?>: <?= $value ?>
+          <!--<br /><?= $key ?>:--> <?= $value ?>
         <?php } ?>
         </p>
         <?php if ($child->mandatory) { ?><p class="hint-danger">Dieses Zusatzangebot ist fester Bestandteil der Veranstaltung und kann nicht abgewählt werden.</p><?php } ?>

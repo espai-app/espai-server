@@ -5,12 +5,12 @@
 package app.espai.dto;
 
 import app.espai.businesslogic.CapacityCalculator;
-import app.espai.dao.Attachments;
 import app.espai.dao.EventTicketPrices;
 import app.espai.dao.Events;
 import app.espai.filter.EventFilter;
 import app.espai.filter.EventTicketPriceFilter;
 import app.espai.model.Event;
+import app.espai.model.EventStatus;
 import app.espai.model.EventTicketPrice;
 import app.espai.model.SeatCategory;
 import app.espai.sdk.model.EventDTO;
@@ -29,13 +29,13 @@ import java.util.stream.Collectors;
 public class EventDTOConverter {
 
   @EJB
-  private Attachments attachments;
-
-  @EJB
   private Events events;
 
   @EJB
   private EventTicketPrices prices;
+
+  @Inject
+  private SeasonDTOConverter seasonConverter;
 
   @Inject
   private EventTicketPriceDTOConverter priceConverter;
@@ -44,7 +44,13 @@ public class EventDTOConverter {
   private ProductionDTOConverter productionConverter;
 
   @Inject
+  private ProductionVersionDTOConverter productionVersionConverter;
+
+  @Inject
   private VenueDTOConverter venueConverter;
+
+  @Inject
+  private HallDTOConverter hallConverter;
 
   @Inject
   private EventSerialDTOConverter serialConverter;
@@ -60,17 +66,20 @@ public class EventDTOConverter {
 
     EventDTO result = new EventDTO();
     result.setId(event.getId());
+    result.setSeason(seasonConverter.toDTO(event.getSeason()));
     result.setDate(event.getDate());
     result.setTime(event.getTime());
     result.setTitle(event.getProduction().getProduction().getTitle());
-    result.setVersion(event.getProduction().getVersionName());
+    result.setVersion(productionVersionConverter.toDTO(event.getProduction()));
     result.setProduction(productionConverter.toDTO(event.getProduction().getProduction()));
     result.setVenue(venueConverter.toDTO(event.getHall().getVenue()));
+    result.setHall(hallConverter.toDTO(event.getHall()));
     result.setEventNote(event.getExternalNote());
     result.setEventSerial(serialConverter.toDTO(event.getEventSerial()));
     result.setTicketLimit(event.getTicketLimit() == null ? event.getHall().getCapacity() : event.getTicketLimit());
     result.setMandatory(event.isMandatory());
     result.setReservable(event.isReservable());
+    result.setStatus(event.getStatus().toString());
 
     // add child events
     EventFilter eventFilter = new EventFilter();
@@ -100,6 +109,27 @@ public class EventDTOConverter {
                       Collectors.toMap(SeatCategory::getName,
                               SeatCategory::getSeatsAvailable)));
     }
+
+    return result;
+  }
+
+  public Event fromDTO(EventDTO dto) {
+
+    if (dto == null) {
+      return null;
+    }
+
+    if (dto.getId() != null) {
+      return events.get(dto.getId());
+    }
+
+    Event result = new Event();
+    result.setSeason(seasonConverter.fromDTO(dto.getSeason()));
+    result.setDate(dto.getDate());
+    result.setTime(dto.getTime());
+    result.setProduction(productionVersionConverter.fromDTO(dto.getVersion(), null, true));
+    result.setHall(hallConverter.fromDTO(dto.getHall()));
+    result.setStatus(EventStatus.valueOf(dto.getStatus().toString()));
 
     return result;
   }

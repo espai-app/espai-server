@@ -53,16 +53,17 @@ public class ReservationWebservice {
 
   @EJB
   private EventTicketPrices ticketPrices;
-  
+
   @EJB
   private ReservationFormFields reservationFormFields;
 
   @Inject
   private jakarta.enterprise.event.Event<ReservationChangedEvent> reservationChangedEvent;
-  
+
+
   @Inject
   private CapacityCalculator capacityCalculator;
-  
+
   @POST
   @Path("checkTicketAvailability")
   public List<String> checkTicketAvailability(ReservationDTO reservation) {
@@ -74,7 +75,7 @@ public class ReservationWebservice {
       // check if event exists
       Event event = events.get(reservation.getEvent());
       eventsToCheck.add(event);
-      
+
       List<ReservationTicket> requestedTickets = convert(reservation.getTickets());
 
       if (reservation.getChildEvents() != null && !reservation.getChildEvents().isEmpty()) {
@@ -85,11 +86,11 @@ public class ReservationWebservice {
 
       for (Event e : eventsToCheck) {
         if (!e.isReservable()) {
-          errors.add(String.format("Die Veranstaltung '%s' kann nicht gebucht werden.", 
+          errors.add(String.format("Die Veranstaltung '%s' kann nicht gebucht werden.",
                   e.getProduction().getProduction().getTitle()));
           continue;
         }
-        
+
         errors.addAll(capacityCalculator.checkCapacity(e, requestedTickets));
       }
 
@@ -99,25 +100,25 @@ public class ReservationWebservice {
 
     return errors;
   }
-  
+
   @POST
   @Path("reservationForm")
   public ReservationFormDTO getReservationForm(ReservationDTO reservation) {
-    
+
     Event event = events.get(reservation.getEvent());
     ReservationForm reservationForm = event.getEffectiveReservationForm();
-    
+
     if (reservationForm == null) {
       throw new InternalError("No form configured.");
     }
-    
+
     ReservationFormFieldFilter fieldFilter = new ReservationFormFieldFilter();
     fieldFilter.setReservationForm(reservationForm);
     fieldFilter.setOrderBy("position");
     fieldFilter.setOrder(PageableFilter.Order.ASC);
-    
+
     List<ReservationFormField> fieldList = reservationFormFields.list(fieldFilter).getItems();
-    
+
     return ReservationFormDTOConverter.convert(reservationForm, fieldList);
   }
 
@@ -133,7 +134,7 @@ public class ReservationWebservice {
       // check if event exists
       Event event = events.get(reservation.getEvent());
       eventsToCheck.add(event);
-      
+
       List<ReservationTicket> requestedTickets = convert(reservation.getTickets());
 
       if (reservation.getChildEvents() != null && !reservation.getChildEvents().isEmpty()) {
@@ -144,11 +145,11 @@ public class ReservationWebservice {
 
       for (Event e : eventsToCheck) {
         if (!e.isReservable()) {
-          errors.add(String.format("Die Veranstaltung '%s' kann nicht gebucht werden.", 
+          errors.add(String.format("Die Veranstaltung '%s' kann nicht gebucht werden.",
                   e.getProduction().getProduction().getTitle()));
           continue;
         }
-        
+
         errors.addAll(capacityCalculator.checkCapacity(e, requestedTickets));
       }
 

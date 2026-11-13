@@ -26,7 +26,7 @@ public class SeasonVenueProductions extends AbstractSeasonVenueProductions {
             "SELECT p FROM SeasonVenueProduction p "
                     + "WHERE p.season = :season "
                     + "AND p.venue = :venue "
-                    + "AND p.production = : production",
+                    + "AND p.production = :production",
             SeasonVenueProduction.class);
 
     query.setParameter("season", season);

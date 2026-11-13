@@ -29,7 +29,9 @@ public class ProductionVersionDTOConverter {
     result.setVersionName(version.getVersionName());
     result.setMediaFormat(version.getMediaFormat());
     result.setSpokenLanguage(version.getSpokenLanguage());
+    result.setAudioDescription(version.isAudioDescription());
     result.setSubtitles(version.getSubtitles());
+    result.setClosedCaption(version.isClosedCaption());
 
     return result;
   }
@@ -57,7 +59,9 @@ public class ProductionVersionDTOConverter {
     result.setVersionName(version.getVersionName());
     result.setMediaFormat(version.getMediaFormat());
     result.setSpokenLanguage(version.getSpokenLanguage());
+    result.setAudioDescription(version.isAudioDescription());
     result.setSubtitles(version.getSubtitles());
+    result.setClosedCaption(version.isClosedCaption());
 
     return result;
   }

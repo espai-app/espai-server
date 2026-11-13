@@ -10,7 +10,6 @@ import java.util.List;
 public class HallDTO {
 
   private Long id;
-  private VenueDTO venue;
   private String name;
   private List<HallCapacityDTO> hallCapacities;
 
@@ -27,20 +26,6 @@ public class HallDTO {
    */
   public void setId(Long id) {
     this.id = id;
-  }
-
-  /**
-   * @return the venue
-   */
-  public VenueDTO getVenue() {
-    return venue;
-  }
-
-  /**
-   * @param venue the venue to set
-   */
-  public void setVenue(VenueDTO venue) {
-    this.venue = venue;
   }
 
   /**

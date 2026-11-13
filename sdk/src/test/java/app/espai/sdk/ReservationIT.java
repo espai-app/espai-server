@@ -16,10 +16,10 @@ import org.junit.jupiter.api.Test;
  * @author rborowski
  */
 public class ReservationIT {
-  
+
   @Test
   public void testSubmitReservation() throws URISyntaxException, IOException {
-    
+
     ReservationDTO reservation = new ReservationDTO();
     reservation.setAcceptTos(true);
     reservation.setCompany("Baumschule \"Zur Eibe\"");
@@ -30,24 +30,24 @@ public class ReservationIT {
     reservation.setCity("Buchen");
     reservation.setPhone("01234 56789");
     reservation.setEmail("ralph.borowski@borowski.it");
-    
+
     reservation.setEvent(10140L);
-    
+
     HashMap<Long, Integer> ticketMap = new HashMap<>();
     ticketMap.put(18602L, 20);
     ticketMap.put(18620L, 2);
-    
+
     reservation.setTickets(ticketMap);
-    
+
     reservation.setMessage("Wir freuen uns schon!");
-    
+
     ReservationClient client = new ReservationClient("http://localhost:8080/espai");
     List<String> errors = client.validate(reservation);
-    
+
     assert(errors.isEmpty());
-    
+
     boolean success = client.submit(reservation);
     assert(success);
   }
-  
+
 }

@@ -9,26 +9,26 @@ $totalMinutes = $event->production->durationInMinutes;
 $errors = [];
 
 if (isset($_POST['action'])) {
-  
+
   // validate
   if (empty($_POST['tos'])) {
     $errors['tos'] = 'Bitte akzeptieren Sie die AGB um fortzufahren.';
   } else {
     $reservation->acceptTos = true;
   }
-  
+
   if (!empty($_POST['newsletter'])) {
     $reservation->extras['Newsletter'] = "ja";
   }
-  
+
   if (empty($errors)) {
-    
+
     $errors = \app\espai\wordpress\Reservation::validate($reservation);
-    
+
     if (empty($errors)) {
       \app\espai\wordpress\Reservation::send($reservation);
-      unset($_SESSION['reservation']);
-      
+      // unset($_SESSION['reservation']);
+
       header('Location: ' . trailingslashit(get_home_url()) . 'buchen/danke');
       exit;
     }
@@ -47,7 +47,7 @@ if (isset($_POST['action'])) {
 
   <h3>Ihre Vorstellung</h3>
 
-  <div><?= $event->title ?> <?= !empty($event->version) ? ' (' . $event->version . ')' : '' ?></div>
+  <div><?= $event->title ?> <?= !empty($event->version->versionName) ? ' (' . $event->version->versionName . ')' : '' ?></div>
   <div>Beginn <?= \app\espai\wordpress\EspaiPlugin::formatDate($event->date) ?>, <?= \app\espai\wordpress\EspaiPlugin::formatTime($event->time) ?> Uhr</div>
   <div>Laufzeit Film <?= $event->production->durationInMinutes ?> min.</div>
   <div><?= $event->venue->name ?>, <?= $event->venue->address ?>, <?= $event->venue->postcode ?> <?= $event->venue->city ?></div>
@@ -83,7 +83,7 @@ if (isset($_POST['action'])) {
     <label>
       <input type="checkbox" name="tos" value="true" /> Ich akzeptiere die <a href="<?= esc_attr(trailingslashit(get_home_url())) ?>agb" target="_blank">Allgemeinen Geschäftsbedingungen</a>.
     </label>
-    
+
     <?php if (isset($errors['tos'])) { ?><p class="validation-error"><?= $errors['tos'] ?></p><?php } ?>
   </div>
 

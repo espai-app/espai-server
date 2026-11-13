@@ -259,8 +259,16 @@
               <p:inputText value="#{v.spokenLanguage}" />
             </p:column>
 
+            <p:column headerText="AD" width="50px">
+              <p:selectBooleanCheckbox value="#{v.audioDescription}" title="Audio-Deskription" />
+            </p:column>
+
             <p:column headerText="Untertitel">
               <p:inputText value="#{v.subtitles}" />
+            </p:column>
+
+            <p:column headerText="CC" width="50px">
+              <p:selectBooleanCheckbox value="#{v.closedCaption}" title="erweiterte Untertitel (closed caption)" />
             </p:column>
 
             <p:column style="width: 50px;">

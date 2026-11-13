@@ -21,6 +21,7 @@ import app.espai.sdk.model.EventDTO;
 import jakarta.ejb.EJB;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -173,5 +174,18 @@ public class SeasonEventWebservice {
     List<EventDTO> eventDTOList = eventList.stream().map(e -> eventConverter.toDTO(e)).toList();
 
     return eventDTOList;
+  }
+
+  @POST
+  public EventDTO create(@PathParam("seasonId") Long seasonId, EventDTO eventDTO) {
+    
+    eventDTO.setId(null);
+    Event event = eventConverter.fromDTO(eventDTO);
+
+    Season season = seasons.get(seasonId);
+    event.setSeason(season);
+    event = events.save(event);
+
+    return eventConverter.toDTO(event);
   }
 }

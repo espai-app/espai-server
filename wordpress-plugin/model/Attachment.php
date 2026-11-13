@@ -11,6 +11,7 @@ class Attachment {
   public $caption;
   public $location;
   public $copyright;
+  public $category;
   
   public static function of($attachment) {
     $espai = Espai::getInstance();

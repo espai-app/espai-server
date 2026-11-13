@@ -15,7 +15,9 @@ public class ProductionVersionDTO {
   private String versionName;
   private String mediaFormat;
   private String spokenLanguage;
+  private boolean audioDescription;
   private String subtitles;
+  private boolean closedCaption;
 
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
   /**
@@ -75,6 +77,20 @@ public class ProductionVersionDTO {
   }
 
   /**
+   * @return the audioDescription
+   */
+  public boolean isAudioDescription() {
+    return audioDescription;
+  }
+
+  /**
+   * @param audioDescription the audioDescription to set
+   */
+  public void setAudioDescription(boolean audioDescription) {
+    this.audioDescription = audioDescription;
+  }
+
+  /**
    * @return the subtitles
    */
   public String getSubtitles() {
@@ -86,6 +102,20 @@ public class ProductionVersionDTO {
    */
   public void setSubtitles(String subtitles) {
     this.subtitles = subtitles;
+  }
+
+  /**
+   * @return the closedCaption
+   */
+  public boolean isClosedCaption() {
+    return closedCaption;
+  }
+
+  /**
+   * @param closedCaption the closedCaption to set
+   */
+  public void setClosedCaption(boolean closedCaption) {
+    this.closedCaption = closedCaption;
   }
   //</editor-fold>
 }

@@ -6,11 +6,17 @@ $espai_title = 'Teilnehmende Kinos';
 
 <div class="espai-content">
   <h2>Veranstaltungsorte</h2>
+	
+	<p>
+		Tickets für alle KINOLINO-Veranstaltungen bitte direkt beim Veranstaltungsort kaufen.
+	</p>
 
   <?php if (empty($venues)) { ?>
     <p class="empty">Keine Veranstaltungsorte gefunden.</p>
   <?php } else {
-
+	// echo '<pre>';
+	// print_r($venues);
+	// echo '</pre>';
     // order by city
     $venueMap = [];
     foreach ($venues as $v) {
@@ -31,7 +37,7 @@ $espai_title = 'Teilnehmende Kinos';
       <ul class="espai-venue-list">
         <?php foreach ($venueList as $venue) { ?>
           <li>
-            <a href="<?= trailingslashit(get_home_url()) ?>orte/<?= \app\espai\wordpress\EspaiPlugin::slugify($venue->name . ' ' . $venue->city) ?>-<?= $venue->id ?>">
+            <a href="<?= trailingslashit(get_home_url()) ?>orte/<?= $venue->slug ?>">
               <img src="<?= \app\espai\wordpress\Venue::getImage($venue->id) ?>" alt="Logo <?= esc_attr($venue->name) ?>" class="img-responsive" />
               <?= $venue->name ?>
             </a>

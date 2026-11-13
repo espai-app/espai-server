@@ -13,6 +13,10 @@ class SeasonVenue {
   public $email;
   public $publicNotes;
   public $seasonNotes;
+  public $allowFreeBooking;
+  public $slug;
+  public $longitude;
+  public $latitude;
 
   public static function getById($venueId) {
     $espai = Espai::getInstance();

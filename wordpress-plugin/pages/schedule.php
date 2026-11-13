@@ -41,6 +41,10 @@ foreach ($events as $event) {
   <h2>
     Programm
   </h2>
+	
+	<p>
+		Tickets für alle KINOLINO-Veranstaltungen bitte direkt beim Veranstaltungsort kaufen.
+	</p>
 
   <?php foreach ($program as $key => $eventList) { ?>
     <?php $current_date = new \DateTimeImmutable($key); ?>
@@ -58,10 +62,17 @@ foreach ($events as $event) {
             <td><?= substr($event->time, 0, 5) ?> Uhr</td>
             <td>
               <a href="<?= get_home_url() . '/filme/' . \app\espai\wordpress\EspaiPlugin::slugify($event->production->title) . '-' . $event->production->id . '?highlight=' . $event->id ?>">
+                  <?php if ($event->eventSerial !== null) { ?>
+                    <span class="espai-event-serial"><?= $event->eventSerial->name ?></span>
+                  <?php } ?>
                   <?= $event->production->title ?>
               </a>
             </td>
-            <td><?= $event->venue->name ?></td>
+            <td>
+              <a href="<?= get_home_url() . '/orte/' . $event->venue->slug ?>">
+              <?= $event->venue->name ?>
+              </a>
+            </td>
           </tr>
           <?php } ?>
         </thead>

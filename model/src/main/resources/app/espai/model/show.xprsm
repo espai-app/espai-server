@@ -96,9 +96,9 @@ WITH FIELDS
   versionName String(30),
   mediaFormat String(30),
   spokenLanguage String(3),
+  audioDescription Boolean,
   subtitles String(3),
-  audioDescription String(3),
-  signLanguage String(3);
+  closedCaption Boolean;
 
 DEFINE MODEL ProductionTagTemplate
 WITH FIELDS

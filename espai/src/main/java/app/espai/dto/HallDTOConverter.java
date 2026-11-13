@@ -2,6 +2,7 @@
 package app.espai.dto;
 
 import app.espai.dao.HallCapacities;
+import app.espai.dao.Halls;
 import app.espai.filter.HallCapacityFilter;
 import app.espai.model.Hall;
 import app.espai.sdk.model.HallCapacityDTO;
@@ -19,10 +20,10 @@ import java.util.List;
 public class HallDTOConverter {
 
   @EJB
-  private HallCapacities capacities;
+  private Halls halls;
 
-  @Inject
-  private VenueDTOConverter venueDTOConverter;
+  @EJB
+  private HallCapacities capacities;
 
   @Inject
   private HallCapacityDTOConverter capacityConverter;
@@ -39,10 +40,22 @@ public class HallDTOConverter {
     HallDTO result = new HallDTO();
     result.setId(hall.getId());
     result.setName(hall.getName());
-    result.setVenue(venueDTOConverter.toDTO(hall.getVenue()));
     result.setHallCapacities(hallCapacityList);
 
     return result;
+  }
+
+  public Hall fromDTO(HallDTO dto) {
+
+    if (dto == null) {
+      return null;
+    }
+
+    if (dto.getId() != null) {
+      return halls.get(dto.getId());
+    }
+
+    return null;
   }
 
 }

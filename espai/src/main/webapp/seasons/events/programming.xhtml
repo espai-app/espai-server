@@ -103,7 +103,6 @@
                            icon="pi pi-save"
                            value="Programm speichern"
                            action="#{programmingView.save}"
-                           immediate="true"
                            styleClass="mb-3" />
 
           <p:commandButton id="addEvent"
@@ -121,7 +120,7 @@
                            update="@form"
                            immediate="true"
                            styleClass="ui-button-outlined ml-2 mr-3 mb-3"/>
-          
+
           <p:selectBooleanCheckbox value="#{programmingView.keepDate}"
                                    itemLabel="Datum des letzten Eintrags kopieren"
                                    styleClass="mb-3" />

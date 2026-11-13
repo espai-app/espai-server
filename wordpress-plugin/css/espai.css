@@ -3,13 +3,57 @@
     Author     : rborowski
 */
 
+.espai-content,
+.espai-form {
+  max-width: 1716px;
+  margin: 3rem auto;
+}
+
 .espai-form input[type=text],
 .espai-form input[type=number],
-.espai-form select {
+.espai-form input[type=date],
+.espai-form input[type=time],
+.espai-form select,
+.espai-form textarea {
   padding: 0.25rem 0.5rem;
   font-size: 1.1rem;
   border-radius: 3px;
   border: 1px solid #333;
+}
+
+.espai-form input[type=date],
+.espai-form input[type=time] {
+  width: 10em;
+}
+
+.espai-form .input-radio {
+  padding-left: 2rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.espai-form .input-radio input[type=radio] {
+  position: absolute;
+  top: 0.5rem;
+  left: 0;
+}
+
+.espai-fluid {
+  margin: 0 -0.5rem;
+}
+
+.espai-fluid  p {
+  margin: 0 0.5rem;
+}
+
+.espai-fluid label,
+.espai-fluid input[type=text],
+.espai-fluid input[type=number],
+.espai-fluid select,
+.espai-fluid textarea {
+  display:block;
+  margin: 0 0.5rem;
+  width: calc(100% - 1rem);
 }
 
 .espai-form button[type='submit'] {
@@ -43,6 +87,11 @@
   border-bottom: 1px solid #a7c631;
 }
 
+.espai-table p {
+  padding: 0;
+  margin: 0;
+}
+
 .espai-event-table-time {
   width: 15%;
 }
@@ -58,6 +107,43 @@
 
 .espai-event-table-reservation {
   width: 20%;
+}
+
+@media (max-width: 700px) {
+  .espai-content h4 {
+    margin: 2rem 0 0rem 0;
+    font-size: 1.2rem;
+  }
+
+  .espai-event-table,
+  .espai-event-table tbody,
+  .espai-event-table tr,
+  .espai-event-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .espai-event-table {
+    margin-bottom: 1rem;
+  }
+
+  .espai-event-table tr {
+    padding: 1rem 0;
+  }
+
+  .espai-event-table td {
+    padding: 0.25rem 0;
+  }
+
+  .espai-event-table thead {
+    display: none;
+  }
+
+  .espai-event-table td[data-title]:before {
+    content: attr(data-title);
+    padding-right: 0.5rem;
+    display: inline-block;
+  }
 }
 
 .espai-presentation-list {
@@ -124,3 +210,190 @@
 .espai-schedule {
   width: 100%;
 }
+
+.espai-schedule .espai-event-serial {
+  margin-bottom: 0.5rem;
+}
+
+.espai-event-serial {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+a.button:link,
+a.button:visited {
+  padding: 0.25rem 1rem;
+  background: #009AB6;
+  color: white;
+  text-decoration: none;
+  border-radius: 3px;
+  border: 3px solid transparent;
+  display: inline-block;
+}
+
+a.button:focus {
+  border-color: #056d7f;
+  color: white;
+}
+
+.field {
+  position: relative;
+}
+
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  /*position the autocomplete items to be the same width as the container:*/
+  top: 100%;
+  left: 0.5rem;
+  right: 0.5rem;
+  box-shadow: 0 0.5rem 0.5rem #666;
+}
+
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff;
+  border-bottom: 1px solid #d4d4d4;
+}
+.autocomplete-items div:hover {
+  /*when hovering an item:*/
+  background-color: #e9e9e9;
+}
+.autocomplete-active {
+  /*when navigating through the items using the arrow keys:*/
+  background-color: DodgerBlue !important;
+  color: #ffffff;
+}
+
+/* Stephan*/
+.espai-copyright {
+  font-size:10px !important;
+  margin-bottom:5px;
+  color:#aaa;
+}
+
+.espai-copyright:before{
+  content:"© "
+}
+
+.espai-presentation-list {
+  display: flex;
+}
+
+.espai-presentation-list a {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.espai-presentation-list .espai-poster {
+  flex: 1;
+  flex-basis: 400px;
+  display: block;
+  height: 400px;
+  width: 300px;
+  overflow: hidden;
+  position: relative;
+  margin: 0 auto;
+}
+
+.espai-presentation-list .espai-poster img {
+  position: absolute;
+  object-fit: cover;
+  object-position: center;
+  width: 100%;
+  height: 100%;
+}
+
+.espai-presentation-list-title {
+  white-space: nowrap;
+  font-size: 1rem !important;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  margin: 0.5rem 0 1rem 0 !important
+}
+
+.espai-filter{
+  display:flex;
+  background: #f2f2f2;
+  flex-wrap: wrap
+}
+
+.espai-filter,
+.espai-filter form,
+.espai-filter-age > div {
+  max-width: 100%;
+}
+
+.espai-filter-age {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  padding: 1rem 0 1rem 10px !important;
+  box-sizing:border-box;
+}
+
+.espai-filter-age .button,
+.espai-filter-age .button:link {
+	padding: 0.25rem 1rem;
+	background: #009ab6;
+	color: white;
+	border: 3px solid transparent;
+	border-radius: 3px;
+	font-size: 14pt;
+	display: inline-block;
+	line-height: 1em;
+}
+
+.espai-filter-age > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.espai-filter-age select {
+  padding: 5px 7px;
+  margin: 0px 5px;
+  max-width:20em;
+}
+.espai-filter-age > div select {
+  flex:1;
+  background:#fff;
+  border: 1px solid #999;
+}
+.espai-filter-age input[type="number"] {
+  width:3rem;
+}
+
+.espai-venue-list {
+  padding-left:0
+}
+.espai-venue-list li {
+  text-align: left !important;
+  margin-left:0;
+}
+.espai-content img.greta {
+  height:70px;
+  width:auto;
+  margin-top:10px;
+}
+
+.espai-attlist ul {
+  padding-left: 0;
+  list-style-type: none;
+}
+
+.espai-venue-public-notes,
+.espai-venue-season-notes {
+  margin:1em 0;
+}
+
+

@@ -16,6 +16,7 @@ defined('ABSPATH') or die('Sorry, please don\'t try this.');
 
 define('ESPAI_BASE_PATH', __DIR__);
 define('ESPAI_PLUGIN', __FILE__);
+define('ESPAI_BASE_URL', "https://skwmanager.schulkinowoche.de/");
 
 require_once('HttpClient.php');
 
@@ -25,14 +26,16 @@ require_once('model/EventTicketPrice.php');
 require_once('model/Presenter.php');
 require_once('model/Production.php');
 require_once('model/Reservation.php');
+require_once('model/ReservationForm.php');
 require_once('model/Venue.php');
 require_once('model/SeasonVenue.php');
 require_once('model/Event.php');
+require_once('model/Hall.php');
+require_once('model/HallCapacity.php');
+require_once('model/Season.php');
+require_once('model/ProductionVersion.php');
 
 require_once('shortcodes/EventListShortcode.php');
-
-
-
 
 class Espai {
 
@@ -57,9 +60,10 @@ class Espai {
 
 $espaiInstance = Espai::getInstance();
 
-$espaiInstance->baseUrl ="https://skwmanager.schulkinowoche.de/";
+$espaiInstance->baseUrl = ESPAI_BASE_URL;
 // $espaiInstance->baseUrl ="http://192.168.56.1:8080/espai/";
-$espaiInstance->seasonId = 3001;
+$espaiInstance->seasonId = 6001;
+$espaiInstance->apiKey = "acaa7185-ad70-428c-abd7-32d39b617d79";
 
 class EspaiPlugin {
 
@@ -71,6 +75,8 @@ class EspaiPlugin {
     add_action('wp_enqueue_scripts', array(get_called_class(), 'register_scripts_and_styles'));
 
     add_filter( 'document_title_parts', array(get_called_class(), 'register_title'));
+
+	EventListShortcode::init();
   }
 
   public static function activate() {
@@ -83,19 +89,20 @@ class EspaiPlugin {
   }
 
   public static function start_session() {
-    if (!session_id()) {
+    if (session_status() === PHP_SESSION_NONE) {
       session_start();
     }
   }
 
   public static function add_rewrite_rules() {
     add_rewrite_rule('orte[/]?$', 'index.php?espai_page=venue_index', 'top');
-    add_rewrite_rule('orte/([a-z0-9-]+)-([0-9]+)', 'index.php?espai_page=venue_details&espai_venue_id=$matches[2]', 'top');
+    add_rewrite_rule('orte/([a-z0-9-]+)', 'index.php?espai_page=venue_details&espai_venue_id=$matches[1]', 'top');
     add_rewrite_rule('filme[/]?$', 'index.php?espai_page=production_index', 'top');
     add_rewrite_rule('filme/([a-z0-9-]+)-([0-9]+)$', 'index.php?espai_page=production_details&espai_production_id=$matches[2]', 'top');
     add_rewrite_rule('programm[/]?$', 'index.php?espai_page=schedule', 'top');
     add_rewrite_rule('programm/([0-9]{4}-[0-9]{2}-[0-9]{2})[/]?$', 'index.php?espai_page=schedule&espai_date=$matches[1]', 'top');
     add_rewrite_rule('buchen/veranstaltung/([a-z0-9-]+)-([0-9]+)$', 'index.php?espai_page=checkout_event&espai_event_id=$matches[2]', 'top');
+    add_rewrite_rule('buchen/terminwunsch/([a-z0-9-]+)/([0-9]+)$', 'index.php?espai_page=checkout_request_event&espai_venue_id=$matches[1]&espai_production_id=$matches[2]', 'top');
     add_rewrite_rule('buchen/adresse', 'index.php?espai_page=checkout_address', 'top');
     add_rewrite_rule('buchen/zusammenfassung', 'index.php?espai_page=checkout_summary', 'top');
     add_rewrite_rule('buchen/danke', 'index.php?espai_page=checkout_success', 'top');
@@ -119,7 +126,7 @@ class EspaiPlugin {
     wp_enqueue_style( 'espai' );
   }
 
-  public static $ALLOWED_PAGES = ['checkout_address', 'checkout_error',
+  public static $ALLOWED_PAGES = ['checkout_address', 'checkout_error', 'checkout_request_event',
       'checkout_event', 'checkout_success', 'checkout_summary',
       'production_details', 'production_index', 'venue_details',
       'venue_index', 'schedule'];
